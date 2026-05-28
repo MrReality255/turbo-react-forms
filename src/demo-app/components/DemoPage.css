@@ -1,22 +1,22 @@
 body {
-  background-color: #000;
-  color: #0f0;
-  font-family: monospace;
+    background-color: #000;
+    color: #0f0;
+    font-family: monospace;
 }
 
 button {
-  background-color: #333;
-  border-style: solid;
-  font-family: monospace;
-  padding: 1em;
-  margin: 0.25em;
-  color: #ccc;
+    background-color: #333;
+    border-style: solid;
+    font-family: monospace;
+    padding: 1em;
+    margin: 0.25em;
+    color: #ccc;
 }
 
 button:hover {
-  background-color: #339;
+    background-color: #339;
 }
 
 div.menu button {
-  color: red;
+    color: red;
 }

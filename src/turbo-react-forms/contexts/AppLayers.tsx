@@ -1,20 +1,20 @@
-import { createContext } from 'react'
+import { createContext } from 'react';
+import { TStateHandle } from '../utils';
 
 export type TLayerRec = {
-    handle: number
-    renderFct: () => React.ReactNode
-}
+    handle: number;
+    renderFct: () => React.ReactNode;
+};
 
 export type TLayerState = {
-    layers: TLayerRec[]
-    notifications: TLayerRec[]
-}
+    maxHandle: number;
+    layers: TLayerRec[];
+    notifications: TLayerRec[];
+};
 
-export type TLayerRecs = {
-    layers: TLayerRec[]
-    notifications: TLayerRec[]
-    updateLayers: (updater: (old: TLayerRec[]) => TLayerRec[]) => void
-    updateNotifications: (updater: (old: TLayerRec[]) => TLayerRec[]) => void
-}
+export type TLayerContext = {
+    main: TStateHandle<TLayerState>;
+    local: TStateHandle<TLayerState>;
+};
 
-export const ctxLayers = createContext<TLayerRecs | null>(null)
+export const ctxLayers = createContext<TLayerContext | null>(null);

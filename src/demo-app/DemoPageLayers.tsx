@@ -1,30 +1,39 @@
-import { DemoPage } from './components/DemoPage'
-
-import { useLayers } from '../turbo-react-forms'
+import { DemoPage } from './components/DemoPage';
+import { useLayers } from '../turbo-react-forms';
+import { PropsWithChildren, useEffect } from 'react';
+import { TLayerContainer } from '../turbo-react-forms/app/LayerContainer';
 
 export function DemoPageLayers() {
-    const layers = useLayers()
+    const layers = useLayers();
     return (
         <DemoPage>
             <button
                 onClick={() => {
-                    layers.show((nr) => {
+                    layers.main.show((nr) => {
                         return (
                             <PopupWindow>
                                 new window: {nr}
                                 <hr></hr>
                                 <input type="text"></input>
-                                <button onClick={() => layers.hide()}>
+                                <button onClick={() => layers.main.hide()}>
                                     Close()
                                 </button>
                             </PopupWindow>
-                        )
-                    })
+                        );
+                    });
                 }}
             >
                 Show a popup window
             </button>
-            <button>Show a notification</button>
+            <button
+                onClick={() => {
+                    layers.main.showNotification((nr) => (
+                        <Notification h={nr} w={250}></Notification>
+                    ));
+                }}
+            >
+                Show a notification
+            </button>
             <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
                 eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
@@ -43,38 +52,131 @@ export function DemoPageLayers() {
                 mi vitae est. Mauris placerat eleifend leo.
             </p>
         </DemoPage>
-    )
+    );
 }
 
 function PopupWindow(p: { children?: React.ReactNode }) {
-    const l = useLayers()
+    const l = useLayers();
     return (
         <div
             style={{ width: '640px', height: '480px', backgroundColor: '#400' }}
         >
+            <TLayerContainer>
+                <PopupWindowContent>{p.children}</PopupWindowContent>
+            </TLayerContainer>
+        </div>
+    );
+}
+
+function PopupWindowContent(p: PropsWithChildren) {
+    const l = useLayers();
+    return (
+        <>
             Popup window
             <hr></hr>
             {p.children}
             <button
                 onClick={() => {
-                    l.show((nr) => (
+                    l.main.show((nr) => (
                         <PopupWindow>
                             <input type="text"></input>
                             <h1>{nr}</h1>
                             <button
                                 onClick={() => {
-                                    l.hide(nr)
+                                    l.main.hide(nr);
                                 }}
                             >
                                 Close
                             </button>
                         </PopupWindow>
-                    ))
+                    ));
                 }}
             >
                 new popup
             </button>
-            <button>Show notification</button>
+            <button
+                onClick={() => {
+                    l.main.showNotification((h) => {
+                        const w = h * 20 + 200;
+                        return <Notification w={w} h={h}></Notification>;
+                    });
+                }}
+            >
+                Show notification
+            </button>
+            <button
+                onClick={() => {
+                    l.local.show((nr) => {
+                        return <LocalLayer handle={nr}></LocalLayer>;
+                    });
+                }}
+            >
+                Show local layer
+            </button>
+            <button
+                onClick={() => {
+                    l.local.showNotification((nr) => (
+                        <Notification isLocal w={100} h={nr}></Notification>
+                    ));
+                }}
+            >
+                Show local notification
+            </button>
+        </>
+    );
+}
+
+function LocalLayer({ handle }: { handle: number }) {
+    const l = useLayers();
+
+    useEffect(() => {
+        setTimeout(() => {
+            l.local.hide(handle);
+        }, 2000);
+    }, []);
+
+    return (
+        <div
+            style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#ff0',
+                opacity: 0.5,
+            }}
+        >
+            Local layer
         </div>
-    )
+    );
+}
+
+function Notification({
+    w,
+    h,
+    isLocal = false,
+}: {
+    w: number;
+    h: number;
+    isLocal?: boolean;
+}) {
+    const l = useLayers();
+    useEffect(() => {
+        setTimeout(() => {
+            const src = isLocal ? l.local : l.main;
+            src.hideNotification(h);
+        }, 2000);
+    }, []);
+    return (
+        <div
+            style={{
+                backgroundColor: '#050',
+                padding: '1em',
+                width: '200px',
+            }}
+            onClick={() => {
+                l.main.hideNotification(h);
+            }}
+        >
+            My notification. Handle: {h}
+        </div>
+    );
 }

@@ -1,28 +1,100 @@
-import { ctxLayers } from '../contexts/AppLayers'
-import { useContext } from 'react'
+import { ctxLayers, TLayerState } from '../contexts/AppLayers';
+import { useContext, useMemo } from 'react';
+import { TStateHandle } from '../utils';
 
 export function useLayers() {
-    const ctx = useContext(ctxLayers)
-    if (!ctx) {
-        throw 'missing context ctxLayers'
+    const ctx = useContext(ctxLayers);
+
+    const mainLayerHandler = useMemo(() => {
+        if (!ctx) {
+            return null;
+        }
+        return newLayerHandler(ctx.main);
+    }, [ctx?.main]);
+
+    const localLayerHandler = useMemo(() => {
+        if (!ctx) {
+            return null;
+        }
+        return newLayerHandler(ctx.local);
+    }, [ctx?.local]);
+
+    if (!mainLayerHandler || !localLayerHandler) {
+        throw new Error('useLayers must be used within a ctxLayers provider');
     }
+
     return {
-        showNotification: function (renderFct: () => React.ReactNode) {},
+        main: mainLayerHandler,
+        local: localLayerHandler,
+    };
+}
 
-        show: function (renderFct: (nr: number) => React.ReactNode) {
-            let nr = -1
+function newLayerHandler(ctx: TStateHandle<TLayerState>) {
+    return {
+        showNotification: function (renderer: (nr: number) => React.ReactNode) {
+            ctx.updateState((prev) => {
+                const newHandle = prev.maxHandle;
+                return {
+                    ...prev,
+                    maxHandle: newHandle + 1,
+                    notifications: [
+                        ...prev.notifications,
+                        {
+                            handle: newHandle,
+                            renderFct: () => renderer(newHandle),
+                        },
+                    ],
+                };
+            });
+        },
 
-            ctx.updateLayers((prev) => {
-                nr = prev.reduce((a, b) => Math.max(a, b.handle), 0) + 1
-                return [...prev, { handle: nr, renderFct: () => renderFct(nr) }]
-            })
-            return nr
+        hideNotification: function (nr?: number) {
+            ctx.updateState((prev) => {
+                const lastItem =
+                    prev.notifications[prev.notifications.length - 1];
+                const delHandle = nr ?? lastItem?.handle;
+
+                if (delHandle === undefined) {
+                    return prev;
+                }
+                return {
+                    ...prev,
+                    notifications: prev.notifications.filter(
+                        (n) => n.handle != delHandle
+                    ),
+                };
+            });
+        },
+
+        show: function (renderer: (nr: number) => React.ReactNode) {
+            ctx.updateState((prev) => {
+                const newHandle = prev.maxHandle;
+                return {
+                    ...prev,
+                    maxHandle: newHandle + 1,
+                    layers: [
+                        ...prev.layers,
+                        {
+                            handle: newHandle,
+                            renderFct: () => renderer(newHandle),
+                        },
+                    ],
+                };
+            });
         },
         hide: function (nr?: number) {
-            ctx.updateLayers((oldLayers) => {
-                nr = nr ?? oldLayers[oldLayers.length - 1].handle
-                return oldLayers.filter((layer) => layer.handle != nr)
-            })
+            ctx.updateState((prev) => {
+                const lastItem = prev.layers[prev.layers.length - 1];
+                const delHandle = nr ?? lastItem?.handle;
+
+                if (delHandle === undefined) {
+                    return prev;
+                }
+                return {
+                    ...prev,
+                    layers: prev.layers.filter((l) => l.handle != delHandle),
+                };
+            });
         },
-    }
+    };
 }

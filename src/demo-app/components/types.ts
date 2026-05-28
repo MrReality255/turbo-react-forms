@@ -1,8 +1,8 @@
 export type DemoPageProps = {
-  children?: React.ReactNode;
+    children?: React.ReactNode;
 };
 
 export type DemoMenuItemProps = {
-  caption: string;
-  url: string;
+    caption: string;
+    url: string;
 };

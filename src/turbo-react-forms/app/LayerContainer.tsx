@@ -1,13 +1,8 @@
-import { useState, useMemo, ReactNode, PropsWithChildren } from 'react'
-import {
-    ctxLayers,
-    TLayerRec,
-    TLayerRecs,
-    TLayerState,
-} from '../contexts/AppLayers'
-import { TLayerContainerProps } from './types'
-import { TWrapperFct } from '../utils'
-import React from 'react'
+import { useState, useMemo, ReactNode, useContext } from 'react';
+import { ctxLayers, TLayerContext, TLayerState } from '../contexts/AppLayers';
+import { TLayerContainerProps } from './types';
+import { TStateHandle, TWrapperFct } from '../utils';
+import React from 'react';
 
 function defaultMainWrapper(content: ReactNode) {
     return (
@@ -22,11 +17,11 @@ function defaultMainWrapper(content: ReactNode) {
         >
             {content}
         </div>
-    )
+    );
 }
 
 function defaultContentWrapper(content: ReactNode) {
-    return <div style={{ zIndex: 0 }}>{content}</div>
+    return <div style={{ zIndex: 0 }}>{content}</div>;
 }
 
 function defaultLayerWrapper(id: number, zIdx: number) {
@@ -45,25 +40,44 @@ function defaultLayerWrapper(id: number, zIdx: number) {
             >
                 {c}
             </div>
-        )
-    }
+        );
+    };
 }
 
 function defaultNotificationsWrapper(layerCount: number): TWrapperFct {
     return (c) => (
         <div
             style={{
+                pointerEvents: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1em',
                 position: 'absolute',
                 left: '0',
                 top: '0',
-                width: '100%',
-                height: 'auto',
                 zIndex: layerCount,
+                width: '100%',
             }}
         >
             {c}
         </div>
-    )
+    );
+}
+
+function defaultNotificationWrapper(c: React.ReactNode) {
+    return (
+        <div
+            style={{
+                left: '50%',
+                position: 'relative',
+                transform: 'translate(-50%,0)',
+                width: 'fit-content',
+                pointerEvents: 'all',
+            }}
+        >
+            {c}
+        </div>
+    );
 }
 
 export function TLayerContainer({
@@ -71,54 +85,56 @@ export function TLayerContainer({
     contentWrapper = defaultContentWrapper,
     layerWrapper = defaultLayerWrapper,
     notificationsWrapper = defaultNotificationsWrapper,
+    notificationWrapper = defaultNotificationWrapper,
     children,
 }: TLayerContainerProps) {
+    const ctx = useContext(ctxLayers);
+
     const [layersState, setLayersState] = useState<TLayerState>({
         layers: [],
         notifications: [],
-    })
+        maxHandle: 1,
+    });
 
-    const contextValue = useMemo<TLayerRecs>(
+    const newLocalState = useMemo<TStateHandle<TLayerState>>(
         () => ({
-            layers: layersState.layers,
-            notifications: layersState.notifications,
-            updateLayers: (updater) => {
-                setLayersState({
-                    ...layersState,
-                    layers: updater(layersState.layers),
-                })
-            },
-            updateNotifications: (updater) => {
-                setLayersState({
-                    ...layersState,
-                    notifications: updater(layersState.notifications),
-                })
-            },
+            state: layersState,
+            setState: setLayersState,
+            updateState: setLayersState,
         }),
         [layersState]
-    )
+    );
 
-    const notifyWrapperFct = notificationsWrapper(layersState.layers.length)
+    const newLayerCtx = useMemo<TLayerContext>(() => {
+        return {
+            main: ctx?.main ?? newLocalState,
+            local: newLocalState,
+        };
+    }, [newLocalState]);
+
+    const notifyWrapperFct = notificationsWrapper(layersState.layers.length);
 
     return mainWrapper(
-        <ctxLayers.Provider value={contextValue}>
+        <ctxLayers.Provider value={newLayerCtx}>
             {contentWrapper(children)}
             {layersState.layers.map((layer, idx) => {
-                const layerFct = layerWrapper(layer.handle, idx + 1)
-                return layerFct(layer.renderFct())
+                const layerFct = layerWrapper(layer.handle, idx + 1);
+                const rf = layer.renderFct;
+                return layerFct(rf());
             })}
             {layersState.notifications.length > 0 &&
                 notifyWrapperFct(
                     <>
                         {layersState.notifications.map((n, idx) => {
+                            const rf = n.renderFct;
                             return (
                                 <React.Fragment key={idx}>
-                                    {n.renderFct()}
+                                    {notificationWrapper(rf())}
                                 </React.Fragment>
-                            )
+                            );
                         })}
                     </>
                 )}
         </ctxLayers.Provider>
-    )
+    );
 }
