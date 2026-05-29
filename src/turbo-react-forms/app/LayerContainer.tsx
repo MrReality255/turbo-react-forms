@@ -93,7 +93,7 @@ export function TLayerContainer({
     const [layersState, setLayersState] = useState<TLayerState>({
         layers: [],
         notifications: [],
-        maxHandle: 1,
+        maxHandle: ctx ? 1 : 2,
     });
 
     const newLocalState = useMemo<TStateHandle<TLayerState>>(

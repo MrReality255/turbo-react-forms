@@ -26,6 +26,20 @@ export function useLayers() {
     return {
         main: mainLayerHandler,
         local: localLayerHandler,
+        hide: (handle: number) => {
+            if (handle & 1) {
+                localLayerHandler.hide(handle);
+            } else {
+                mainLayerHandler.hide(handle);
+            }
+        },
+        hideNotification: (handle: number) => {
+            if (handle & 1) {
+                localLayerHandler.hideNotification(handle);
+            } else {
+                mainLayerHandler.hideNotification(handle);
+            }
+        },
     };
 }
 
@@ -36,7 +50,7 @@ function newLayerHandler(ctx: TStateHandle<TLayerState>) {
                 const newHandle = prev.maxHandle;
                 return {
                     ...prev,
-                    maxHandle: newHandle + 1,
+                    maxHandle: newHandle + 2,
                     notifications: [
                         ...prev.notifications,
                         {
@@ -71,7 +85,7 @@ function newLayerHandler(ctx: TStateHandle<TLayerState>) {
                 const newHandle = prev.maxHandle;
                 return {
                     ...prev,
-                    maxHandle: newHandle + 1,
+                    maxHandle: newHandle + 2,
                     layers: [
                         ...prev.layers,
                         {

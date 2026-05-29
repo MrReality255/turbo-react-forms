@@ -15,7 +15,7 @@ export function DemoPageLayers() {
                                 new window: {nr}
                                 <hr></hr>
                                 <input type="text"></input>
-                                <button onClick={() => layers.main.hide()}>
+                                <button onClick={() => layers.hide(nr)}>
                                     Close()
                                 </button>
                             </PopupWindow>
@@ -28,7 +28,7 @@ export function DemoPageLayers() {
             <button
                 onClick={() => {
                     layers.main.showNotification((nr) => (
-                        <Notification h={nr} w={250}></Notification>
+                        <Notification h={nr}></Notification>
                     ));
                 }}
             >
@@ -83,7 +83,7 @@ function PopupWindowContent(p: PropsWithChildren) {
                             <h1>{nr}</h1>
                             <button
                                 onClick={() => {
-                                    l.main.hide(nr);
+                                    l.hide(nr);
                                 }}
                             >
                                 Close
@@ -97,8 +97,7 @@ function PopupWindowContent(p: PropsWithChildren) {
             <button
                 onClick={() => {
                     l.main.showNotification((h) => {
-                        const w = h * 20 + 200;
-                        return <Notification w={w} h={h}></Notification>;
+                        return <Notification h={h}></Notification>;
                     });
                 }}
             >
@@ -116,7 +115,7 @@ function PopupWindowContent(p: PropsWithChildren) {
             <button
                 onClick={() => {
                     l.local.showNotification((nr) => (
-                        <Notification isLocal w={100} h={nr}></Notification>
+                        <Notification h={nr}></Notification>
                     ));
                 }}
             >
@@ -131,7 +130,7 @@ function LocalLayer({ handle }: { handle: number }) {
 
     useEffect(() => {
         setTimeout(() => {
-            l.local.hide(handle);
+            l.hide(handle);
         }, 2000);
     }, []);
 
@@ -149,20 +148,11 @@ function LocalLayer({ handle }: { handle: number }) {
     );
 }
 
-function Notification({
-    w,
-    h,
-    isLocal = false,
-}: {
-    w: number;
-    h: number;
-    isLocal?: boolean;
-}) {
+function Notification({ h }: { h: number }) {
     const l = useLayers();
     useEffect(() => {
         setTimeout(() => {
-            const src = isLocal ? l.local : l.main;
-            src.hideNotification(h);
+            l.hideNotification(h);
         }, 2000);
     }, []);
     return (
@@ -173,7 +163,7 @@ function Notification({
                 width: '200px',
             }}
             onClick={() => {
-                l.main.hideNotification(h);
+                l.hideNotification(h);
             }}
         >
             My notification. Handle: {h}
