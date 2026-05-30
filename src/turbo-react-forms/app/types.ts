@@ -12,3 +12,8 @@ export type TLayerContainerProps = {
     notificationWrapper?: TWrapperFct;
     children?: React.ReactNode;
 };
+
+export type TLayerProps = {
+    data?: unknown;
+    onClose?: () => void;
+};

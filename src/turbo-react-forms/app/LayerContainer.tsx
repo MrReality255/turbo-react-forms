@@ -1,5 +1,10 @@
 import { useState, useMemo, ReactNode, useContext } from 'react';
-import { ctxLayers, TLayerContext, TLayerState } from '../contexts/AppLayers';
+import {
+    ctxLayer,
+    ctxLayers,
+    TLayersContext,
+    TLayersState,
+} from '../contexts/LayersContext';
 import { TLayerContainerProps } from './types';
 import { TStateHandle, TWrapperFct } from '../utils';
 import React from 'react';
@@ -90,13 +95,13 @@ export function TLayerContainer({
 }: TLayerContainerProps) {
     const ctx = useContext(ctxLayers);
 
-    const [layersState, setLayersState] = useState<TLayerState>({
+    const [layersState, setLayersState] = useState<TLayersState>({
         layers: [],
         notifications: [],
         maxHandle: ctx ? 1 : 2,
     });
 
-    const newLocalState = useMemo<TStateHandle<TLayerState>>(
+    const newLocalState = useMemo<TStateHandle<TLayersState>>(
         () => ({
             state: layersState,
             setState: setLayersState,
@@ -105,7 +110,7 @@ export function TLayerContainer({
         [layersState]
     );
 
-    const newLayerCtx = useMemo<TLayerContext>(() => {
+    const newLayerCtx = useMemo<TLayersContext>(() => {
         return {
             main: ctx?.main ?? newLocalState,
             local: newLocalState,
@@ -120,7 +125,14 @@ export function TLayerContainer({
             {layersState.layers.map((layer, idx) => {
                 const layerFct = layerWrapper(layer.handle, idx + 1);
                 const rf = layer.renderFct;
-                return layerFct(rf());
+                return (
+                    <ctxLayer.Provider
+                        value={{ handle: layer.handle }}
+                        key={layer.handle}
+                    >
+                        {layerFct(rf())}
+                    </ctxLayer.Provider>
+                );
             })}
             {layersState.notifications.length > 0 &&
                 notifyWrapperFct(
@@ -128,9 +140,12 @@ export function TLayerContainer({
                         {layersState.notifications.map((n, idx) => {
                             const rf = n.renderFct;
                             return (
-                                <React.Fragment key={idx}>
+                                <ctxLayer.Provider
+                                    value={{ handle: n.handle }}
+                                    key={idx}
+                                >
                                     {notificationWrapper(rf())}
-                                </React.Fragment>
+                                </ctxLayer.Provider>
                             );
                         })}
                     </>

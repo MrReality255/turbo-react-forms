@@ -1,5 +1,10 @@
 import { DemoPage } from './components/DemoPage';
-import { useLayers } from '../turbo-react-forms';
+import {
+    TLayer,
+    useClosingEffect,
+    useLayer,
+    useLayers,
+} from '../turbo-react-forms';
 import { PropsWithChildren, useEffect } from 'react';
 import { TLayerContainer } from '../turbo-react-forms/app/LayerContainer';
 
@@ -10,16 +15,7 @@ export function DemoPageLayers() {
             <button
                 onClick={() => {
                     layers.main.show((nr) => {
-                        return (
-                            <PopupWindow>
-                                new window: {nr}
-                                <hr></hr>
-                                <input type="text"></input>
-                                <button onClick={() => layers.hide(nr)}>
-                                    Close()
-                                </button>
-                            </PopupWindow>
-                        );
+                        return <PopupWindow handle={nr}></PopupWindow>;
                     });
                 }}
             >
@@ -55,40 +51,68 @@ export function DemoPageLayers() {
     );
 }
 
-function PopupWindow(p: { children?: React.ReactNode }) {
+function PopupWindow({ handle: nr }: { handle: number }) {
+    return (
+        <PopupWindowWrapper handle={nr}>
+            new window: {nr}
+            <hr></hr>
+            <input type="text"></input>
+        </PopupWindowWrapper>
+    );
+}
+
+function PopupWindowLocal({ handle }: { handle: number }) {
     const l = useLayers();
     return (
-        <div
-            style={{ width: '640px', height: '480px', backgroundColor: '#400' }}
-        >
-            <TLayerContainer>
-                <PopupWindowContent>{p.children}</PopupWindowContent>
-            </TLayerContainer>
-        </div>
+        <PopupWindowWrapper handle={handle}>
+            <input type="text"></input>
+            <h1>{handle}</h1>
+        </PopupWindowWrapper>
+    );
+}
+
+function PopupWindowWrapper(p: { children?: React.ReactNode; handle: number }) {
+    const l = useLayers();
+    const e = useClosingEffect({
+        delay: 200,
+        onClose: () => {
+            l.hide(p.handle);
+        },
+    });
+
+    return (
+        <TLayer onClose={() => e.hide()}>
+            <div
+                style={{
+                    ...e.get(),
+                    width: '640px',
+                    height: '480px',
+                    backgroundColor: '#400',
+                }}
+            >
+                <TLayerContainer>
+                    Handle: {p.handle}
+                    <PopupWindowContent>{p.children}</PopupWindowContent>
+                </TLayerContainer>
+            </div>
+        </TLayer>
     );
 }
 
 function PopupWindowContent(p: PropsWithChildren) {
     const l = useLayers();
+    const la = useLayer();
+
     return (
         <>
             Popup window
             <hr></hr>
             {p.children}
+            <button onClick={() => la.onClose!()}>OnClose()</button>
             <button
                 onClick={() => {
                     l.main.show((nr) => (
-                        <PopupWindow>
-                            <input type="text"></input>
-                            <h1>{nr}</h1>
-                            <button
-                                onClick={() => {
-                                    l.hide(nr);
-                                }}
-                            >
-                                Close
-                            </button>
-                        </PopupWindow>
+                        <PopupWindowLocal handle={nr}></PopupWindowLocal>
                     ));
                 }}
             >
@@ -150,20 +174,26 @@ function LocalLayer({ handle }: { handle: number }) {
 
 function Notification({ h }: { h: number }) {
     const l = useLayers();
+    const ce = useClosingEffect({
+        mode: 'opacity',
+        delay: 200,
+        onClose: () => l.hideNotification(),
+    });
     useEffect(() => {
         setTimeout(() => {
-            l.hideNotification(h);
+            ce.hide();
         }, 2000);
     }, []);
     return (
         <div
             style={{
+                ...ce.get(),
                 backgroundColor: '#050',
                 padding: '1em',
                 width: '200px',
             }}
             onClick={() => {
-                l.hideNotification(h);
+                ce.hide();
             }}
         >
             My notification. Handle: {h}
