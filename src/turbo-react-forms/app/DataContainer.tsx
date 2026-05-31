@@ -6,22 +6,22 @@ import { useNewDataObject } from '../hooks';
 export function DataContainer({
     children,
     data,
-    key,
+    field,
     idx,
     onInit,
 }: TDataContainerProps) {
     const dataObj = useNewDataObject(data === undefined ? onInit : undefined);
     const actualObj = useMemo(() => {
         const src = data ?? dataObj;
-        if (key !== undefined && idx !== undefined) {
-            return src.listGet(key, idx);
+        if (field !== undefined && idx !== undefined) {
+            return src.listGet(field, idx);
         }
-        if (key !== undefined) {
-            return src.objectGet(key);
+        if (field !== undefined) {
+            return src.objectGet(field);
         }
 
         return src;
-    }, [dataObj, key, idx]);
+    }, [data, dataObj, field, idx]);
 
     return (
         <ctxDataObject.Provider value={actualObj}>

@@ -1,6 +1,7 @@
-import { ctxLayer, ctxLayers, TLayersState } from '../contexts/LayersContext';
+import { ctxLayer, ctxLayers } from '../contexts/LayersContext';
 import { useContext, useMemo } from 'react';
 import { TStateHandle } from '../utils';
+import { TLayersState } from '../contexts/types';
 
 export function useLayersOrNull() {
     const ctx = useContext(ctxLayers);

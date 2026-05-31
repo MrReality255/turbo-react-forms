@@ -8,7 +8,7 @@ export type TAppContainerProps = {
 
 export type TDataContainerProps = PropsWithChildren<{
     data?: IDataObject;
-    key?: string;
+    field?: string;
     idx?: number;
     onInit?: () => TDataObjectMap;
 }>;

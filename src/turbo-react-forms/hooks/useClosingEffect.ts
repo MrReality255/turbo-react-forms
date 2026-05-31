@@ -16,8 +16,8 @@ export function useClosingEffect({
     const initState = useMemo(() => {
         return {
             transition,
-            transform: mode == 'resize' ? 'scale(0.1)' : undefined,
-            opacity: mode == 'opacity' ? 0 : undefined,
+            transform: mode == 'resize' ? 'scale(0.5)' : undefined,
+            opacity: mode == 'opacity' ? 0.25 : undefined,
         };
     }, []);
 
@@ -56,12 +56,10 @@ export function useClosingEffect({
     };
 }
 function getTransition(mode: TClosingEffect, delay: number) {
-    delay = delay / 1000;
-
     switch (mode) {
         case 'resize':
-            return `transform ${delay}s ease`;
+            return `transform ${delay}ms ease`;
         case 'opacity':
-            return `opacity ${delay}s ease`;
+            return `opacity ${delay}ms ease`;
     }
 }

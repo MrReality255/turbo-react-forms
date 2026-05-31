@@ -1,5 +1,6 @@
 import {
     DataContainer,
+    useClosingEffect,
     useDataObject,
     useNewDataObject,
 } from '../turbo-react-forms';
@@ -23,6 +24,8 @@ function Form1() {
     const data = useDataObject();
     return (
         <div>
+            {JSON.stringify(data.getRef())}
+            <h2>Standard form</h2>
             <h3>Form1</h3>
             <input
                 type="text"
@@ -35,10 +38,29 @@ function Form1() {
                     )
                 }
             ></input>
-            <h3>Subform</h3>
-            <DataContainer data={data} key="subform">
+            <h2>Subform</h2>
+            <DataContainer data={data} field="subform">
                 <Form2></Form2>
             </DataContainer>
+            <h2>Template list</h2>
+            {data.listItems('template_items').map((itemCtx, idx) => {
+                return (
+                    <DataContainer data={itemCtx} key={itemCtx.getID()}>
+                        <Form3
+                            onDelete={() =>
+                                data.listRemove('template_items', idx)
+                            }
+                        ></Form3>
+                    </DataContainer>
+                );
+            })}
+            <button
+                onClick={() => {
+                    data.listAdd('template_items');
+                }}
+            >
+                OnAdd()
+            </button>
         </div>
     );
 }
@@ -59,6 +81,39 @@ function Form2() {
                     )
                 }
             ></input>
+        </div>
+    );
+}
+
+function Form3(p: { onDelete: () => void }) {
+    const data = useDataObject();
+    const ce = useClosingEffect({
+        mode: 'opacity',
+        onClose: () => p.onDelete(),
+    });
+
+    return (
+        <div style={{ ...ce.get() }}>
+            <h3>Template list item: {data.getID()}</h3>
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                }}
+            >
+                <div>
+                    <input
+                        type="text"
+                        value={data.getRawValue('name')}
+                        onChange={(e) =>
+                            data.setValue('name', e.currentTarget.value, true)
+                        }
+                    ></input>
+                </div>
+                <div>
+                    <button onClick={() => ce.hide()}>delete</button>
+                </div>
+            </div>
         </div>
     );
 }

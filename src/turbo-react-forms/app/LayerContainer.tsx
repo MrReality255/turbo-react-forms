@@ -58,12 +58,12 @@ export function TLayerContainer({
             {layersState.notifications.length > 0 &&
                 notifyWrapperFct(
                     <>
-                        {layersState.notifications.map((n, idx) => {
+                        {layersState.notifications.map((n) => {
                             const rf = n.renderFct;
                             return (
                                 <ctxLayer.Provider
                                     value={{ handle: n.handle }}
-                                    key={idx}
+                                    key={n.handle}
                                 >
                                     {notificationWrapper(rf())}
                                 </ctxLayer.Provider>

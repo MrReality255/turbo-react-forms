@@ -5,30 +5,53 @@ import {
     TDataObjectList,
     TDataObjectMap,
     TDataObjectValue,
+    TDataRootObject,
 } from './types';
-import { DataUtils, TStateHandle } from '../utils';
+import { DataUtils, TStateUpdateHandle } from '../utils';
 
-export function useNewDataObject(initFct?: () => TDataObjectMap) {
+export function useNewDataObject(
+    initFct?: () => TDataObjectMap,
+    strictMode?: boolean
+) {
     const initData = useMemo(() => {
         return initFct?.() ?? {};
     }, []);
-    const [obj, updateObj] = useState<TDataObject>({
+    const [obj, updateObj] = useState<TDataRootObject>({
         type: 'obj',
         data: initData,
+        id: 1,
+        maxID: 2,
     });
+
     const objHandle = useMemo(() => {
         return {
-            setState: updateObj,
             state: obj,
-            updateState: updateObj,
+            updateState: updateRootObj,
         };
     }, [obj]);
     return useMemo(() => {
-        return createNewDataObject(objHandle);
+        return createNewDataObject(
+            objHandle,
+            strictMode ?? false,
+            () => objHandle.state.maxID
+        );
     }, [objHandle]);
+
+    function updateRootObj(fct: (prev: TDataObject) => TDataObject) {
+        updateObj((prev) => {
+            return {
+                ...fct(prev),
+                maxID: prev.maxID + 1,
+            };
+        });
+    }
 }
 
-function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
+function createNewDataObject(
+    os: TStateUpdateHandle<TDataObject>,
+    strictMode: boolean,
+    nextHandleProvider: () => number
+): IDataObject {
     return {
         get,
         set,
@@ -45,6 +68,9 @@ function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
             if (typeof v === 'string') {
                 return v;
             }
+            if (v === undefined) {
+                return '';
+            }
             return v.type == 'invalid' ? v.value : JSON.stringify(v);
         },
 
@@ -53,17 +79,30 @@ function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
         },
 
         objectGet: (key: string) => {
-            return createNewDataObject({
-                state: os.state.data[key] as TDataObject,
-                setState: function (newVal: TDataObject) {
-                    set(key, newVal);
+            return createNewDataObject(
+                {
+                    state: (os.state.data[key] ??
+                        (strictMode
+                            ? undefined
+                            : { type: 'obj', data: {} })) as TDataObject,
+                    updateState: function (
+                        fct: (prev: TDataObject) => TDataObject
+                    ) {
+                        update(key, (prev) => {
+                            if (prev === undefined && !strictMode) {
+                                prev = {
+                                    type: 'obj',
+                                    data: {},
+                                    id: nextHandleProvider(),
+                                };
+                            }
+                            return fct(prev as TDataObject);
+                        });
+                    },
                 },
-                updateState: function (
-                    fct: (prev: TDataObject) => TDataObject
-                ) {
-                    update(key, (prev) => fct(prev as TDataObject));
-                },
-            });
+                strictMode,
+                nextHandleProvider
+            );
         },
 
         listAdd: function (key: string, initFct?: () => TDataObjectMap) {
@@ -74,13 +113,44 @@ function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
                     ...list,
                     type: 'list',
                     items: [
-                        ...list.items,
+                        ...(list?.items ?? []),
                         {
+                            id: nextHandleProvider(),
                             type: 'obj',
                             data: newValue,
                         },
                     ],
                 };
+            });
+        },
+
+        listItems: function (key: string) {
+            const items = (get(key) as TDataObjectList)?.items ?? [];
+            return items.map((item, itemIdx) => {
+                return createNewDataObject(
+                    {
+                        state: item,
+                        updateState: function (
+                            itemUpdaterFct: (prev: TDataObject) => TDataObject
+                        ) {
+                            update(key, (prevValue) => {
+                                const prevListObj =
+                                    prevValue as TDataObjectList;
+                                return {
+                                    type: 'list',
+                                    items: prevListObj.items.map(
+                                        (prevListItem, prevItemIdx) =>
+                                            prevItemIdx == itemIdx
+                                                ? itemUpdaterFct(prevListItem)
+                                                : prevListItem
+                                    ),
+                                };
+                            });
+                        },
+                    },
+                    strictMode,
+                    nextHandleProvider
+                );
             });
         },
 
@@ -97,33 +167,28 @@ function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
 
         listGet: function (key: string, idx: number) {
             const list = os.state.data[key] as TDataObjectList;
-            return createNewDataObject({
-                state: list.items[idx],
-                setState: function (newVal: TDataObject) {
-                    update(key, (prev) => {
-                        const prevList = prev as TDataObjectList;
-                        return {
-                            type: 'list',
-                            items: prevList.items.map((item, i) => {
-                                return i == idx ? newVal : item;
-                            }),
-                        };
-                    });
+            return createNewDataObject(
+                {
+                    state: list.items[idx],
+                    updateState: function (
+                        ItemUpdaterFct: (prev: TDataObject) => TDataObject
+                    ) {
+                        update(key, (prev) => {
+                            const prevList = prev as TDataObjectList;
+                            return {
+                                type: 'list',
+                                items: prevList.items.map((item, i) => {
+                                    return i == idx
+                                        ? ItemUpdaterFct(item)
+                                        : item;
+                                }),
+                            };
+                        });
+                    },
                 },
-                updateState: function (
-                    fct: (prev: TDataObject) => TDataObject
-                ) {
-                    update(key, (prev) => {
-                        const prevList = prev as TDataObjectList;
-                        return {
-                            type: 'list',
-                            items: prevList.items.map((item, i) => {
-                                return i == idx ? fct(item) : item;
-                            }),
-                        };
-                    });
-                },
-            });
+                strictMode,
+                nextHandleProvider
+            );
         },
 
         clone: function () {
@@ -131,6 +196,7 @@ function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
         },
 
         getRef: () => os.state,
+        getID: () => os.state.id,
     };
 
     function get(key: string) {
@@ -156,6 +222,7 @@ function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
         os.updateState((prev) => {
             return {
                 ...prev,
+                id: prev.id,
                 data: {
                     ...prev.data,
                     [key]: fct(prev.data[key]),
@@ -167,6 +234,7 @@ function createNewDataObject(os: TStateHandle<TDataObject>): IDataObject {
 
 function cloneDataObject(src: TDataObject): TDataObject {
     return {
+        id: src.id,
         type: 'obj',
         data: Object.fromEntries(
             Object.entries(src.data).map(([key, value]) => [

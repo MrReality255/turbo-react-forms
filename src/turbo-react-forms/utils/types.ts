@@ -1,8 +1,11 @@
 // General
-export type TStateHandle<T> = {
+export type TStateUpdateHandle<T> = {
     state: T;
-    setState: (val: T) => void;
     updateState: (fct: (prev: T) => T) => void;
+};
+
+export type TStateHandle<T> = TStateUpdateHandle<T> & {
+    setState: (val: T) => void;
 };
 
 // UI
