@@ -1,13 +1,79 @@
 import { useState, useMemo, ReactNode, useContext } from 'react';
-import {
-    ctxLayer,
-    ctxLayers,
-    TLayersContext,
-    TLayersState,
-} from '../contexts/LayersContext';
+import React from 'react';
+
+import { ctxLayer, ctxLayers } from '../contexts/LayersContext';
 import { TLayerContainerProps } from './types';
 import { TStateHandle, TWrapperFct } from '../utils';
-import React from 'react';
+import { TLayersContext, TLayersState } from '../contexts/types';
+
+export function TLayerContainer({
+    mainWrapper = defaultMainWrapper,
+    contentWrapper = defaultContentWrapper,
+    layerWrapper = defaultLayerWrapper,
+    notificationsWrapper = defaultNotificationsWrapper,
+    notificationWrapper = defaultNotificationWrapper,
+    children,
+}: TLayerContainerProps) {
+    const ctx = useContext(ctxLayers);
+
+    const [layersState, setLayersState] = useState<TLayersState>({
+        layers: [],
+        notifications: [],
+        maxHandle: ctx ? 1 : 2,
+    });
+
+    const newLocalState = useMemo<TStateHandle<TLayersState>>(
+        () => ({
+            state: layersState,
+            setState: setLayersState,
+            updateState: setLayersState,
+        }),
+        [layersState]
+    );
+
+    const newLayerCtx = useMemo<TLayersContext>(() => {
+        return {
+            main: ctx?.main ?? newLocalState,
+            local: newLocalState,
+        };
+    }, [newLocalState]);
+
+    const notifyWrapperFct = notificationsWrapper(layersState.layers.length);
+
+    return mainWrapper(
+        <ctxLayers.Provider value={newLayerCtx}>
+            {contentWrapper(children)}
+            {layersState.layers.map((layer, idx) => {
+                const layerFct = layerWrapper(layer.handle, idx + 1);
+                const rf = layer.renderFct;
+                return (
+                    <ctxLayer.Provider
+                        value={{ handle: layer.handle }}
+                        key={layer.handle}
+                    >
+                        {layerFct(rf())}
+                    </ctxLayer.Provider>
+                );
+            })}
+            {layersState.notifications.length > 0 &&
+                notifyWrapperFct(
+                    <>
+                        {layersState.notifications.map((n, idx) => {
+                            const rf = n.renderFct;
+                            return (
+                                <ctxLayer.Provider
+                                    value={{ handle: n.handle }}
+                                    key={idx}
+                                >
+                                    {notificationWrapper(rf())}
+                                </ctxLayer.Provider>
+                            );
+                        })}
+                    </>
+                )}
+        </ctxLayers.Provider>
+    );
+}
 
 function defaultMainWrapper(content: ReactNode) {
     return (
@@ -82,74 +148,5 @@ function defaultNotificationWrapper(c: React.ReactNode) {
         >
             {c}
         </div>
-    );
-}
-
-export function TLayerContainer({
-    mainWrapper = defaultMainWrapper,
-    contentWrapper = defaultContentWrapper,
-    layerWrapper = defaultLayerWrapper,
-    notificationsWrapper = defaultNotificationsWrapper,
-    notificationWrapper = defaultNotificationWrapper,
-    children,
-}: TLayerContainerProps) {
-    const ctx = useContext(ctxLayers);
-
-    const [layersState, setLayersState] = useState<TLayersState>({
-        layers: [],
-        notifications: [],
-        maxHandle: ctx ? 1 : 2,
-    });
-
-    const newLocalState = useMemo<TStateHandle<TLayersState>>(
-        () => ({
-            state: layersState,
-            setState: setLayersState,
-            updateState: setLayersState,
-        }),
-        [layersState]
-    );
-
-    const newLayerCtx = useMemo<TLayersContext>(() => {
-        return {
-            main: ctx?.main ?? newLocalState,
-            local: newLocalState,
-        };
-    }, [newLocalState]);
-
-    const notifyWrapperFct = notificationsWrapper(layersState.layers.length);
-
-    return mainWrapper(
-        <ctxLayers.Provider value={newLayerCtx}>
-            {contentWrapper(children)}
-            {layersState.layers.map((layer, idx) => {
-                const layerFct = layerWrapper(layer.handle, idx + 1);
-                const rf = layer.renderFct;
-                return (
-                    <ctxLayer.Provider
-                        value={{ handle: layer.handle }}
-                        key={layer.handle}
-                    >
-                        {layerFct(rf())}
-                    </ctxLayer.Provider>
-                );
-            })}
-            {layersState.notifications.length > 0 &&
-                notifyWrapperFct(
-                    <>
-                        {layersState.notifications.map((n, idx) => {
-                            const rf = n.renderFct;
-                            return (
-                                <ctxLayer.Provider
-                                    value={{ handle: n.handle }}
-                                    key={idx}
-                                >
-                                    {notificationWrapper(rf())}
-                                </ctxLayer.Provider>
-                            );
-                        })}
-                    </>
-                )}
-        </ctxLayers.Provider>
     );
 }

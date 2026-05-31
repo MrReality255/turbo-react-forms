@@ -1,12 +1,12 @@
 import { DemoPage } from './components/DemoPage';
 import {
     TLayer,
+    TLayerContainer,
     useClosingEffect,
     useLayer,
     useLayers,
 } from '../turbo-react-forms';
 import { PropsWithChildren, useEffect } from 'react';
-import { TLayerContainer } from '../turbo-react-forms/app/LayerContainer';
 
 export function DemoPageLayers() {
     const layers = useLayers();
