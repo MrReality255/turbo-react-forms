@@ -3,6 +3,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { TAppContainer } from '../turbo-react-forms/app/AppContainer';
 import { DemoPageLayers } from './DemoPageLayers';
 import { DemoDataObject } from './DemoDataObject';
+import { DemoForms } from './DemoForms';
 
 export default function DemoApp() {
     return (
@@ -25,6 +26,7 @@ function AppRouter() {
                     path="/dataobject"
                     element={<DemoDataObject></DemoDataObject>}
                 ></Route>
+                <Route path="/forms" element={<DemoForms></DemoForms>}></Route>
             </Routes>
         </HashRouter>
     );
