@@ -1,4 +1,4 @@
-import { TAppContainerProps } from './index';
+import { TAppContainerProps } from '.';
 import { TLayerContainer } from './LayerContainer';
 
 export function TAppContainer(p: TAppContainerProps) {
