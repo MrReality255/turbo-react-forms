@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TFormControlLib, TFormControlList, TFormState } from './types';
-import { TDataObjectMap, useLayers } from '../hooks';
+import { ILayers, TDataObjectMap, useLayersOrNull } from '../hooks';
 import { FormWrapper } from './FormWrapper';
 
 export function createFormHook<P extends Record<string, unknown>>(
@@ -22,13 +22,22 @@ function useForm<P extends Record<string, unknown>, Ctx>(
         ctx: null,
         mode: 'ready',
     });
-    const lc = useLayers();
+    const lc = useLayersOrNull();
 
     return {
         state,
         setState,
         show: async function (data: TDataObjectMap | null, ctx: Ctx) {
-            lc.main.show((handle) => <FormWrapper></FormWrapper>);
+            const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
+            showMethod((handle) => <FormWrapper handle={handle}></FormWrapper>);
         },
+    };
+}
+function getDefaultShowMethod(lc: ILayers | null) {
+    return function (contentProvider: (handle: number) => React.ReactNode) {
+        if (!lc) {
+            throw 'you need to use layer manager without default show method';
+        }
+        lc.main.show((handle) => contentProvider(handle));
     };
 }

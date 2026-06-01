@@ -50,3 +50,19 @@ export interface IDataObject {
     getID: () => number;
     getRef: () => TDataObject;
 }
+
+export interface ILayerManager {
+    show: (ctrl: (handle: number) => React.ReactNode) => void;
+    showNotification: (ctrl: (handle: number) => React.ReactNode) => void;
+
+    hide: (handle?: number) => void;
+    hideNotification: (handle?: number) => void;
+}
+
+export interface ILayers {
+    main: ILayerManager;
+    local: ILayerManager;
+
+    hide: (handle?: number) => void;
+    hideNotification: (handle?: number) => void;
+}

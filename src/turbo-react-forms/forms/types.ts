@@ -28,6 +28,7 @@ export type TFormControlLib<P extends Record<string, unknown>> = {
     controls: {
         [K in keyof P]: TFormControlDef<P[K]>;
     };
+    showMethod?: (contentProvider: (handle: number) => React.ReactNode) => void;
 };
 
 export type TFormControlList<P extends Record<string, unknown>> = {
@@ -37,3 +38,7 @@ export type TFormControlList<P extends Record<string, unknown>> = {
         prop: P[Type];
     };
 }[keyof P][];
+
+export type TFormWrapperProps = {
+    handle: number;
+};
