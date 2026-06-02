@@ -1,13 +1,12 @@
+import { TDataObjectMap } from '../hooks';
+import { TKey } from '../utils';
+
 export type TFormMode = 'ready' | 'loading' | 'waiting';
 
-export type TFormState = {
-    ctx: unknown | null;
+export type TFormState<Ctx> = {
+    ctx: Ctx;
     mode: TFormMode;
-};
-
-export type TFormContext = TFormState & {
-    submit: () => void;
-    close: () => void;
+    handle: number;
 };
 
 export type TFormControlBaseProps = {
@@ -31,6 +30,10 @@ export type TFormControlLib<P extends Record<string, unknown>> = {
     showMethod?: (contentProvider: (handle: number) => React.ReactNode) => void;
 };
 
+export type TFormSubmitFct<Ctx, SubmitType> = (
+    submitCtx: TFormSubmitFuncCtx<Ctx>
+) => Promise<TFormSubmitCtx<Ctx, SubmitType>>;
+
 export type TFormControlList<P extends Record<string, unknown>> = {
     [Type in keyof P]: {
         id: string;
@@ -39,6 +42,27 @@ export type TFormControlList<P extends Record<string, unknown>> = {
     };
 }[keyof P][];
 
-export type TFormWrapperProps = {
+export type TFormConfig<P extends Record<string, unknown>, Ctx, SubmitType> = {
+    controls:
+        | TFormControlList<P>
+        | ((state: TFormState<Ctx>) => TFormControlList<P>);
+    onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
+};
+
+export type TFormWrapperProps<Ctx> = {
     handle: number;
+    formCtx: Ctx;
+
+    children?: React.ReactNode;
+};
+
+export type TFormSubmitFuncCtx<Ctx> = {
+    id: TKey;
+    ctx: Ctx;
+    rawData: TDataObjectMap;
+    validData: TDataObjectMap;
+};
+
+export type TFormSubmitCtx<Ctx, SubmitType> = TFormSubmitFuncCtx<Ctx> & {
+    submitData: SubmitType;
 };

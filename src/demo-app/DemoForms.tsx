@@ -38,8 +38,6 @@ export function DemoForms() {
     return (
         <DemoPage>
             <h1>Demo forms</h1>
-            <h3>State</h3>
-            {JSON.stringify(frm.state)}
             <button onClick={() => handleBtn()}>Show</button>
         </DemoPage>
     );

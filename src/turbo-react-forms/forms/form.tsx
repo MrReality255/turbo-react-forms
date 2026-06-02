@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { TFormControlLib, TFormControlList, TFormState } from './types';
+import { TFormControlLib, TFormControlList, TFormSubmitFct } from './types';
 import { ILayers, TDataObjectMap, useLayersOrNull } from '../hooks';
 import { FormWrapper } from './FormWrapper';
 
@@ -8,28 +7,28 @@ export function createFormHook<P extends Record<string, unknown>>(
 ) {
     return {
         emptyList: [] as TFormControlList<P>,
-        useForm: function <Ctx>(list: TFormControlList<P>) {
-            return useForm<P, Ctx>(lib, list);
+        useForm: function <Ctx, SubmitType>(list: TFormControlList<P>) {
+            return useForm<P, Ctx, SubmitType>(lib, list);
         },
     };
 }
 
-function useForm<P extends Record<string, unknown>, Ctx>(
+function useForm<P extends Record<string, unknown>, Ctx, SubmitType>(
     lib: TFormControlLib<P>,
     list: TFormControlList<P>
 ) {
-    const [state, setState] = useState<TFormState>({
-        ctx: null,
-        mode: 'ready',
-    });
     const lc = useLayersOrNull();
 
     return {
-        state,
-        setState,
-        show: async function (data: TDataObjectMap | null, ctx: Ctx) {
+        show: async function (
+            data: TDataObjectMap | null,
+            ctx: Ctx,
+            submitFct?: TFormSubmitFct<Ctx, SubmitType>
+        ) {
             const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
-            showMethod((handle) => <FormWrapper handle={handle}></FormWrapper>);
+            showMethod((handle) => (
+                <FormWrapper handle={handle} formCtx={ctx}></FormWrapper>
+            ));
         },
     };
 }

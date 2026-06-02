@@ -1,4 +1,6 @@
 // General
+export type TKey = number | string;
+
 export type TStateUpdateHandle<T> = {
     state: T;
     updateState: (fct: (prev: T) => T) => void;

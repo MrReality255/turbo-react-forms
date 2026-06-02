@@ -1,4 +1,4 @@
-import { TLayerProps, TStateHandle } from '..';
+import { TFormState, TLayerProps, TStateHandle, TStateUpdateHandle } from '..';
 
 export type TLayerRec = {
     handle: number;
@@ -18,4 +18,8 @@ export type TLayersContext = {
 
 export type TLayerContext = TLayerProps & {
     handle: number;
+};
+
+export type TFormContext<Ctx> = {
+    stateHandle: TStateUpdateHandle<TFormState<Ctx>>;
 };
