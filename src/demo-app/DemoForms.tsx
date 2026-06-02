@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { createFormHook, TFormControlBaseProps } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
 
@@ -33,16 +34,22 @@ export function DemoForms() {
     const items: typeof emptyList = [
         { id: 'something', type: 'text' as const, prop: { maxLen: 344 } },
     ];
+    const [formResponse, setFormResponse] = useState('-');
 
-    const frm = useForm(items);
+    const frm = useForm({
+        controls: () => items,
+    });
     return (
         <DemoPage>
             <h1>Demo forms</h1>
             <button onClick={() => handleBtn()}>Show</button>
+            <h2>Response</h2>
+            {formResponse}
         </DemoPage>
     );
 
     async function handleBtn() {
         const result = await frm.show(null, null);
+        setFormResponse(JSON.stringify(result));
     }
 }

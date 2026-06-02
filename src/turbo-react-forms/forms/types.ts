@@ -49,11 +49,20 @@ export type TFormConfig<P extends Record<string, unknown>, Ctx, SubmitType> = {
     onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
 };
 
-export type TFormWrapperProps<Ctx> = {
-    handle: number;
+export type TFormWrapperProps<
+    P extends Record<string, unknown>,
+    Ctx,
+    SubmitType,
+> = {
+    config: TFormConfig<P, Ctx, SubmitType>;
     formCtx: Ctx;
+    handle: number;
+    initData: TDataObjectMap | null;
 
     children?: React.ReactNode;
+
+    onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined;
+    onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType>) => void;
 };
 
 export type TFormSubmitFuncCtx<Ctx> = {

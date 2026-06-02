@@ -1,4 +1,10 @@
-import { TFormControlLib, TFormControlList, TFormSubmitFct } from './types';
+import {
+    TFormConfig,
+    TFormControlLib,
+    TFormControlList,
+    TFormSubmitCtx,
+    TFormSubmitFct,
+} from './types';
 import { ILayers, TDataObjectMap, useLayersOrNull } from '../hooks';
 import { FormWrapper } from './FormWrapper';
 
@@ -7,15 +13,17 @@ export function createFormHook<P extends Record<string, unknown>>(
 ) {
     return {
         emptyList: [] as TFormControlList<P>,
-        useForm: function <Ctx, SubmitType>(list: TFormControlList<P>) {
-            return useForm<P, Ctx, SubmitType>(lib, list);
+        useForm: function <Ctx, SubmitType>(
+            config: TFormConfig<P, Ctx, SubmitType>
+        ) {
+            return useForm<P, Ctx, SubmitType>(lib, config);
         },
     };
 }
 
 function useForm<P extends Record<string, unknown>, Ctx, SubmitType>(
     lib: TFormControlLib<P>,
-    list: TFormControlList<P>
+    config: TFormConfig<P, Ctx, SubmitType>
 ) {
     const lc = useLayersOrNull();
 
@@ -25,13 +33,23 @@ function useForm<P extends Record<string, unknown>, Ctx, SubmitType>(
             ctx: Ctx,
             submitFct?: TFormSubmitFct<Ctx, SubmitType>
         ) {
-            const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
-            showMethod((handle) => (
-                <FormWrapper handle={handle} formCtx={ctx}></FormWrapper>
-            ));
+            return new Promise<TFormSubmitCtx<Ctx, SubmitType>>((resolve) => {
+                const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
+                showMethod((handle) => (
+                    <FormWrapper<P, Ctx, SubmitType>
+                        config={config}
+                        formCtx={ctx}
+                        handle={handle}
+                        initData={data}
+                        onSubmit={submitFct}
+                        onResolve={resolve}
+                    ></FormWrapper>
+                ));
+            });
         },
     };
 }
+
 function getDefaultShowMethod(lc: ILayers | null) {
     return function (contentProvider: (handle: number) => React.ReactNode) {
         if (!lc) {

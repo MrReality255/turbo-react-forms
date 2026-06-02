@@ -3,7 +3,9 @@ import { TFormState, TFormWrapperProps } from '.';
 import { ctxForm } from '../contexts/FormContext';
 import { TFormContext } from '../contexts/types';
 
-export function FormWrapper<Ctx>(p: TFormWrapperProps<Ctx>) {
+export function FormWrapper<P extends Record<string, unknown>, Ctx, SubmitType>(
+    p: TFormWrapperProps<P, Ctx, SubmitType>
+) {
     const [state, setState] = useState<TFormState<Ctx>>({
         ctx: p.formCtx,
         handle: p.handle,
