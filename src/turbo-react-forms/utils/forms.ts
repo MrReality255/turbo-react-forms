@@ -2,6 +2,8 @@ import {
     DataUtils,
     TDataObjectMap,
     TFormConfig,
+    TFormControlCustom,
+    TFormControlDynamic,
     TFormControlLib,
     TFormControlSubform,
     TFormControlTemplate,
@@ -40,8 +42,16 @@ function createInitData<
             case 'subform':
                 createInitDateForSubform(result, control, initData, ctx, lib);
                 return;
+            case 'plain':
+                return;
             default:
-                createInitDataTypedControl(result, control, initData, ctx, lib);
+                createInitDataStringControl(
+                    result,
+                    control,
+                    initData,
+                    ctx,
+                    lib
+                );
                 return;
         }
     });
@@ -79,13 +89,16 @@ function createInitDateForSubform<
     throw new Error('Function not implemented.');
 }
 
-function createInitDataTypedControl<
+function createInitDataStringControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     Ctx,
 >(
     result: TDataObjectMap,
-    control: TFormControlTyped<P, V, keyof P, Ctx>,
+    control:
+        | TFormControlTyped<P, V, keyof P, Ctx>
+        | TFormControlDynamic<Ctx>
+        | TFormControlCustom<V, Ctx>,
     initData: TDataObjectMap,
     ctx: Ctx,
     lib: TFormControlLib<P, V>
@@ -107,19 +120,21 @@ function validate<
 >(
     value: string,
     ctx: Ctx,
-    control: TFormControlTyped<P, V, keyof P, Ctx>,
+    control:
+        | TFormControlTyped<P, V, keyof P, Ctx>
+        | TFormControlDynamic<Ctx>
+        | TFormControlCustom<V, Ctx>,
     lib: TFormControlLib<P, V>
 ): boolean {
     if (!value) {
         return control.optional ?? false;
     }
-
-    if (!control.onValidate && !control.validation) {
-        return true;
-    }
-
     if (control.onValidate && !control.onValidate(value, ctx)) {
         return false;
+    }
+
+    if (control.class === 'dynamic') {
+        return true;
     }
 
     if (control.validation) {

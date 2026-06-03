@@ -49,23 +49,45 @@ export type TFormControlBaseProps = TFormControlCommonProps & {
     onValueChange: (newValue: string) => void;
 };
 
-export type TFormControlTyped<
-    P,
-    V,
-    Type extends keyof P,
-    Ctx,
-> = TFormControlCommonProps & {
-    class?: undefined;
-    type: Type;
-    prop: P[Type];
+export type TFormControlAtomicProps<Ctx> = {
     defaultValue?: string;
-    validation?: keyof V;
-
     onGetDefaultValue?: (ctx: Ctx) => string;
     onWriteValue?: (newValue: string) => string;
     onReadValue?: (value: string) => string;
     onValidate?: (value: string, ctx: Ctx) => boolean;
 };
+
+export type TFormCustomControlProps<Ctx> = TFormControlBaseProps & {
+    ctx: Ctx;
+};
+
+export type TFormControlTyped<
+    P,
+    V,
+    Type extends keyof P,
+    Ctx,
+> = TFormControlCommonProps &
+    TFormControlAtomicProps<Ctx> & {
+        class?: undefined;
+        type: Type;
+        prop: P[Type];
+        validation?: keyof V;
+    };
+
+export type TFormControlDynamic<Ctx> = TFormControlCommonProps &
+    TFormControlAtomicProps<Ctx> & {
+        class: 'dynamic';
+        type: string;
+        prop: Record<string, unknown>;
+    };
+
+export type TFormControlCustom<V, Ctx> = TFormControlCommonProps &
+    TFormControlAtomicProps<Ctx> & {
+        class: 'custom';
+        validation?: keyof V;
+
+        onRender: () => React.ReactNode;
+    };
 
 export type TFormControlTemplate<
     P extends Record<string, unknown>,
@@ -85,6 +107,11 @@ export type TFormControlSubform<
     subform: TFormSubformProps<P, V, Ctx>;
 };
 
+export type TFormControlPlain<Ctx> = {
+    class: 'plain';
+    onRender: (ctx: Ctx) => React.ReactNode;
+};
+
 export type TFormControlList<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
@@ -93,7 +120,10 @@ export type TFormControlList<
     [Type in keyof P]:
         | TFormControlTyped<P, V, Type, Ctx>
         | TFormControlTemplate<P, V, Ctx>
-        | TFormControlSubform<P, V, Ctx>;
+        | TFormControlSubform<P, V, Ctx>
+        | TFormControlDynamic<Ctx>
+        | TFormControlCustom<V, Ctx>
+        | TFormControlPlain<Ctx>;
 }[keyof P][];
 
 export type TFormSubformProps<
