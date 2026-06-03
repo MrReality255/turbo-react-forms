@@ -2,9 +2,11 @@ import {
     DataUtils,
     TDataObjectMap,
     TFormConfig,
+    TFormControl,
     TFormControlCustom,
     TFormControlDynamic,
     TFormControlLib,
+    TFormControlString,
     TFormControlSubform,
     TFormControlTemplate,
     TFormControlTyped,
@@ -35,27 +37,41 @@ function createInitData<
 
     const result: TDataObjectMap = {};
     myControlList.forEach((control) => {
-        switch (control.class) {
-            case 'template':
-                createInitDateForTemplate(result, control, initData, ctx, lib);
-                return;
-            case 'subform':
-                createInitDateForSubform(result, control, initData, ctx, lib);
-                return;
-            case 'plain':
-                return;
-            default:
-                createInitDataStringControl(
-                    result,
-                    control,
-                    initData,
-                    ctx,
-                    lib
-                );
-                return;
-        }
+        createInitDataForControl(result, control, initData, ctx, lib);
     });
     return result;
+}
+
+function createInitDataForControl<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    Ctx,
+>(
+    result: TDataObjectMap,
+    control: TFormControl<P, V, keyof P, Ctx>,
+    initData: TDataObjectMap,
+    ctx: Ctx,
+    lib: TFormControlLib<P, V>
+) {
+    switch (control.class) {
+        case 'template':
+            createInitDateForTemplate<P, V, Ctx>(
+                result,
+                control,
+                initData,
+                ctx,
+                lib
+            );
+            return;
+        case 'subform':
+            createInitDateForSubform(result, control, initData, ctx, lib);
+            return;
+        case 'plain':
+            return;
+        default:
+            createInitDataStringControl(result, control, initData, ctx, lib);
+            return;
+    }
 }
 
 function createInitDateForTemplate<
@@ -86,7 +102,7 @@ function createInitDateForSubform<
     ctx: Ctx,
     lib: TFormControlLib<P, V>
 ) {
-    throw new Error('Function not implemented.');
+    control.subform.controls;
 }
 
 function createInitDataStringControl<
@@ -95,10 +111,7 @@ function createInitDataStringControl<
     Ctx,
 >(
     result: TDataObjectMap,
-    control:
-        | TFormControlTyped<P, V, keyof P, Ctx>
-        | TFormControlDynamic<Ctx>
-        | TFormControlCustom<V, Ctx>,
+    control: TFormControlString<P, V, keyof P, Ctx>,
     initData: TDataObjectMap,
     ctx: Ctx,
     lib: TFormControlLib<P, V>
@@ -120,10 +133,7 @@ function validate<
 >(
     value: string,
     ctx: Ctx,
-    control:
-        | TFormControlTyped<P, V, keyof P, Ctx>
-        | TFormControlDynamic<Ctx>
-        | TFormControlCustom<V, Ctx>,
+    control: TFormControlString<P, V, keyof P, Ctx>,
     lib: TFormControlLib<P, V>
 ): boolean {
     if (!value) {

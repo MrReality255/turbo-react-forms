@@ -112,18 +112,28 @@ export type TFormControlPlain<Ctx> = {
     onRender: (ctx: Ctx) => React.ReactNode;
 };
 
+export type TFormControlString<P, V, Type extends keyof P, Ctx> =
+    | TFormControlTyped<P, V, Type, Ctx>
+    | TFormControlDynamic<Ctx>
+    | TFormControlCustom<V, Ctx>;
+
+export type TFormControl<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    Type extends keyof P,
+    Ctx,
+> =
+    | TFormControlString<P, V, Type, Ctx>
+    | TFormControlTemplate<P, V, Ctx>
+    | TFormControlSubform<P, V, Ctx>
+    | TFormControlPlain<Ctx>;
+
 export type TFormControlList<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     Ctx,
 > = {
-    [Type in keyof P]:
-        | TFormControlTyped<P, V, Type, Ctx>
-        | TFormControlTemplate<P, V, Ctx>
-        | TFormControlSubform<P, V, Ctx>
-        | TFormControlDynamic<Ctx>
-        | TFormControlCustom<V, Ctx>
-        | TFormControlPlain<Ctx>;
+    [Type in keyof P]: TFormControl<P, V, Type, Ctx>;
 }[keyof P][];
 
 export type TFormSubformProps<
