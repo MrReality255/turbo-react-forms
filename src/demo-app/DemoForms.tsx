@@ -6,7 +6,7 @@ type TTextProps = {
     maxLen: number;
 };
 
-const { useForm, emptyList } = createFormHook({
+const { useForm, newEmptyList } = createFormHook({
     controls: {
         text: {
             onRender: function (bp: TFormControlBaseProps, p: TTextProps) {
@@ -28,10 +28,14 @@ const { useForm, emptyList } = createFormHook({
             },
         },
     },
+    validators: {
+        number: (x: string) => !isNaN(parseFloat(x)),
+    },
 });
 
 export function DemoForms() {
-    const items: typeof emptyList = [
+    const el = newEmptyList();
+    const items: typeof el = [
         { id: 'something', type: 'text' as const, prop: { maxLen: 344 } },
     ];
     const [formResponse, setFormResponse] = useState('-');
@@ -51,5 +55,6 @@ export function DemoForms() {
     async function handleBtn() {
         const result = await frm.show(null, null);
         setFormResponse(JSON.stringify(result));
+        debugger;
     }
 }

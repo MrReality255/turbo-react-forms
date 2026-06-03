@@ -58,24 +58,18 @@ function createNewDataObject(
         update,
 
         getValue: (key: string) => {
-            return DataUtils.using(get(key), (v) =>
-                typeof v === 'string' ? v : null
+            return DataUtils.DataObject.getString(() => get(key));
+        },
+
+        getRawValue: (key: string, objectAsJSON?: boolean) => {
+            return DataUtils.DataObject.getRawValue(
+                () => get(key),
+                objectAsJSON ?? false
             );
         },
 
-        getRawValue: (key: string) => {
-            const v = get(key);
-            if (typeof v === 'string') {
-                return v;
-            }
-            if (v === undefined) {
-                return '';
-            }
-            return v.type == 'invalid' ? v.value : JSON.stringify(v);
-        },
-
         setValue: (key: string, value: string, isValid: boolean) => {
-            set(key, isValid ? value : { type: 'invalid', value });
+            set(key, DataUtils.DataObject.newValue(value, isValid));
         },
 
         objectGet: (key: string) => {
