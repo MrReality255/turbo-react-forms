@@ -1,4 +1,4 @@
-import { TDataObjectList, TDataObjectMap, TDataObjectValue } from '../hooks';
+import { TDataObjectList, TDataObjectValue } from '../hooks';
 
 export const DataUtils = {
     DataObject: {

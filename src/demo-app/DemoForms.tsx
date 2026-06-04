@@ -1,12 +1,43 @@
-import { useState } from 'react';
-import { createFormHook, TFormControlBaseProps } from '../turbo-react-forms';
+import { PropsWithChildren, useState } from 'react';
+import {
+    createFormHook,
+    TFormControlBaseProps,
+    useFormContext,
+} from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
 
 type TTextProps = {
     maxLen: number;
 };
 
+type TFormProps = {
+    title: string;
+};
+
+function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
+    const ctx = useFormContext();
+    return (
+        <div
+            style={{
+                position: 'absolute',
+                background: '#030',
+                minWidth: '640px',
+                minHeight: '480px',
+            }}
+        >
+            <h1>{p.title}</h1>
+            <button onClick={() => ctx.close()}>Close()</button>
+            <h2>Raw data</h2>
+            <pre>{JSON.stringify(ctx.stateHandle.state.rawData, null, 2)}</pre>
+            {p.children}
+        </div>
+    );
+}
+
 const { useForm, newEmptyList } = createFormHook({
+    onRenderMainWrapper: (content: React.ReactNode, form: TFormProps) => {
+        return <DemoFormWrapper {...form}></DemoFormWrapper>;
+    },
     controls: {
         text: {
             onRender: function (bp: TFormControlBaseProps, p: TTextProps) {
@@ -42,6 +73,9 @@ export function DemoForms() {
 
     const frm = useForm({
         controls: () => items,
+        form: {
+            title: 'My demo form',
+        },
     });
     return (
         <DemoPage>

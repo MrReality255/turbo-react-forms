@@ -88,6 +88,7 @@ function PopupWindowWrapper(p: { children?: React.ReactNode; handle: number }) {
                     width: '640px',
                     height: '480px',
                     backgroundColor: '#400',
+                    position: 'relative',
                 }}
             >
                 <TLayerContainer>

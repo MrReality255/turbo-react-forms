@@ -1,16 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { TFormMode, TFormState, TFormWrapperProps } from '.';
 import { ctxForm } from '../contexts/FormContext';
 import { TFormContext } from '../contexts/types';
-import { TDataObjectMap } from '../hooks';
+import { TDataObjectMap, useLayer } from '../hooks';
 import { FormUtils } from '..';
+import { ctxLayer } from '../contexts/LayersContext';
 
-export function FormWrapper<
+export function TFormWrapper<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
     SubmitType,
->(p: TFormWrapperProps<P, V, Ctx, SubmitType>) {
+>(p: TFormWrapperProps<P, V, F, Ctx, SubmitType>) {
+    const { config, formCtx, lib } = p;
+
+    const lctx = useContext(ctxLayer);
+
     const initState = useMemo(() => {
         return newInitState({});
     }, []);
@@ -18,7 +24,7 @@ export function FormWrapper<
     const [state, setState] = useState<TFormState<Ctx>>(
         newInitState(
             FormUtils.createInitData(p.initData, p.config, {
-                ctx: p.formCtx,
+                ctx: formCtx,
                 lib: p.lib,
                 state: initState,
             })
@@ -31,13 +37,26 @@ export function FormWrapper<
                 state,
                 updateState: setState,
             },
+            close: function () {
+                const hideMethod = lib.hideMethod ?? lctx?.onClose;
+                if (!hideMethod) {
+                    throw 'unable to find hide method - use either layers or define hideMethod';
+                }
+                hideMethod();
+                p.onResolve(null);
+            },
         };
     }, [state]);
 
+    const mainWrapper = config.onRenderMainWrapper
+        ? (content: React.ReactNode) =>
+              config.onRenderMainWrapper?.(content, formCtx, state)
+        : (content: React.ReactNode) =>
+              lib.onRenderMainWrapper(content, config.form);
+
     return (
         <ctxForm.Provider value={formContext}>
-            <h1>Form wrapper</h1>
-            <div>{p.children}</div>
+            {mainWrapper(<></>)}
         </ctxForm.Provider>
     );
 

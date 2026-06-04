@@ -18,8 +18,11 @@ export type TLayersContext = {
 
 export type TLayerContext = TLayerProps & {
     handle: number;
+    onClose: () => void;
 };
 
 export type TFormContext<Ctx> = {
     stateHandle: TStateUpdateHandle<TFormState<Ctx>>;
+
+    close: () => void;
 };

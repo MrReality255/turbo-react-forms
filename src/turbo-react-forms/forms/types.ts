@@ -21,6 +21,7 @@ export type TFormControlDef<Props> = {
 export type TFormControlLib<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
 > = {
     controls: {
         [K in keyof P]: TFormControlDef<P[K]>;
@@ -29,6 +30,11 @@ export type TFormControlLib<
         [K in keyof V]: (value: string) => boolean;
     };
     showMethod?: (contentProvider: (handle: number) => React.ReactNode) => void;
+    hideMethod?: () => void;
+    onRenderMainWrapper: (
+        content: React.ReactNode,
+        props: F
+    ) => React.ReactNode;
 };
 
 export type TFormSubmitFct<Ctx, SubmitType> = (
@@ -38,10 +44,12 @@ export type TFormSubmitFct<Ctx, SubmitType> = (
 export type TFormControlCommonProps = {
     id: string;
     sectionID?: TKey;
+
     disabled?: boolean;
-    visible?: boolean;
-    removed?: boolean;
     optional?: boolean;
+    readOnly?: boolean;
+    removed?: boolean;
+    visible?: boolean;
 };
 
 export type TFormControlBaseProps = TFormControlCommonProps & {
@@ -164,32 +172,40 @@ export type TFormTemplateProps<
 export type TFormConfig<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
     SubmitType,
 > = {
+    form: F;
     controls:
         | TFormControlList<P, V, Ctx>
         | ((state: TFormState<Ctx>) => TFormControlList<P, V, Ctx>);
     onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
+    onRenderMainWrapper?: (
+        content: React.ReactNode,
+        ctx: Ctx,
+        state: TFormState<Ctx>
+    ) => React.ReactNode;
 };
 
 export type TFormWrapperProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
     SubmitType,
 > = {
-    config: TFormConfig<P, V, Ctx, SubmitType>;
+    config: TFormConfig<P, V, F, Ctx, SubmitType>;
     formCtx: Ctx;
     handle: number;
     initData: TDataObjectMap | null;
-    lib: TFormControlLib<P, V>;
+    lib: TFormControlLib<P, V, F>;
     section?: TKey;
 
     children?: React.ReactNode;
 
     onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined;
-    onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType>) => void;
+    onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
 };
 
 export type TFormSubmitFuncCtx<Ctx> = {
@@ -206,9 +222,10 @@ export type TFormSubmitCtx<Ctx, SubmitType> = TFormSubmitFuncCtx<Ctx> & {
 export type TFormStateLibCtx<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
 > = {
     state: TFormState<Ctx>;
     ctx: Ctx;
-    lib: TFormControlLib<P, V>;
+    lib: TFormControlLib<P, V, F>;
 };

@@ -6,20 +6,21 @@ import {
     TFormSubmitFct,
 } from './types';
 import { ILayers, TDataObjectMap, useLayersOrNull } from '../hooks';
-import { FormWrapper } from './FormWrapper';
+import { TFormWrapper } from './FormWrapper';
 
 export function createFormHook<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
->(lib: TFormControlLib<P, V>) {
+    F extends Record<string, unknown>,
+>(lib: TFormControlLib<P, V, F>) {
     return {
         newEmptyList: function <Ctx>() {
             return [] as TFormControlList<P, V, Ctx>;
         },
         useForm: function <Ctx, SubmitType>(
-            config: TFormConfig<P, V, Ctx, SubmitType>
+            config: TFormConfig<P, V, F, Ctx, SubmitType>
         ) {
-            return useForm<P, V, Ctx, SubmitType>(lib, config);
+            return useForm<P, V, F, Ctx, SubmitType>(lib, config);
         },
     };
 }
@@ -27,9 +28,13 @@ export function createFormHook<
 function useForm<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
     SubmitType,
->(lib: TFormControlLib<P, V>, config: TFormConfig<P, V, Ctx, SubmitType>) {
+>(
+    lib: TFormControlLib<P, V, F>,
+    config: TFormConfig<P, V, F, Ctx, SubmitType>
+) {
     const lc = useLayersOrNull();
 
     return {
@@ -41,7 +46,7 @@ function useForm<
             return new Promise<TFormSubmitCtx<Ctx, SubmitType>>((resolve) => {
                 const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
                 showMethod((handle) => (
-                    <FormWrapper<P, V, Ctx, SubmitType>
+                    <TFormWrapper<P, V, F, Ctx, SubmitType>
                         config={config}
                         formCtx={ctx}
                         handle={handle}
@@ -49,7 +54,7 @@ function useForm<
                         lib={lib}
                         onSubmit={submitFct}
                         onResolve={resolve}
-                    ></FormWrapper>
+                    ></TFormWrapper>
                 ));
             });
         },

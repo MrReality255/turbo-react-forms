@@ -4,7 +4,6 @@ import {
     TDataObjectMap,
     TFormConfig,
     TFormControl,
-    TFormControlLib,
     TFormControlList,
     TFormControlString,
     TFormControlSubform,
@@ -20,12 +19,13 @@ export const FormUtils = {
 function createInitData<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
     SubmitType,
 >(
     initData: TDataObjectMap | null,
-    config: TFormConfig<P, V, Ctx, SubmitType>,
-    stateLibCtx: TFormStateLibCtx<P, V, Ctx>
+    config: TFormConfig<P, V, F, Ctx, SubmitType>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>
 ): TDataObjectMap {
     initData = initData ?? {};
     const myControlList =
@@ -34,7 +34,7 @@ function createInitData<
             : config.controls;
 
     const result: TDataObjectMap = {};
-    createInitDataForControlList<P, V, Ctx>(
+    createInitDataForControlList<P, V, F, Ctx>(
         result,
         myControlList,
         initData,
@@ -47,12 +47,13 @@ function createInitData<
 function createInitDataForControlList<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
 >(
     result: TDataObjectMap,
     controlList: TFormControl<P, V, keyof P, Ctx>[],
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>,
     handleProvider: THandleProvider
 ) {
     controlList.forEach((control) => {
@@ -69,12 +70,13 @@ function createInitDataForControlList<
 function createInitDataForControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
 >(
     result: TDataObjectMap,
     control: TFormControl<P, V, keyof P, Ctx>,
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>,
     handleProvider: THandleProvider
 ) {
     if (control.class == 'plain' || control.removed) {
@@ -83,7 +85,7 @@ function createInitDataForControl<
 
     switch (control.class) {
         case 'template':
-            createInitDateForTemplate<P, V, Ctx>(
+            createInitDateForTemplate<P, V, F, Ctx>(
                 result,
                 control,
                 initData,
@@ -109,12 +111,13 @@ function createInitDataForControl<
 function createInitDateForTemplate<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
 >(
     result: TDataObjectMap,
     control: TFormControlTemplate<P, V, Ctx>,
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>,
     handleProvider: THandleProvider
 ) {
     const initList = DataUtils.DataObject.getList(
@@ -160,12 +163,13 @@ function createInitDateForTemplate<
 function createInitDataForSubform<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
 >(
     result: TDataObjectMap,
     control: TFormControlSubform<P, V, Ctx>,
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>,
     handleProvider: THandleProvider
 ) {
     if (control.useOwnDataObject) {
@@ -198,12 +202,13 @@ function createInitDataForSubform<
 function createInitDataStringControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
 >(
     result: TDataObjectMap,
     control: TFormControlString<P, V, keyof P, Ctx>,
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, Ctx>
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>
 ) {
     const rawValue = DataUtils.DataObject.getRawValue(
         () => initData[control.id],
@@ -211,24 +216,24 @@ function createInitDataStringControl<
     );
     result[control.id] = DataUtils.DataObject.newValue(
         rawValue,
-        validate(rawValue, stateLibCtx.ctx, control, stateLibCtx.lib)
+        validate(rawValue, control, stateLibCtx)
     );
 }
 
 function validate<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     Ctx,
 >(
     value: string,
-    ctx: Ctx,
     control: TFormControlString<P, V, keyof P, Ctx>,
-    lib: TFormControlLib<P, V>
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>
 ): boolean {
     if (!value) {
         return control.optional ?? false;
     }
-    if (control.onValidate && !control.onValidate(value, ctx)) {
+    if (control.onValidate && !control.onValidate(value, stateLibCtx.ctx)) {
         return false;
     }
 
@@ -237,7 +242,7 @@ function validate<
     }
 
     if (control.validation) {
-        const validatorFct = lib.validators?.[control.validation];
+        const validatorFct = stateLibCtx.lib.validators?.[control.validation];
         if (validatorFct && !validatorFct(value)) {
             return false;
         }
