@@ -38,7 +38,7 @@ export function TFormWrapper<
                 updateState: setState,
             },
             close: function () {
-                const hideMethod = lib.hideMethod ?? lctx?.onClose;
+                const hideMethod = lib.hideMethod ?? lctx?.onHide;
                 if (!hideMethod) {
                     throw 'unable to find hide method - use either layers or define hideMethod';
                 }

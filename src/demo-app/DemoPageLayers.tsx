@@ -81,7 +81,7 @@ function PopupWindowWrapper(p: { children?: React.ReactNode; handle: number }) {
     });
 
     return (
-        <TLayer onClose={() => e.hide()}>
+        <TLayer onHide={() => e.hide()}>
             <div
                 style={{
                     ...e.get(),
@@ -109,7 +109,7 @@ function PopupWindowContent(p: PropsWithChildren) {
             Popup window
             <hr></hr>
             {p.children}
-            <button onClick={() => la.onClose!()}>OnClose()</button>
+            <button onClick={() => la.onHide!()}>OnClose()</button>
             <button
                 onClick={() => {
                     l.main.show((nr) => (
