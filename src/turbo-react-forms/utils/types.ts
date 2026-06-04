@@ -1,5 +1,7 @@
 // General
 export type TKey = number | string;
+export type TRef<T> = { current: T };
+export type THandleProvider = () => number;
 
 export type TStateUpdateHandle<T> = {
     state: T;

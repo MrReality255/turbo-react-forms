@@ -17,13 +17,11 @@ export function FormWrapper<
 
     const [state, setState] = useState<TFormState<Ctx>>(
         newInitState(
-            FormUtils.createInitData(
-                p.initData,
-                initState,
-                p.formCtx,
-                p.config,
-                p.lib
-            )
+            FormUtils.createInitData(p.initData, p.config, {
+                ctx: p.formCtx,
+                lib: p.lib,
+                state: initState,
+            })
         )
     );
 

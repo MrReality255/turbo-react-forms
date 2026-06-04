@@ -104,6 +104,7 @@ export type TFormControlSubform<
     Ctx,
 > = TFormControlCommonProps & {
     class: 'subform';
+    useOwnDataObject?: boolean;
     subform: TFormSubformProps<P, V, Ctx>;
 };
 
@@ -200,4 +201,14 @@ export type TFormSubmitFuncCtx<Ctx> = {
 
 export type TFormSubmitCtx<Ctx, SubmitType> = TFormSubmitFuncCtx<Ctx> & {
     submitData: SubmitType;
+};
+
+export type TFormStateLibCtx<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    Ctx,
+> = {
+    state: TFormState<Ctx>;
+    ctx: Ctx;
+    lib: TFormControlLib<P, V>;
 };

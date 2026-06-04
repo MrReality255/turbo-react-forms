@@ -41,6 +41,14 @@ export const DataUtils = {
             return isValid ? value : { type: 'invalid', value };
         },
     },
+    newHandleProvider: function () {
+        const handleRef = {
+            current: 1,
+        };
+        return function () {
+            return handleRef.current++;
+        };
+    },
     using: function <T, R = T>(src: T, fct: (x: T) => R) {
         return fct(src);
     },
