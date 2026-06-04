@@ -72,16 +72,12 @@ function PopupWindowLocal({ handle }: { handle: number }) {
 }
 
 function PopupWindowWrapper(p: { children?: React.ReactNode; handle: number }) {
-    const l = useLayers();
     const e = useClosingEffect({
         delay: 200,
-        onClose: () => {
-            l.hide(p.handle);
-        },
     });
 
     return (
-        <TLayer onHide={() => e.hide()}>
+        <TLayer onHide={(prevClose) => e.hide(prevClose)}>
             <div
                 style={{
                     ...e.get(),
@@ -109,7 +105,7 @@ function PopupWindowContent(p: PropsWithChildren) {
             Popup window
             <hr></hr>
             {p.children}
-            <button onClick={() => la.onHide!()}>OnClose()</button>
+            <button onClick={() => la.hide()}>OnClose()</button>
             <button
                 onClick={() => {
                     l.main.show((nr) => (

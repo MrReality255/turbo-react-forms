@@ -1,3 +1,4 @@
+import { TRef } from '.';
 import { TDataObjectList, TDataObjectValue } from '../hooks';
 
 export const DataUtils = {
@@ -47,6 +48,11 @@ export const DataUtils = {
         };
         return function () {
             return handleRef.current++;
+        };
+    },
+    newRef: function <T>(initValue: T): TRef<T> {
+        return {
+            current: initValue,
         };
     },
     using: function <T, R = T>(src: T, fct: (x: T) => R) {

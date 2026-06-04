@@ -2,6 +2,7 @@ import { PropsWithChildren, useState } from 'react';
 import {
     createFormHook,
     TFormControlBaseProps,
+    useClosingEffect,
     useFormContext,
 } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
@@ -16,9 +17,14 @@ type TFormProps = {
 
 function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
     const ctx = useFormContext();
+    const closer = useClosingEffect({ mode: 'opacity', delay: 800 });
+    ctx.hideMethodRef.current = (prev) => {
+        closer.hide(prev);
+    };
     return (
         <div
             style={{
+                ...closer.get(),
                 position: 'absolute',
                 background: '#030',
                 minWidth: '640px',
@@ -89,6 +95,5 @@ export function DemoForms() {
     async function handleBtn() {
         const result = await frm.show(null, null);
         setFormResponse(JSON.stringify(result));
-        debugger;
     }
 }

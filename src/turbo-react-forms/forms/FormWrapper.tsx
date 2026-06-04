@@ -3,7 +3,7 @@ import { TFormMode, TFormState, TFormWrapperProps } from '.';
 import { ctxForm } from '../contexts/FormContext';
 import { TFormContext } from '../contexts/types';
 import { TDataObjectMap, useLayer } from '../hooks';
-import { FormUtils } from '..';
+import { DataUtils, FormUtils } from '..';
 import { ctxLayer } from '../contexts/LayersContext';
 
 export function TFormWrapper<
@@ -14,7 +14,9 @@ export function TFormWrapper<
     SubmitType,
 >(p: TFormWrapperProps<P, V, F, Ctx, SubmitType>) {
     const { config, formCtx, lib } = p;
-
+    const hideMethodRef = useMemo(() => {
+        return DataUtils.newRef((prev: () => void) => prev());
+    }, []);
     const lctx = useContext(ctxLayer);
 
     const initState = useMemo(() => {
@@ -37,13 +39,17 @@ export function TFormWrapper<
                 state,
                 updateState: setState,
             },
+            hideMethodRef,
             close: function () {
-                const hideMethod = lib.hideMethod ?? lctx?.onHide;
+                const hideMethod = lib.hideMethod ?? lctx?.hide;
                 if (!hideMethod) {
                     throw 'unable to find hide method - use either layers or define hideMethod';
                 }
-                hideMethod();
-                p.onResolve(null);
+                const customHideRef = hideMethodRef.current;
+                customHideRef(function () {
+                    hideMethod();
+                    p.onResolve(null);
+                });
             },
         };
     }, [state]);

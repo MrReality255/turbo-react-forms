@@ -23,6 +23,5 @@ export type TLayerContainerProps = {
 };
 
 export type TLayerProps = {
-    data?: unknown;
-    onHide?: () => void;
+    onHide?: (orig: () => void) => void;
 };

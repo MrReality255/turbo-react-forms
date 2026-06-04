@@ -3,7 +3,7 @@ import React from 'react';
 
 import { ctxLayer, ctxLayers } from '../contexts/LayersContext';
 import { TLayerContainerProps } from './types';
-import { TStateHandle, TWrapperFct } from '../utils';
+import { LayerUtils, TStateHandle, TWrapperFct } from '../utils';
 import { TLayersContext, TLayersState } from '../contexts/types';
 
 export function TLayerContainer({
@@ -38,6 +38,8 @@ export function TLayerContainer({
         };
     }, [newLocalState]);
 
+    const myHandler = LayerUtils.newHandler(newLocalState);
+
     const notifyWrapperFct = notificationsWrapper(layersState.layers.length);
 
     return mainWrapper(
@@ -48,7 +50,10 @@ export function TLayerContainer({
                 const rf = layer.renderFct;
                 return (
                     <ctxLayer.Provider
-                        value={{ handle: layer.handle }}
+                        value={{
+                            handle: layer.handle,
+                            hide: () => myHandler.hide(layer.handle),
+                        }}
                         key={layer.handle}
                     >
                         {layerFct(rf())}
@@ -62,7 +67,13 @@ export function TLayerContainer({
                             const rf = n.renderFct;
                             return (
                                 <ctxLayer.Provider
-                                    value={{ handle: n.handle }}
+                                    value={{
+                                        handle: n.handle,
+                                        hide: () =>
+                                            myHandler.hideNotification(
+                                                n.handle
+                                            ),
+                                    }}
                                     key={n.handle}
                                 >
                                     {notificationWrapper(rf())}

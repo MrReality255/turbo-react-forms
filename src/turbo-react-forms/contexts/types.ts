@@ -1,4 +1,4 @@
-import { TFormState, TLayerProps, TStateHandle, TStateUpdateHandle } from '..';
+import { TFormState, TRef, TStateHandle, TStateUpdateHandle } from '..';
 
 export type TLayerRec = {
     handle: number;
@@ -16,12 +16,14 @@ export type TLayersContext = {
     local: TStateHandle<TLayersState>;
 };
 
-export type TLayerContext = TLayerProps & {
+export type TLayerContext = {
     handle: number;
+    hide: () => void;
 };
 
 export type TFormContext<Ctx> = {
     stateHandle: TStateUpdateHandle<TFormState<Ctx>>;
+    hideMethodRef: TRef<(origHide: () => void) => void>;
 
     close: () => void;
 };
