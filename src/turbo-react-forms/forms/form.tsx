@@ -43,20 +43,23 @@ function useForm<
             ctx: Ctx,
             submitFct?: TFormSubmitFct<Ctx, SubmitType>
         ) {
-            return new Promise<TFormSubmitCtx<Ctx, SubmitType>>((resolve) => {
-                const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
-                showMethod((handle) => (
-                    <TFormWrapper<P, V, F, Ctx, SubmitType>
-                        config={config}
-                        formCtx={ctx}
-                        handle={handle}
-                        initData={data}
-                        lib={lib}
-                        onSubmit={submitFct}
-                        onResolve={resolve}
-                    ></TFormWrapper>
-                ));
-            });
+            return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>(
+                (resolve) => {
+                    const showMethod =
+                        lib.showMethod ?? getDefaultShowMethod(lc);
+                    showMethod((handle) => (
+                        <TFormWrapper<P, V, F, Ctx, SubmitType>
+                            config={config}
+                            formCtx={ctx}
+                            handle={handle}
+                            initData={data}
+                            lib={lib}
+                            onSubmit={submitFct}
+                            onResolve={resolve}
+                        ></TFormWrapper>
+                    ));
+                }
+            );
         },
     };
 }

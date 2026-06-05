@@ -24,7 +24,6 @@ function Form1() {
     const data = useDataObject();
     return (
         <div>
-            {JSON.stringify(data.getRef())}
             <h2>Standard form</h2>
             <h3>Form1</h3>
             <input

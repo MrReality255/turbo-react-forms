@@ -1,10 +1,10 @@
-import { useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { TFormMode, TFormState, TFormWrapperProps } from '.';
 import { ctxForm } from '../contexts/FormContext';
-import { TFormContext } from '../contexts/types';
-import { TDataObjectMap, useLayer } from '../hooks';
-import { DataUtils, FormUtils } from '..';
-import { ctxLayer } from '../contexts/LayersContext';
+import { TDataObjectMap } from '../hooks';
+import { FormUtils } from '..';
+import { useNewFormContext } from '../hooks/useNewFormContext';
+import { RenderUtils } from './render';
 
 export function TFormWrapper<
     P extends Record<string, unknown>,
@@ -14,10 +14,6 @@ export function TFormWrapper<
     SubmitType,
 >(p: TFormWrapperProps<P, V, F, Ctx, SubmitType>) {
     const { config, formCtx, lib } = p;
-    const hideMethodRef = useMemo(() => {
-        return DataUtils.newRef((prev: () => void) => prev());
-    }, []);
-    const lctx = useContext(ctxLayer);
 
     const initState = useMemo(() => {
         return newInitState({});
@@ -33,26 +29,15 @@ export function TFormWrapper<
         )
     );
 
-    const formContext = useMemo<TFormContext<Ctx>>(() => {
-        return {
-            stateHandle: {
-                state,
-                updateState: setState,
-            },
-            hideMethodRef,
-            close: function () {
-                const hideMethod = lib.hideMethod ?? lctx?.hide;
-                if (!hideMethod) {
-                    throw 'unable to find hide method - use either layers or define hideMethod';
-                }
-                const customHideRef = hideMethodRef.current;
-                customHideRef(function () {
-                    hideMethod();
-                    p.onResolve(null);
-                });
-            },
-        };
-    }, [state]);
+    const formContext = useNewFormContext(
+        {
+            ctx: p.formCtx,
+            lib: p.lib,
+            state,
+            updateState: setState,
+        },
+        p.onResolve
+    );
 
     const mainWrapper = config.onRenderMainWrapper
         ? (content: React.ReactNode) =>
@@ -62,7 +47,13 @@ export function TFormWrapper<
 
     return (
         <ctxForm.Provider value={formContext}>
-            {mainWrapper(<></>)}
+            {mainWrapper(
+                RenderUtils.renderContent(
+                    FormUtils.createRenderContent(p.config, state),
+                    state,
+                    state.rawData
+                )
+            )}
         </ctxForm.Provider>
     );
 

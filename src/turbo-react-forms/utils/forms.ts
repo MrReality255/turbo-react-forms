@@ -8,12 +8,14 @@ import {
     TFormControlString,
     TFormControlSubform,
     TFormControlTemplate,
+    TFormState,
     TFormStateLibCtx,
     THandleProvider,
 } from '..';
 
 export const FormUtils = {
     createInitData,
+    createRenderContent,
 };
 
 function createInitData<
@@ -120,6 +122,7 @@ function createInitDateForTemplate<
     stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>,
     handleProvider: THandleProvider
 ) {
+    const template = control.template;
     const initList = DataUtils.DataObject.getList(
         () => initData[control.id]
     ) ?? {
@@ -127,36 +130,40 @@ function createInitDateForTemplate<
         items: [],
     };
 
-    result[control.id] = {
-        type: 'list',
-        items: initList.items.map((item, idx) => {
+    const items = initList.items
+        .filter(
+            (_item, idx) =>
+                template.maxCount == undefined || idx < template.maxCount
+        )
+        .map((item, idx) => {
             const newObj: TDataObject = {
                 type: 'obj',
                 data: {},
                 id: handleProvider(),
             };
-            const clf = control.template.controls;
-            const actualControls =
-                typeof clf === 'function'
-                    ? clf(stateLibCtx.state, idx, newObj.id)
-                    : clf;
 
             createInitDataForSubform(
                 newObj.data,
-                {
-                    class: 'subform',
-                    id: '',
-                    subform: {
-                        controls: actualControls,
-                    },
-                    disabled: control.disabled,
-                },
+                newTemplateSubForm(control, idx, newObj.id, stateLibCtx),
                 item.data,
                 stateLibCtx,
                 handleProvider
             );
             return newObj;
-        }),
+        });
+
+    // create new items to reach the minimum
+    if (template.minCount && items.length < template.minCount) {
+        for (let i = items.length; i < template.minCount; i++) {
+            items.push(
+                newTemplateItem(control, i, stateLibCtx, handleProvider)
+            );
+        }
+    }
+
+    result[control.id] = {
+        type: 'list',
+        items,
     };
 }
 
@@ -248,4 +255,82 @@ function validate<
         }
     }
     return true;
+}
+function newTemplateItem<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+>(
+    control: TFormControlTemplate<P, V, Ctx>,
+    idx: number,
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>,
+    handleProvider: THandleProvider
+): TDataObject {
+    const newObj: TDataObject = {
+        type: 'obj',
+        id: handleProvider(),
+        data: {},
+    };
+
+    createInitDataForSubform(
+        newObj.data,
+        newTemplateSubForm(control, idx, newObj.id, stateLibCtx),
+        {},
+        stateLibCtx,
+        handleProvider
+    );
+
+    return newObj;
+}
+
+function newTemplateSubForm<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+>(
+    control: TFormControlTemplate<P, V, Ctx>,
+    idx: number,
+    handle: number,
+    stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>
+): TFormControlSubform<P, V, Ctx> {
+    const template = control.template;
+    const actualControls =
+        typeof template.controls === 'function'
+            ? template.controls(stateLibCtx.state, idx, handle)
+            : template.controls;
+
+    return {
+        class: 'subform',
+        id: '',
+        subform: {
+            controls: actualControls,
+        },
+        disabled: control.disabled,
+    };
+}
+
+function createRenderContent<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+    SubmitType,
+>(
+    config: TFormConfig<P, V, F, Ctx, SubmitType>,
+    state: TFormState<Ctx>
+): TFormControlList<P, V, Ctx> {
+    const controls =
+        typeof config.controls === 'function'
+            ? config.controls(state)
+            : config.controls;
+    return controls.filter(
+        (ctrl) =>
+            (ctrl.sectionID === undefined ||
+                state.section === undefined ||
+                ctrl.sectionID === state.section) &&
+            !ctrl.removed &&
+            !ctrl.hidden
+    );
 }

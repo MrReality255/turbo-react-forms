@@ -17,7 +17,7 @@ type TFormProps = {
 
 function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
     const ctx = useFormContext();
-    const closer = useClosingEffect({ mode: 'opacity', delay: 800 });
+    const closer = useClosingEffect({ mode: 'resize', delay: 300 });
     ctx.hideMethodRef.current = (prev) => {
         closer.hide(prev);
     };

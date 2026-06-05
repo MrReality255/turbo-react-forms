@@ -41,19 +41,32 @@ export type TFormSubmitFct<Ctx, SubmitType> = (
     submitCtx: TFormSubmitFuncCtx<Ctx>
 ) => Promise<TFormSubmitCtx<Ctx, SubmitType>>;
 
-export type TFormControlCommonProps = {
-    id: string;
+export type TFormControlRenderProps = {
     sectionID?: TKey;
+    removed?: boolean;
+    hidden?: boolean;
+};
+
+export type TFormControlCommonProps = TFormControlRenderProps & {
+    id: string;
 
     disabled?: boolean;
     optional?: boolean;
     readOnly?: boolean;
-    removed?: boolean;
-    visible?: boolean;
+
+    onWrap?: (content: React.ReactNode) => React.ReactNode;
 };
 
 export type TFormControlBaseProps = TFormControlCommonProps & {
     value: string;
+    onValueChange: (newValue: string) => void;
+};
+
+export type TFormControlCustomProps<Ctx> = {
+    ctx: Ctx;
+    disabled: boolean;
+    value: string;
+
     onValueChange: (newValue: string) => void;
 };
 
@@ -94,7 +107,7 @@ export type TFormControlCustom<V, Ctx> = TFormControlCommonProps &
         class: 'custom';
         validation?: keyof V;
 
-        onRender: () => React.ReactNode;
+        onRender: (props: TFormControlCustomProps<Ctx>) => React.ReactNode;
     };
 
 export type TFormControlTemplate<
@@ -116,7 +129,7 @@ export type TFormControlSubform<
     subform: TFormSubformProps<P, V, Ctx>;
 };
 
-export type TFormControlPlain<Ctx> = {
+export type TFormControlPlain<Ctx> = TFormControlRenderProps & {
     class: 'plain';
     onRender: (ctx: Ctx) => React.ReactNode;
 };
@@ -167,6 +180,9 @@ export type TFormTemplateProps<
               idx: number,
               handle: number
           ) => TFormControlList<P, V, Ctx>);
+
+    minCount?: number;
+    maxCount?: number;
 };
 
 export type TFormConfig<
@@ -228,4 +244,13 @@ export type TFormStateLibCtx<
     state: TFormState<Ctx>;
     ctx: Ctx;
     lib: TFormControlLib<P, V, F>;
+};
+
+export type TFormStateHandleLibCtx<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+> = TFormStateLibCtx<P, V, F, Ctx> & {
+    updateState: (fct: (prev: TFormState<Ctx>) => TFormState<Ctx>) => void;
 };
