@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { TFormMode, TFormState, TFormWrapperProps } from '.';
 import { ctxForm } from '../contexts/FormContext';
-import { TDataObjectMap } from '../hooks';
+import { TDataObject, TDataObjectMap } from '../hooks';
 import { FormUtils } from '..';
 import { useNewFormContext } from '../hooks/useNewFormContext';
 import { RenderUtils } from './render';
@@ -63,7 +63,11 @@ export function TFormWrapper<
             handle: p.handle,
             mode: 'ready' as TFormMode,
             section: p.section,
-            rawData,
+            rawData: {
+                data: rawData,
+                id: 1,
+                type: 'obj',
+            } as TDataObject,
         };
     }
 }

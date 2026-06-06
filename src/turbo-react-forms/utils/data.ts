@@ -1,4 +1,4 @@
-import { TRef } from '.';
+import { TRef, TValidity } from '.';
 import { TDataObjectList, TDataObjectValue } from '../hooks';
 
 export const DataUtils = {
@@ -38,9 +38,32 @@ export const DataUtils = {
             }
             return value;
         },
-        newValue: function (value: string, isValid: boolean): TDataObjectValue {
-            return isValid ? value : { type: 'invalid', value };
+        getValidity: function (get: () => TDataObjectValue): TValidity {
+            const v = get();
+            if (typeof v !== 'object' || v.type !== 'invalid') {
+                return true;
+            }
+            return {
+                valid: false,
+                hint: v.hint,
+            };
         },
+        newValue: function (
+            value: string,
+            isValid: TValidity
+        ): TDataObjectValue {
+            return typeof isValid == 'boolean'
+                ? value
+                : {
+                      type: 'invalid',
+                      value: value,
+                      hint: getHint(isValid),
+                  };
+        },
+    },
+    Validity: {
+        isValid,
+        getHint,
     },
     newHandleProvider: function () {
         const handleRef = {
@@ -59,3 +82,11 @@ export const DataUtils = {
         return fct(src);
     },
 };
+
+function isValid(v: TValidity): boolean {
+    return typeof v === 'boolean' ? v : false;
+}
+
+function getHint(v: TValidity) {
+    return typeof v === 'boolean' ? undefined : v.hint;
+}

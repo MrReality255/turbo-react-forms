@@ -4,18 +4,21 @@ import {
     TDataObject,
     TDataObjectList,
     TDataObjectMap,
+    TDataObjectNew,
     TDataObjectValue,
     TDataRootObject,
 } from './types';
-import { DataUtils, TStateUpdateHandle } from '../utils';
+import { DataUtils, TStateUpdateHandle, TValidity } from '../utils';
 
-export function useNewDataObject(
-    initFct?: () => TDataObjectMap,
-    strictMode?: boolean
-) {
+export function useNewDataObject(source: TDataObjectNew) {
     const initData = useMemo(() => {
-        return initFct?.() ?? {};
+        if ('data' in source) {
+            return null;
+        }
+
+        return source.initFct?.() ?? {};
     }, []);
+
     const [obj, updateObj] = useState<TDataRootObject>({
         type: 'obj',
         data: initData,
@@ -57,6 +60,14 @@ function createNewDataObject(
         set,
         update,
 
+        getHint: (key: string) => {
+            const result = get(key);
+            if (typeof result !== 'object' || result.type !== 'invalid') {
+                return undefined;
+            }
+            return result.hint;
+        },
+
         getValue: (key: string) => {
             return DataUtils.DataObject.getString(() => get(key));
         },
@@ -68,7 +79,14 @@ function createNewDataObject(
             );
         },
 
-        setValue: (key: string, value: string, isValid: boolean) => {
+        isValid: (key: string) => {
+            return DataUtils.using(
+                get(key),
+                (v) => typeof v !== 'object' || v.type !== 'invalid'
+            );
+        },
+
+        setValue: (key: string, value: string, isValid: TValidity) => {
             set(key, DataUtils.DataObject.newValue(value, isValid));
         },
 
@@ -256,6 +274,7 @@ function cloneValue(value: TDataObjectValue): TDataObjectValue {
             return {
                 type: 'invalid',
                 value: value.value,
+                hint: value.hint,
             };
     }
 }

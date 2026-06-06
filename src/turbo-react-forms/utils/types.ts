@@ -12,6 +12,8 @@ export type TStateHandle<T> = TStateUpdateHandle<T> & {
     setState: (val: T) => void;
 };
 
+export type TValidity = boolean | { valid: false; hint: string | undefined };
+
 // UI
 export type TClosingEffect = 'resize' | 'opacity';
 export type TRenderFct<T> = (src: T) => React.ReactNode;

@@ -1,5 +1,5 @@
-import { TDataObjectMap } from '../hooks';
-import { TKey } from '../utils';
+import { TDataObject, TDataObjectMap } from '../hooks';
+import { TKey, TValidity } from '../utils';
 
 export type TFormMode = 'ready' | 'loading' | 'waiting';
 
@@ -8,7 +8,7 @@ export type TFormState<Ctx> = {
     mode: TFormMode;
     handle: number;
     section?: TKey;
-    rawData: TDataObjectMap;
+    rawData: TDataObject;
 };
 
 export type TFormControlDef<Props> = {
@@ -65,9 +65,11 @@ export type TFormControlBaseProps = TFormControlCommonProps & {
 export type TFormControlCustomProps<Ctx> = {
     ctx: Ctx;
     disabled: boolean;
+    hint: string | undefined;
     value: string;
+    valid: boolean;
 
-    onValueChange: (newValue: string) => void;
+    onValueChange: (newValue: string, valid?: TValidity) => void;
 };
 
 export type TFormControlAtomicProps<Ctx> = {

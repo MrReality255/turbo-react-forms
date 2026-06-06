@@ -27,3 +27,7 @@ export type TFormContext<Ctx> = {
 
     close: () => void;
 };
+
+export type TFormControlContext = {
+    id: string;
+};

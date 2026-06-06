@@ -42,7 +42,7 @@ function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
 
 const { useForm, newEmptyList } = createFormHook({
     onRenderMainWrapper: (content: React.ReactNode, form: TFormProps) => {
-        return <DemoFormWrapper {...form}></DemoFormWrapper>;
+        return <DemoFormWrapper {...form}>{content}</DemoFormWrapper>;
     },
     controls: {
         text: {
@@ -73,7 +73,35 @@ const { useForm, newEmptyList } = createFormHook({
 export function DemoForms() {
     const el = newEmptyList();
     const items: typeof el = [
-        { id: 'something', type: 'text' as const, prop: { maxLen: 344 } },
+        {
+            id: 'custom1',
+            class: 'custom',
+            onWrap: (c) => {
+                return (
+                    <div style={{ background: '#010', padding: '1em' }}>
+                        {c}
+                    </div>
+                );
+            },
+            onRender: (p) => {
+                return (
+                    <div>
+                        Custom control
+                        <input
+                            disabled={p.disabled}
+                            value={p.value}
+                            onChange={(e) =>
+                                p.onValueChange(e.currentTarget.value)
+                            }
+                            type="text"
+                            style={{ color: p.valid ? undefined : 'red' }}
+                        ></input>
+                        {p.hint}
+                    </div>
+                );
+            },
+        },
+        // { id: 'something', type: 'text' as const, prop: { maxLen: 344 } },
     ];
     const [formResponse, setFormResponse] = useState('-');
 

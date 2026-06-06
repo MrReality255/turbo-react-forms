@@ -34,9 +34,12 @@ function Form1() {
                         'item1',
                         e.currentTarget.value,
                         e.currentTarget.value.length > 3
+                            ? true
+                            : { valid: false, hint: 'too short' }
                     )
                 }
             ></input>
+            {data.getHint('item1')}
             <h2>Subform</h2>
             <DataContainer data={data} field="subform">
                 <Form2></Form2>

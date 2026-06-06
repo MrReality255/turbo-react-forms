@@ -1,4 +1,4 @@
-import { TStateHandle } from '..';
+import { TStateHandle, TValidity } from '..';
 
 export type TDataObjectMap = Record<string, TDataObjectValue>;
 export type TDataObject = {
@@ -15,6 +15,7 @@ export type TDataObjectList = {
 };
 export type TDataObjectInvalidValue = {
     value: string;
+    hint: string | undefined;
     type: 'invalid';
 };
 
@@ -36,9 +37,11 @@ export interface IDataObject {
         incNr: boolean
     ) => void;
 
+    getHint: (key: string) => string | undefined;
     getValue: (key: string) => string | null;
-    getRawValue: (key: string) => string;
-    setValue: (key: string, value: string, isValid: boolean) => void;
+    getRawValue: (key: string, objectAsJson?: boolean) => string;
+    isValid: (key: string) => boolean;
+    setValue: (key: string, value: string, isValid: TValidity) => void;
 
     listAdd: (key: string, initFct?: () => TDataObjectMap) => void;
     listGet: (key: string, idx: number) => IDataObject;
@@ -66,3 +69,14 @@ export interface ILayers {
     hide: (handle?: number) => void;
     hideNotification: (handle?: number) => void;
 }
+
+export type TDataObjectNew = {
+    strictMode?: boolean;
+} & (
+    | {
+          initFct?: () => TDataObjectMap;
+      }
+    | {
+          data: TDataObject;
+      }
+);

@@ -1,10 +1,12 @@
 import {
     TFormControl,
     TFormControlCommonProps,
+    TFormControlCustom,
     TFormControlList,
     TFormState,
 } from '.';
-import { DataUtils, TDataObjectMap } from '..';
+import { IDataObject } from '..';
+import { TFormControlContainer } from './FormControlContainer';
 
 export const RenderUtils = {
     renderContent,
@@ -17,9 +19,20 @@ function renderContent<
 >(
     list: TFormControlList<P, V, Ctx>,
     state: TFormState<Ctx>,
-    rawData: TDataObjectMap
+    rawData: IDataObject
 ) {
-    return <>{list.map((item) => renderControl(item, state, rawData))}</>;
+    return (
+        <>
+            {list.map((item, idx) => {
+                const key = item.class !== 'plain' ? item.id : 'plain' + idx;
+                return (
+                    <TFormControlContainer control={item} key={key}>
+                        {renderControl(item, state, rawData)}
+                    </TFormControlContainer>
+                );
+            })}
+        </>
+    );
 }
 
 function renderControl<
@@ -29,7 +42,7 @@ function renderControl<
 >(
     item: TFormControl<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
-    rawData: TDataObjectMap
+    rawData: IDataObject
 ): React.ReactNode {
     // an invisible / removed control should not be there anyway, but just to allow universal use :-)
     if (item.hidden || item.removed) {
@@ -40,24 +53,30 @@ function renderControl<
         case 'plain':
             return item.onRender(state.ctx);
         case 'custom':
-            return wrapControl(
-                item,
-                item.onRender({
-                    ctx: state.ctx,
-                    disabled:
-                        (item.disabled ?? false) || state.mode !== 'ready',
-                    value: DataUtils.DataObject.getRawValue(
-                        () => rawData[item.id],
-                        false
-                    ),
-                    onValueChange: (newValue) => {
-                        alert('new value');
-                    },
-                })
-            );
+            return renderCustomControl(item, state, rawData);
         default:
             throw 'not implemented';
     }
+}
+
+function renderCustomControl<V extends Record<string, unknown>, Ctx>(
+    item: TFormControlCustom<V, Ctx>,
+    state: TFormState<Ctx>,
+    rawData: IDataObject
+) {
+    return wrapControl(
+        item,
+        item.onRender({
+            ctx: state.ctx,
+            disabled: (item.disabled ?? false) || state.mode !== 'ready',
+            hint: rawData.getHint(item.id),
+            valid: rawData.isValid(item.id),
+            value: rawData.getRawValue(item.id),
+            onValueChange: (newValue) => {
+                alert('new value' + newValue);
+            },
+        })
+    );
 }
 
 function wrapControl(ctrl: TFormControlCommonProps, content: React.ReactNode) {
