@@ -7,7 +7,7 @@ import {
 import { DemoPage } from './components/DemoPage';
 
 export function DemoDataObject() {
-    const obj = useNewDataObject();
+    const obj = useNewDataObject({});
     return (
         <DemoPage>
             <div>Demo data object</div>

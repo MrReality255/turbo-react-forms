@@ -1,14 +1,24 @@
-import { TDataObject, TDataObjectMap } from '../hooks';
-import { TKey, TValidity } from '../utils';
+import {
+    IDataObject,
+    TDataObject,
+    TDataObjectEvent,
+    TDataObjectMap,
+} from '../hooks';
+import { THandleProvider, TKey, TValidity } from '../utils';
 
 export type TFormMode = 'ready' | 'loading' | 'waiting';
 
-export type TFormState<Ctx> = {
+export type TFormInternalState<Ctx> = {
     ctx: Ctx;
     mode: TFormMode;
     handle: number;
     section?: TKey;
     rawData: TDataObject;
+    handleProvider: THandleProvider;
+};
+
+export type TFormState<Ctx> = TFormInternalState<Ctx> & {
+    data: IDataObject;
 };
 
 export type TFormControlDef<Props> = {
@@ -27,7 +37,7 @@ export type TFormControlLib<
         [K in keyof P]: TFormControlDef<P[K]>;
     };
     validators?: {
-        [K in keyof V]: (value: string) => boolean;
+        [K in keyof V]: (value: string) => TValidity;
     };
     showMethod?: (contentProvider: (handle: number) => React.ReactNode) => void;
     hideMethod?: () => void;
@@ -65,6 +75,7 @@ export type TFormControlBaseProps = TFormControlCommonProps & {
 export type TFormControlCustomProps<Ctx> = {
     ctx: Ctx;
     disabled: boolean;
+    readOnly: boolean;
     hint: string | undefined;
     value: string;
     valid: boolean;
@@ -77,7 +88,7 @@ export type TFormControlAtomicProps<Ctx> = {
     onGetDefaultValue?: (ctx: Ctx) => string;
     onWriteValue?: (newValue: string) => string;
     onReadValue?: (value: string) => string;
-    onValidate?: (value: string, ctx: Ctx) => boolean;
+    onValidate?: (value: string, ctx: Ctx) => TValidity;
 };
 
 export type TFormCustomControlProps<Ctx> = TFormControlBaseProps & {
@@ -187,6 +198,18 @@ export type TFormTemplateProps<
     maxCount?: number;
 };
 
+export type TModalResult = 'submit' | 'cancel';
+
+export type TFormUpdateContext<Ctx, SubmitType> = {
+    ctx?: Ctx;
+    modalResult?: {
+        result: TModalResult;
+        data: SubmitType;
+    };
+
+    onUpdateData?: (prev: TDataObject) => TDataObject;
+};
+
 export type TFormConfig<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
@@ -194,16 +217,25 @@ export type TFormConfig<
     Ctx,
     SubmitType,
 > = {
-    form: F;
+    form: F | ((state: TFormState<Ctx>) => F);
     controls:
         | TFormControlList<P, V, Ctx>
         | ((state: TFormState<Ctx>) => TFormControlList<P, V, Ctx>);
-    onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
     onRenderMainWrapper?: (
         content: React.ReactNode,
         ctx: Ctx,
         state: TFormState<Ctx>
     ) => React.ReactNode;
+    onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
+    onUpdate?: (
+        command: string | null,
+        event: TDataObjectEvent,
+        ctx: Ctx,
+        data: TDataObject
+    ) =>
+        | TFormUpdateContext<Ctx, SubmitType>
+        | undefined
+        | Promise<TFormUpdateContext<Ctx, SubmitType> | undefined>;
 };
 
 export type TFormWrapperProps<
@@ -219,6 +251,7 @@ export type TFormWrapperProps<
     initData: TDataObjectMap | null;
     lib: TFormControlLib<P, V, F>;
     section?: TKey;
+    strictMode?: boolean;
 
     children?: React.ReactNode;
 
@@ -246,13 +279,4 @@ export type TFormStateLibCtx<
     state: TFormState<Ctx>;
     ctx: Ctx;
     lib: TFormControlLib<P, V, F>;
-};
-
-export type TFormStateHandleLibCtx<
-    P extends Record<string, unknown>,
-    V extends Record<string, unknown>,
-    F extends Record<string, unknown>,
-    Ctx,
-> = TFormStateLibCtx<P, V, F, Ctx> & {
-    updateState: (fct: (prev: TFormState<Ctx>) => TFormState<Ctx>) => void;
 };

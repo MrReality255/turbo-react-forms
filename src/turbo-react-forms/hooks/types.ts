@@ -1,4 +1,4 @@
-import { TStateHandle, TValidity } from '..';
+import { TStateHandle, TStateUpdateHandle, TValidity } from '..';
 
 export type TDataObjectMap = Record<string, TDataObjectValue>;
 export type TDataObject = {
@@ -28,13 +28,17 @@ export type TDataObjectValue =
 export type TDataObjectWrapper = TDataObject & {};
 
 export interface IDataObject {
-    set: (key: string, value: TDataObjectValue) => void;
+    set: (
+        key: string,
+        value: TDataObjectValue,
+        eventInfo: TDataObjectEvent
+    ) => void;
     get: (key: string) => TDataObjectValue;
 
     update: (
         key: string,
         fct: (prev: TDataObjectValue) => TDataObjectValue,
-        incNr: boolean
+        eventInfo: TDataObjectEvent
     ) => void;
 
     getHint: (key: string) => string | undefined;
@@ -72,11 +76,39 @@ export interface ILayers {
 
 export type TDataObjectNew = {
     strictMode?: boolean;
-} & (
-    | {
-          initFct?: () => TDataObjectMap;
-      }
-    | {
-          data: TDataObject;
-      }
-);
+    initFct?: () => TDataObjectMap;
+};
+
+export type TDataObjectStateUpdateHandle = {
+    state: TDataObject;
+    updateState: (
+        fct: (prev: TDataObject) => TDataObject,
+        eventInfo: TDataObjectEvent
+    ) => void;
+};
+
+export type TDataObjectEvent =
+    | TDataObjectValueEvent
+    | TDataObjectEventListAddEvent
+    | TDataObjectEventListRemoveEvent;
+
+export type TDataObjectValueEvent = {
+    type: 'value';
+    id: string;
+    value: string;
+    isValid: TValidity | null;
+    ownerID: number;
+};
+
+export type TDataObjectEventListAddEvent = {
+    type: 'list-add';
+    id: string;
+    ownerID: number;
+};
+
+export type TDataObjectEventListRemoveEvent = {
+    type: 'list-remove';
+    id: string;
+    ownerID: number;
+    idx: number | undefined;
+};

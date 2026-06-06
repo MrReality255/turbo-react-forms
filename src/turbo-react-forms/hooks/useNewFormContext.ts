@@ -1,6 +1,6 @@
 import { useContext, useMemo } from 'react';
 import { TFormContext } from '../contexts/types';
-import { TFormStateHandleLibCtx, TFormSubmitCtx } from '../forms';
+import { TFormStateLibCtx, TFormSubmitCtx } from '../forms';
 import { DataUtils } from '..';
 import { ctxLayer } from '../contexts/LayersContext';
 
@@ -11,7 +11,7 @@ export function useNewFormContext<
     Ctx,
     SubmitType,
 >(
-    { state, lib, updateState }: TFormStateHandleLibCtx<P, V, F, Ctx>,
+    { state, lib }: TFormStateLibCtx<P, V, F, Ctx>,
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void
 ) {
     const hideMethodRef = useMemo(() => {
@@ -21,10 +21,7 @@ export function useNewFormContext<
 
     return useMemo<TFormContext<Ctx>>(() => {
         return {
-            stateHandle: {
-                state,
-                updateState: updateState,
-            },
+            data: state.data,
             hideMethodRef,
             close: function () {
                 const hideMethod = lib.hideMethod ?? lctx?.hide;

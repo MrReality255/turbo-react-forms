@@ -1,4 +1,5 @@
 import {
+    DataObjectUtils,
     DataUtils,
     TDataObject,
     TDataObjectMap,
@@ -11,11 +12,13 @@ import {
     TFormState,
     TFormStateLibCtx,
     THandleProvider,
+    TValidity,
 } from '..';
 
 export const FormUtils = {
     createInitData,
     createRenderContent,
+    validate,
 };
 
 function createInitData<
@@ -123,9 +126,7 @@ function createInitDateForTemplate<
     handleProvider: THandleProvider
 ) {
     const template = control.template;
-    const initList = DataUtils.DataObject.getList(
-        () => initData[control.id]
-    ) ?? {
+    const initList = DataObjectUtils.getList(() => initData[control.id]) ?? {
         type: 'list',
         items: [],
     };
@@ -217,11 +218,11 @@ function createInitDataStringControl<
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>
 ) {
-    const rawValue = DataUtils.DataObject.getRawValue(
+    const rawValue = DataObjectUtils.getRawValue(
         () => initData[control.id],
         false
     );
-    result[control.id] = DataUtils.DataObject.newValue(
+    result[control.id] = DataObjectUtils.newValue(
         rawValue,
         validate(rawValue, control, stateLibCtx)
     );
@@ -236,12 +237,16 @@ function validate<
     value: string,
     control: TFormControlString<P, V, keyof P, Ctx>,
     stateLibCtx: TFormStateLibCtx<P, V, F, Ctx>
-): boolean {
+): TValidity {
     if (!value) {
         return control.optional ?? false;
     }
-    if (control.onValidate && !control.onValidate(value, stateLibCtx.ctx)) {
-        return false;
+
+    if (control.onValidate) {
+        const v = control.onValidate(value, stateLibCtx.ctx);
+        if (v !== true) {
+            return v;
+        }
     }
 
     if (control.class === 'dynamic') {
@@ -250,8 +255,11 @@ function validate<
 
     if (control.validation) {
         const validatorFct = stateLibCtx.lib.validators?.[control.validation];
-        if (validatorFct && !validatorFct(value)) {
-            return false;
+        if (validatorFct) {
+            const validationFctResult = validatorFct(value);
+            if (validationFctResult !== true) {
+                return validationFctResult;
+            }
         }
     }
     return true;

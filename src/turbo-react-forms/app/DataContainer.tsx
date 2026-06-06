@@ -10,7 +10,9 @@ export function DataContainer({
     idx,
     onInit,
 }: TDataContainerProps) {
-    const dataObj = useNewDataObject(data === undefined ? onInit : undefined);
+    const dataObj = useNewDataObject({
+        initFct: data === undefined ? onInit : undefined,
+    });
     const actualObj = useMemo(() => {
         const src = data ?? dataObj;
         if (field !== undefined && idx !== undefined) {

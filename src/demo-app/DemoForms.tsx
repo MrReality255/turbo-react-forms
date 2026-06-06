@@ -13,6 +13,7 @@ type TTextProps = {
 
 type TFormProps = {
     title: string;
+    isLoading: boolean;
 };
 
 function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
@@ -34,8 +35,25 @@ function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
             <h1>{p.title}</h1>
             <button onClick={() => ctx.close()}>Close()</button>
             <h2>Raw data</h2>
-            <pre>{JSON.stringify(ctx.stateHandle.state.rawData, null, 2)}</pre>
+            <pre>{JSON.stringify(ctx.data.getRef(), null, 2)}</pre>
             {p.children}
+            {p.isLoading && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        right: 0,
+                        background: '#000',
+                        opacity: 0.5,
+                    }}
+                >
+                    Loading
+                </div>
+            )}
         </div>
     );
 }
@@ -88,6 +106,7 @@ export function DemoForms() {
                     <div>
                         Custom control
                         <input
+                            readOnly={p.readOnly}
                             disabled={p.disabled}
                             value={p.value}
                             onChange={(e) =>
@@ -105,10 +124,27 @@ export function DemoForms() {
     ];
     const [formResponse, setFormResponse] = useState('-');
 
-    const frm = useForm({
+    const frm = useForm<{ id: number }, any>({
         controls: () => items,
-        form: {
-            title: 'My demo form',
+        form: (state) => {
+            return {
+                title: 'My demo form',
+                isLoading: state.mode !== 'ready',
+            };
+        },
+        onUpdate: function (cmd, event, ctx, data) {
+            switch (event.id) {
+                case 'custom1':
+                    if (event.type == 'value' && event.value.length > 4) {
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                resolve(undefined);
+                            }, 500);
+                        });
+                    }
+                default:
+                    console.log('triggered event: ' + JSON.stringify(event));
+            }
         },
     });
     return (
@@ -121,7 +157,7 @@ export function DemoForms() {
     );
 
     async function handleBtn() {
-        const result = await frm.show(null, null);
+        const result = await frm.show(null, { id: 324 });
         setFormResponse(JSON.stringify(result));
     }
 }

@@ -1,4 +1,4 @@
-import { TFormState, TRef, TStateHandle, TStateUpdateHandle } from '..';
+import { IDataObject, TRef, TStateHandle } from '..';
 
 export type TLayerRec = {
     handle: number;
@@ -22,7 +22,7 @@ export type TLayerContext = {
 };
 
 export type TFormContext<Ctx> = {
-    stateHandle: TStateUpdateHandle<TFormState<Ctx>>;
+    data: IDataObject;
     hideMethodRef: TRef<(origHide: () => void) => void>;
 
     close: () => void;
