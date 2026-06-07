@@ -1,6 +1,7 @@
 import { PropsWithChildren, useState } from 'react';
 import {
     createFormHook,
+    DataUtils,
     TFormControlBaseProps,
     useClosingEffect,
     useFormContext,
@@ -68,8 +69,11 @@ const { useForm, newEmptyList } = createFormHook({
                 return (
                     <input
                         type="text"
-                        maxLength={p.maxLen}
+                        max={p.maxLen}
                         value={bp.value}
+                        onChange={(e) =>
+                            bp.onValueChange(e.currentTarget.value)
+                        }
                     ></input>
                 );
             },
@@ -91,6 +95,12 @@ const { useForm, newEmptyList } = createFormHook({
 export function DemoForms() {
     const el = newEmptyList();
     const items: typeof el = [
+        {
+            id: 'tb1',
+            type: 'text',
+            class: undefined,
+            prop: { maxLen: 30 },
+        },
         {
             id: 'custom1',
             class: 'custom',
@@ -115,7 +125,7 @@ export function DemoForms() {
                             type="text"
                             style={{ color: p.valid ? undefined : 'red' }}
                         ></input>
-                        {p.hint}
+                        {DataUtils.Validity.getHint(p.valid)}
                     </div>
                 );
             },

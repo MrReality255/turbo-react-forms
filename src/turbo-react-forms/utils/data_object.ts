@@ -58,7 +58,7 @@ export const DataObjectUtils = {
         };
     },
     newValue: function (value: string, isValid: TValidity): TDataObjectValue {
-        return typeof isValid == 'boolean'
+        return typeof isValid == 'boolean' && isValid
             ? value
             : {
                   type: 'invalid',
@@ -163,6 +163,14 @@ function create(
             return DataUtils.using(
                 get(key),
                 (v) => typeof v !== 'object' || v.type !== 'invalid'
+            );
+        },
+
+        getValidity: (key: string) => {
+            return DataUtils.using(get(key), (v) =>
+                typeof v !== 'object' || v.type !== 'invalid'
+                    ? true
+                    : { valid: false, hint: v.hint }
             );
         },
 

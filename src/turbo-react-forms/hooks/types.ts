@@ -43,6 +43,7 @@ export interface IDataObject {
 
     getHint: (key: string) => string | undefined;
     getValue: (key: string) => string | null;
+    getValidity: (key: string) => TValidity;
     getRawValue: (key: string, objectAsJson?: boolean) => string;
     isValid: (key: string) => boolean;
     setValue: (key: string, value: string, isValid: TValidity) => void;

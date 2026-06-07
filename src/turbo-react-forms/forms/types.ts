@@ -51,36 +51,36 @@ export type TFormSubmitFct<Ctx, SubmitType> = (
     submitCtx: TFormSubmitFuncCtx<Ctx>
 ) => Promise<TFormSubmitCtx<Ctx, SubmitType>>;
 
-export type TFormControlRenderProps = {
+export type TFormControlRenderInfoProps = {
     sectionID?: TKey;
     removed?: boolean;
     hidden?: boolean;
 };
 
-export type TFormControlCommonProps = TFormControlRenderProps & {
+export type TFormControlCommonProps = {
     id: string;
 
     disabled?: boolean;
     optional?: boolean;
     readOnly?: boolean;
-
-    onWrap?: (content: React.ReactNode) => React.ReactNode;
 };
+
+export type TFormControlCommonRenderInfoProps = TFormControlCommonProps &
+    TFormControlRenderInfoProps;
+
+export type TFormControlCommonPropsDef = TFormControlCommonProps &
+    TFormControlCommonRenderInfoProps & {
+        onWrap?: (content: React.ReactNode) => React.ReactNode;
+    };
 
 export type TFormControlBaseProps = TFormControlCommonProps & {
     value: string;
+    valid: TValidity;
     onValueChange: (newValue: string) => void;
 };
 
-export type TFormControlCustomProps<Ctx> = {
+export type TFormControlCustomProps<Ctx> = TFormControlBaseProps & {
     ctx: Ctx;
-    disabled: boolean;
-    readOnly: boolean;
-    hint: string | undefined;
-    value: string;
-    valid: boolean;
-
-    onValueChange: (newValue: string, valid?: TValidity) => void;
 };
 
 export type TFormControlAtomicProps<Ctx> = {
@@ -100,7 +100,7 @@ export type TFormControlTyped<
     V,
     Type extends keyof P,
     Ctx,
-> = TFormControlCommonProps &
+> = TFormControlCommonPropsDef &
     TFormControlAtomicProps<Ctx> & {
         class?: undefined;
         type: Type;
@@ -108,14 +108,14 @@ export type TFormControlTyped<
         validation?: keyof V;
     };
 
-export type TFormControlDynamic<Ctx> = TFormControlCommonProps &
+export type TFormControlDynamic<Ctx> = TFormControlCommonPropsDef &
     TFormControlAtomicProps<Ctx> & {
         class: 'dynamic';
         type: string;
         prop: Record<string, unknown>;
     };
 
-export type TFormControlCustom<V, Ctx> = TFormControlCommonProps &
+export type TFormControlCustom<V, Ctx> = TFormControlCommonPropsDef &
     TFormControlAtomicProps<Ctx> & {
         class: 'custom';
         validation?: keyof V;
@@ -127,7 +127,7 @@ export type TFormControlTemplate<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     Ctx,
-> = TFormControlCommonProps & {
+> = TFormControlCommonPropsDef & {
     class: 'template';
     template: TFormTemplateProps<P, V, Ctx>;
 };
@@ -136,13 +136,13 @@ export type TFormControlSubform<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     Ctx,
-> = TFormControlCommonProps & {
+> = TFormControlCommonPropsDef & {
     class: 'subform';
     useOwnDataObject?: boolean;
     subform: TFormSubformProps<P, V, Ctx>;
 };
 
-export type TFormControlPlain<Ctx> = TFormControlRenderProps & {
+export type TFormControlPlain<Ctx> = TFormControlRenderInfoProps & {
     class: 'plain';
     onRender: (ctx: Ctx) => React.ReactNode;
 };
