@@ -36,7 +36,7 @@ function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
             <h1>{p.title}</h1>
             <button onClick={() => ctx.close()}>Close()</button>
             <h2>Raw data</h2>
-            <pre>{JSON.stringify(ctx.data.getRef(), null, 2)}</pre>
+            <p>{JSON.stringify(ctx.data.getRef())}</p>
             {p.children}
             {p.isLoading && (
                 <div
@@ -83,7 +83,17 @@ const { useForm, newEmptyList } = createFormHook({
                 bp: TFormControlBaseProps,
                 props: { aaa: number }
             ) {
-                return <input type="checkbox" value={bp.value}></input>;
+                return (
+                    <input
+                        type="checkbox"
+                        checked={bp.value != 'false' && bp.value != ''}
+                        onChange={(e) =>
+                            bp.onValueChange(
+                                e.currentTarget.checked ? 'true' : 'false'
+                            )
+                        }
+                    ></input>
+                );
             },
         },
     },
@@ -100,6 +110,14 @@ export function DemoForms() {
             type: 'text',
             class: undefined,
             prop: { maxLen: 30 },
+        },
+        {
+            id: 'cb1',
+            class: undefined,
+            type: 'checkBox',
+            prop: {
+                aaa: 3,
+            },
         },
         {
             id: 'custom1',
@@ -130,7 +148,22 @@ export function DemoForms() {
                 );
             },
         },
-        // { id: 'something', type: 'text' as const, prop: { maxLen: 344 } },
+        {
+            id: 'list1',
+            class: 'template',
+            template: {
+                minCount: 1,
+                controls: () => {
+                    return [
+                        {
+                            id: 'listItemName',
+                            type: 'text',
+                            prop: { maxLen: 200 },
+                        },
+                    ];
+                },
+            },
+        },
     ];
     const [formResponse, setFormResponse] = useState('-');
 

@@ -41,6 +41,10 @@ export type TFormControlLib<
     };
     showMethod?: (contentProvider: (handle: number) => React.ReactNode) => void;
     hideMethod?: () => void;
+    onRenderControl: (
+        content: React.ReactNode,
+        controlProps: TControlBa
+    ) => React.ReactNode;
     onRenderMainWrapper: (
         content: React.ReactNode,
         props: F
@@ -55,6 +59,16 @@ export type TFormControlRenderInfoProps = {
     sectionID?: TKey;
     removed?: boolean;
     hidden?: boolean;
+};
+
+export type TFormControlReactContext = {
+    before?: React.ReactNode;
+    after?: React.ReactNode;
+};
+
+export type TFormControlOuterProps = {
+    label?: string | React.ReactNode;
+    context?: TFormControlReactContext;
 };
 
 export type TFormControlCommonProps = {

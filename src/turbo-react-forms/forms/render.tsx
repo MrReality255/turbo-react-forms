@@ -4,9 +4,11 @@ import {
     TFormControlBaseProps,
     TFormControlCommonPropsDef,
     TFormControlCustom,
+    TFormControlDynamic,
     TFormControlLib,
     TFormControlList,
     TFormControlString,
+    TFormControlTemplate,
     TFormControlTyped,
     TFormState,
 } from '.';
@@ -93,14 +95,28 @@ function renderControl<
         case 'custom':
             return renderCustomControl(item, state, lib, rawData);
         case 'dynamic':
-            throw 'not implemented';
+            return renderDynamicControl(item, state, lib, rawData);
         case 'subform':
             throw 'not implemented';
         case 'template':
-            throw 'not implemented';
+            return renderTemplateControl(item, state, lib, rawData);
         default:
             return renderTypedControl(item, state, lib, rawData);
     }
+}
+
+function renderTemplateControl<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+>(
+    item: TFormControlTemplate<P, V, Ctx>,
+    state: TFormState<Ctx>,
+    lib: TFormControlLib<P, V, F>,
+    rawData: IDataObject
+) {
+    return wrapControl(item, <>Template</>);
 }
 
 function renderTypedControl<
@@ -120,6 +136,29 @@ function renderTypedControl<
             newBaseProps(item, state, rawData, lib),
             item.prop
         )
+    );
+}
+
+function renderDynamicControl<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+>(
+    item: TFormControlDynamic<Ctx>,
+    state: TFormState<Ctx>,
+    lib: TFormControlLib<P, V, F>,
+    rawData: IDataObject
+) {
+    return renderTypedControl(
+        {
+            ...item,
+            class: undefined,
+            prop: item.prop as unknown as P[keyof P],
+        },
+        state,
+        lib,
+        rawData
     );
 }
 
