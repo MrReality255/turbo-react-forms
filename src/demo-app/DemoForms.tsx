@@ -1,106 +1,9 @@
-import { PropsWithChildren, useState } from 'react';
-import {
-    createFormHook,
-    DataUtils,
-    TFormControlBaseProps,
-    useClosingEffect,
-    useFormContext,
-} from '../turbo-react-forms';
+import { useState } from 'react';
+import { DataUtils } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
+import { DemoFormLib } from './DemoFormLib';
 
-type TTextProps = {
-    maxLen: number;
-};
-
-type TFormProps = {
-    title: string;
-    isLoading: boolean;
-};
-
-function DemoFormWrapper(p: PropsWithChildren<TFormProps>) {
-    const ctx = useFormContext();
-    const closer = useClosingEffect({ mode: 'resize', delay: 300 });
-    ctx.hideMethodRef.current = (prev) => {
-        closer.hide(prev);
-    };
-    return (
-        <div
-            style={{
-                ...closer.get(),
-                position: 'absolute',
-                background: '#030',
-                minWidth: '640px',
-                minHeight: '480px',
-            }}
-        >
-            <h1>{p.title}</h1>
-            <button onClick={() => ctx.close()}>Close()</button>
-            <h2>Raw data</h2>
-            <p>{JSON.stringify(ctx.data.getRef())}</p>
-            {p.children}
-            {p.isLoading && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        right: 0,
-                        background: '#000',
-                        opacity: 0.5,
-                    }}
-                >
-                    Loading
-                </div>
-            )}
-        </div>
-    );
-}
-
-const { useForm, newEmptyList } = createFormHook({
-    onRenderMainWrapper: (content: React.ReactNode, form: TFormProps) => {
-        return <DemoFormWrapper {...form}>{content}</DemoFormWrapper>;
-    },
-    controls: {
-        text: {
-            onRender: function (bp: TFormControlBaseProps, p: TTextProps) {
-                return (
-                    <input
-                        type="text"
-                        max={p.maxLen}
-                        value={bp.value}
-                        onChange={(e) =>
-                            bp.onValueChange(e.currentTarget.value)
-                        }
-                    ></input>
-                );
-            },
-        },
-        checkBox: {
-            onRender: function (
-                bp: TFormControlBaseProps,
-                props: { aaa: number }
-            ) {
-                return (
-                    <input
-                        type="checkbox"
-                        checked={bp.value != 'false' && bp.value != ''}
-                        onChange={(e) =>
-                            bp.onValueChange(
-                                e.currentTarget.checked ? 'true' : 'false'
-                            )
-                        }
-                    ></input>
-                );
-            },
-        },
-    },
-    validators: {
-        number: (x: string) => !isNaN(parseFloat(x)),
-    },
-});
+const { useForm, newEmptyList } = DemoFormLib;
 
 export function DemoForms() {
     const el = newEmptyList();
@@ -110,6 +13,8 @@ export function DemoForms() {
             type: 'text',
             class: undefined,
             prop: { maxLen: 30 },
+            label: 'Text box1',
+            validation: 'number',
         },
         {
             id: 'cb1',
@@ -118,13 +23,21 @@ export function DemoForms() {
             prop: {
                 aaa: 3,
             },
+            label: 'check box 1',
+            context: {
+                after: 'Some text after',
+                before: 'Some text before',
+                bottom: 'Some text at the final bottom',
+                top: 'Some text at the top',
+            },
         },
         {
             id: 'custom1',
             class: 'custom',
             onWrap: (c) => {
                 return (
-                    <div style={{ background: '#010', padding: '1em' }}>
+                    <div>
+                        custom control:
                         {c}
                     </div>
                 );

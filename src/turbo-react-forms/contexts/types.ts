@@ -22,6 +22,7 @@ export type TLayerContext = {
 };
 
 export type TFormContext<Ctx> = {
+    ctx: Ctx;
     data: IDataObject;
     hideMethodRef: TRef<(origHide: () => void) => void>;
 

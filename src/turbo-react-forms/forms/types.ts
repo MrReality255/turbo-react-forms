@@ -37,18 +37,20 @@ export type TFormControlLib<
         [K in keyof P]: TFormControlDef<P[K]>;
     };
     validators?: {
-        [K in keyof V]: (value: string) => TValidity;
+        [K in keyof V]: (value: string, props: P[keyof P] | null) => TValidity;
     };
     showMethod?: (contentProvider: (handle: number) => React.ReactNode) => void;
     hideMethod?: () => void;
-    onRenderControl: (
+    onRenderControl?: (
         content: React.ReactNode,
-        controlProps: TControlBa
+        controlProps: TFormControlWrapperProps,
+        hintTranslator: (hint: string | undefined) => string | undefined
     ) => React.ReactNode;
     onRenderMainWrapper: (
         content: React.ReactNode,
         props: F
     ) => React.ReactNode;
+    onTranslateHint?: (hint: string) => string;
 };
 
 export type TFormSubmitFct<Ctx, SubmitType> = (
@@ -62,8 +64,10 @@ export type TFormControlRenderInfoProps = {
 };
 
 export type TFormControlReactContext = {
+    top?: React.ReactNode;
     before?: React.ReactNode;
     after?: React.ReactNode;
+    bottom?: React.ReactNode;
 };
 
 export type TFormControlOuterProps = {
@@ -83,9 +87,21 @@ export type TFormControlCommonRenderInfoProps = TFormControlCommonProps &
     TFormControlRenderInfoProps;
 
 export type TFormControlCommonPropsDef = TFormControlCommonProps &
-    TFormControlCommonRenderInfoProps & {
+    TFormControlCommonRenderInfoProps &
+    TFormControlOuterProps & {
         onWrap?: (content: React.ReactNode) => React.ReactNode;
     };
+
+export type TFormControlWrapperBaseProps = TFormControlOuterProps &
+    TFormControlCommonProps & {
+        value: string | null;
+        valid: TValidity | null;
+    };
+
+export type TFormControlWrapperProps = TFormControlWrapperBaseProps & {
+    type: string | null;
+    class: string | undefined;
+};
 
 export type TFormControlBaseProps = TFormControlCommonProps & {
     value: string;

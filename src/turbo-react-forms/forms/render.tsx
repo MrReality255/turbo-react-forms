@@ -10,6 +10,7 @@ import {
     TFormControlString,
     TFormControlTemplate,
     TFormControlTyped,
+    TFormControlWrapperBaseProps,
     TFormState,
 } from '.';
 import { FormUtils, IDataObject } from '..';
@@ -18,6 +19,38 @@ import { TFormControlContainer } from './FormControlContainer';
 export const RenderUtils = {
     renderContent,
 };
+
+function newBaseRenderWrapperProps<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    Ctx,
+>(
+    item: TFormControl<P, V, keyof P, Ctx>,
+    state: TFormState<Ctx>,
+    rawData: IDataObject
+): TFormControlWrapperBaseProps {
+    if (item.class === 'plain') {
+        return {
+            id: '',
+            valid: null,
+            value: null,
+            disabled: state.mode == 'loading',
+            readOnly: state.mode !== 'ready',
+            optional: false,
+        };
+    }
+
+    return {
+        id: item.id,
+        disabled: item.disabled || state.mode == 'loading',
+        readOnly: item.readOnly || state.mode !== 'ready',
+        value: rawData.getRawValue(item.id),
+        valid: rawData.getValidity(item.id),
+        optional: item.optional ?? false,
+        context: item.context,
+        label: item.label,
+    };
+}
 
 function newBaseProps<
     P extends Record<string, unknown>,
@@ -31,9 +64,7 @@ function newBaseProps<
     lib: TFormControlLib<P, V, F>
 ): TFormControlBaseProps {
     return {
-        id: item.id,
-        disabled: item.disabled ?? state.mode == 'loading',
-        readOnly: item.readOnly || state.mode !== 'ready',
+        ...newBaseRenderWrapperProps(item, state, rawData),
         value: rawData.getRawValue(item.id),
         valid: rawData.getValidity(item.id),
         onValueChange: (newValue) => {
@@ -88,7 +119,36 @@ function renderControl<
     if (item.hidden || item.removed) {
         return <></>;
     }
+    const content = renderControlContent(item, state, lib, rawData);
 
+    if (lib.onRenderControl) {
+        return lib.onRenderControl(
+            content,
+            {
+                ...newBaseRenderWrapperProps(item, state, rawData),
+                class: item.class as string | undefined,
+                type:
+                    item.class === 'dynamic' || item.class === undefined
+                        ? (item.type as string)
+                        : null,
+            },
+            (hint) => translateHint(hint, lib.onTranslateHint)
+        );
+    }
+    return content;
+}
+
+function renderControlContent<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+>(
+    item: TFormControl<P, V, keyof P, Ctx>,
+    state: TFormState<Ctx>,
+    lib: TFormControlLib<P, V, F>,
+    rawData: IDataObject
+) {
     switch (item.class) {
         case 'plain':
             return item.onRender(state.ctx);
@@ -197,4 +257,13 @@ function prepareValue<Ctx>(
         return newValue;
     }
     return control.onWriteValue(newValue);
+}
+function translateHint(
+    hint: string | undefined,
+    onTranslateHint: ((hint: string) => string) | undefined
+): string | undefined {
+    if (hint === undefined || onTranslateHint === undefined) {
+        return hint;
+    }
+    return onTranslateHint(hint);
 }

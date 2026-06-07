@@ -256,7 +256,10 @@ function validate<
     if (control.validation) {
         const validatorFct = stateLibCtx.lib.validators?.[control.validation];
         if (validatorFct) {
-            const validationFctResult = validatorFct(value);
+            const validationFctResult = validatorFct(
+                value,
+                control.class !== 'custom' ? control.prop : null
+            );
             if (validationFctResult !== true) {
                 return validationFctResult;
             }
