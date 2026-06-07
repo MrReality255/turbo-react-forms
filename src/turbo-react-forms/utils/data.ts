@@ -1,4 +1,4 @@
-import { THandleProvider, TRef, TValidity } from '.';
+import { TRef, TValidity } from '.';
 
 export const DataUtils = {
     DataObject: {},
@@ -19,9 +19,8 @@ export const DataUtils = {
             current: initValue,
         };
     },
-    using: function <T, R = T>(src: T, fct: (x: T) => R) {
-        return fct(src);
-    },
+    orNone,
+    using,
 };
 
 function isValid(v: TValidity): boolean {
@@ -30,4 +29,12 @@ function isValid(v: TValidity): boolean {
 
 function getHint(v: TValidity) {
     return typeof v === 'boolean' ? undefined : v.hint;
+}
+
+function orNone<T, R>(src: T | undefined, converterFct: (src: T) => R) {
+    return src !== undefined ? converterFct(src) : undefined;
+}
+
+function using<T, R = T>(src: T, fct: (x: T) => R) {
+    return fct(src);
 }

@@ -19,6 +19,7 @@ export const FormUtils = {
     createInitData,
     createRenderContent,
     validate,
+    wrap,
 };
 
 function createInitData<
@@ -344,4 +345,11 @@ function createRenderContent<
             !ctrl.removed &&
             !ctrl.hidden
     );
+}
+
+function wrap(
+    content: React.ReactNode,
+    wrapper?: (content: React.ReactNode) => React.ReactNode
+) {
+    return wrapper ? wrapper(content) : content;
 }

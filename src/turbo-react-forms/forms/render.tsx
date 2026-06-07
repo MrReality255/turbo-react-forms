@@ -13,7 +13,7 @@ import {
     TFormControlWrapperBaseProps,
     TFormState,
 } from '.';
-import { FormUtils, IDataObject } from '..';
+import { DataUtils, FormUtils, IDataObject } from '..';
 import { TFormControlContainer } from './FormControlContainer';
 
 export const RenderUtils = {
@@ -171,12 +171,44 @@ function renderTemplateControl<
     F extends Record<string, unknown>,
     Ctx,
 >(
-    item: TFormControlTemplate<P, V, Ctx>,
+    ctrl: TFormControlTemplate<P, V, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F>,
     rawData: IDataObject
 ) {
-    return wrapControl(item, <>Template</>);
+    const items = rawData.listItems(ctrl.id);
+    const disableAdd =
+        ctrl.template.maxCount !== undefined &&
+        items.length >= ctrl.template.maxCount;
+    const disableDelete =
+        ctrl.template.minCount !== undefined &&
+        items.length <= ctrl.template.minCount;
+
+    const content = renderTemplateControls(ctrl, state, lib, items);
+    const node = FormUtils.wrap(content);
+    /*
+    ctrl.template.onWrapItems?.(
+        content,
+        { disableAdd, disableDelete },
+        state
+    ) ?? content;
+     */
+
+    return wrapControl(ctrl, node);
+}
+
+function renderTemplateControls<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    Ctx,
+>(
+    ctrl: TFormControlTemplate<P, V, Ctx>,
+    state: TFormState<Ctx>,
+    lib: TFormControlLib<P, V, F>,
+    items: IDataObject[]
+): React.ReactNode {
+    return <div>TODO</div>;
 }
 
 function renderTypedControl<
@@ -246,7 +278,7 @@ function wrapControl(
     ctrl: TFormControlCommonPropsDef,
     content: React.ReactNode
 ) {
-    return ctrl.onWrap ? ctrl.onWrap(content) : content;
+    return FormUtils.wrap(content, ctrl.onWrap);
 }
 
 function prepareValue<Ctx>(
