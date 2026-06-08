@@ -167,3 +167,9 @@ export type TFormControlBaseProps = TFormControlCommonProps & {
     valid: TValidity;
     onValueChange: (newValue: string) => void;
 };
+
+export type TFormControlSpecificProps<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    Ctx,
+> = P[keyof P] | TFormTemplateProps<P, V, Ctx> | TFormSubformProps<P, V, Ctx>;

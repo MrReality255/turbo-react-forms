@@ -1,4 +1,9 @@
-import { TFormControlBaseProps, TFormControlWrapperProps, TFormState } from '.';
+import {
+    TFormControlBaseProps,
+    TFormControlWrapperProps,
+    TFormState,
+    TFormTemplateStateProps,
+} from '.';
 import { TValidity } from '..';
 
 export type TFormControlLib<
@@ -22,6 +27,10 @@ export type TFormControlLib<
     onRenderMainWrapper: (
         content: React.ReactNode,
         props: F
+    ) => React.ReactNode;
+    onRenderTemplateItems: (
+        items: React.ReactNode,
+        props: TFormTemplateStateProps
     ) => React.ReactNode;
     onTranslateHint?: (hint: string) => string;
 };

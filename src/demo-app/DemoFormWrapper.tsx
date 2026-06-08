@@ -19,7 +19,9 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
                 position: 'absolute',
                 background: '#030',
                 minWidth: '640px',
-                minHeight: '480px',
+                height: '800px',
+                padding: '1em',
+                overflow: 'auto',
             }}
         >
             <h1>{p.title}</h1>

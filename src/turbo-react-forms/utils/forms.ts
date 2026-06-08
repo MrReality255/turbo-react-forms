@@ -6,6 +6,7 @@ import {
     TFormConfig,
     TFormControl,
     TFormControlList,
+    TFormControlSpecificProps,
     TFormControlString,
     TFormControlSubform,
     TFormControlTemplate,
@@ -18,6 +19,8 @@ import {
 export const FormUtils = {
     createInitData,
     createRenderContent,
+    getControlID,
+    getControlProps,
     validate,
     wrap,
 };
@@ -345,6 +348,34 @@ function createRenderContent<
             !ctrl.removed &&
             !ctrl.hidden
     );
+}
+
+function getControlID<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    Ctx,
+>(item: TFormControl<P, V, keyof P, Ctx>): string | null {
+    return item.class !== 'plain' ? item.id : null;
+}
+
+function getControlProps<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    Ctx,
+>(
+    item: TFormControl<P, V, keyof P, Ctx>
+): TFormControlSpecificProps<P, V, Ctx> | null {
+    switch (item.class) {
+        case 'plain':
+        case 'custom':
+            return null;
+        case 'subform':
+            return item.subform;
+        case 'template':
+            return item.template;
+        default:
+            return item.prop as P[keyof P];
+    }
 }
 
 function wrap(

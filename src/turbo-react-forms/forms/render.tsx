@@ -1,4 +1,5 @@
 import {
+    TFormConfig,
     TFormControl,
     TFormControlAtomicProps,
     TFormControlBaseProps,
@@ -12,6 +13,7 @@ import {
     TFormControlTyped,
     TFormControlWrapperBaseProps,
     TFormState,
+    TFormTemplateStateProps,
 } from '.';
 import { DataUtils, FormUtils, IDataObject } from '..';
 import { TFormControlContainer } from './FormControlContainer';
@@ -88,6 +90,7 @@ function renderContent<
     list: TFormControlList<P, V, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F>,
+    config: TFormConfig<P, V, F, Ctx, any>,
     rawData: IDataObject
 ) {
     return (
@@ -96,7 +99,7 @@ function renderContent<
                 const key = item.class !== 'plain' ? item.id : 'plain' + idx;
                 return (
                     <TFormControlContainer control={item} key={key}>
-                        {renderControl(item, state, lib, rawData)}
+                        {renderControl(item, state, lib, config, rawData)}
                     </TFormControlContainer>
                 );
             })}
@@ -113,6 +116,7 @@ function renderControl<
     item: TFormControl<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F>,
+    config: TFormConfig<P, V, F, Ctx, any>,
     rawData: IDataObject
 ): React.ReactNode {
     // an invisible / removed control should not be there anyway, but just to allow universal use :-)
@@ -132,7 +136,22 @@ function renderControl<
                         ? (item.type as string)
                         : null,
             },
-            (hint) => translateHint(hint, lib.onTranslateHint)
+            (hint) =>
+                translateHint(
+                    translateHint(
+                        hint,
+                        DataUtils.orNone(
+                            config.onTranslateHint,
+                            (trFct) => (hint: string) =>
+                                trFct(
+                                    hint,
+                                    FormUtils.getControlID(item) ?? '',
+                                    FormUtils.getControlProps(item)
+                                )
+                        )
+                    ),
+                    lib.onTranslateHint
+                )
         );
     }
     return content;
@@ -185,14 +204,26 @@ function renderTemplateControl<
         items.length <= ctrl.template.minCount;
 
     const content = renderTemplateControls(ctrl, state, lib, items);
-    const node = FormUtils.wrap(content);
-    /*
-    ctrl.template.onWrapItems?.(
-        content,
-        { disableAdd, disableDelete },
-        state
-    ) ?? content;
-     */
+    const templateStateProps: TFormTemplateStateProps = {
+        disableAdd,
+        disableDelete,
+    };
+
+    const node = FormUtils.wrap(
+        FormUtils.wrap(
+            content,
+            DataUtils.orNone(
+                ctrl.template.onWrapItems,
+                (fct) => (content: React.ReactNode) =>
+                    fct(content, templateStateProps, state)
+            )
+        ),
+        DataUtils.orNone(
+            lib.onRenderTemplateItems,
+            (fct) => (content: React.ReactNode) =>
+                fct(content, templateStateProps)
+        )
+    );
 
     return wrapControl(ctrl, node);
 }
@@ -290,6 +321,7 @@ function prepareValue<Ctx>(
     }
     return control.onWriteValue(newValue);
 }
+
 function translateHint(
     hint: string | undefined,
     onTranslateHint: ((hint: string) => string) | undefined

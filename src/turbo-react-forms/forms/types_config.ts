@@ -1,4 +1,9 @@
-import { TFormControlList, TFormModalResult, TFormState } from '.';
+import {
+    TFormControlList,
+    TFormControlSpecificProps,
+    TFormModalResult,
+    TFormState,
+} from '.';
 import { TDataObject, TDataObjectEvent, TDataObjectMap, TKey } from '..';
 
 export type TFormConfig<
@@ -18,6 +23,11 @@ export type TFormConfig<
         state: TFormState<Ctx>
     ) => React.ReactNode;
     onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
+    onTranslateHint?: (
+        hint: string,
+        id: string,
+        props: TFormControlSpecificProps<P, V, Ctx> | null
+    ) => string;
     onUpdate?: (
         command: string | null,
         event: TDataObjectEvent,

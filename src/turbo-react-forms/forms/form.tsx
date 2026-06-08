@@ -4,7 +4,7 @@ import {
     TFormControlList,
     TFormSubmitCtx,
     TFormSubmitFct,
-} from './types';
+} from '.';
 import { ILayers, TDataObjectMap, useLayersOrNull } from '../hooks';
 import { TFormWrapper } from './FormWrapper';
 
