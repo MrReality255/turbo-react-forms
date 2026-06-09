@@ -12,15 +12,16 @@ export function createFormHook<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
->(lib: TFormControlLib<P, V, F>) {
+    TT extends Record<string, unknown>,
+>(lib: TFormControlLib<P, V, F, TT>) {
     return {
         newEmptyList: function <Ctx>() {
-            return [] as TFormControlList<P, V, Ctx>;
+            return [] as TFormControlList<P, V, TT, Ctx>;
         },
         useForm: function <Ctx, SubmitType>(
-            config: TFormConfig<P, V, F, Ctx, SubmitType>
+            config: TFormConfig<P, V, F, TT, Ctx, SubmitType>
         ) {
-            return useForm<P, V, F, Ctx, SubmitType>(lib, config);
+            return useForm<P, V, F, TT, Ctx, SubmitType>(lib, config);
         },
     };
 }
@@ -29,11 +30,12 @@ function useForm<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
     SubmitType,
 >(
-    lib: TFormControlLib<P, V, F>,
-    config: TFormConfig<P, V, F, Ctx, SubmitType>
+    lib: TFormControlLib<P, V, F, TT>,
+    config: TFormConfig<P, V, F, TT, Ctx, SubmitType>
 ) {
     const lc = useLayersOrNull();
 

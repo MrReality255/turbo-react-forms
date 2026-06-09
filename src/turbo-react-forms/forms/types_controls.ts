@@ -35,11 +35,12 @@ export type TFormControlCustom<V, Ctx> = TFormControlCommonPropsDef &
 export type TFormSubformProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 > = {
     controls:
-        | TFormControlList<P, V, Ctx>
-        | ((state: TFormState<Ctx>) => TFormControlList<P, V, Ctx>);
+        | TFormControlList<P, V, TT, Ctx>
+        | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, Ctx>);
 };
 
 export type TFormTemplateStateProps = {
@@ -50,15 +51,16 @@ export type TFormTemplateStateProps = {
 export type TFormTemplateProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 > = {
     controls:
-        | TFormControlList<P, V, Ctx>
+        | TFormControlList<P, V, TT, Ctx>
         | ((
               state: TFormState<Ctx>,
               idx: number,
               handle: number
-          ) => TFormControlList<P, V, Ctx>);
+          ) => TFormControlList<P, V, TT, Ctx>);
 
     minCount?: number;
     maxCount?: number;
@@ -74,20 +76,36 @@ export type TFormTemplateProps<
 export type TFormControlTemplate<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
-> = TFormControlCommonPropsDef & {
-    class: 'template';
-    template: TFormTemplateProps<P, V, Ctx>;
-};
+> = TFormControlCommonPropsDef &
+    TFormControlTemplateCustomProps<TT, keyof TT> & {
+        class: 'template';
+        template: TFormTemplateProps<P, V, TT, Ctx>;
+    };
+
+export type TFormControlTemplateCustomProps<
+    TT extends Record<string, unknown>,
+    Type extends keyof TT,
+> =
+    | {
+          type: Type;
+          props: TT[Type];
+      }
+    | {
+          type?: undefined;
+          props?: undefined;
+      };
 
 export type TFormControlSubform<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 > = TFormControlCommonPropsDef & {
     class: 'subform';
     useOwnDataObject?: boolean;
-    subform: TFormSubformProps<P, V, Ctx>;
+    subform: TFormSubformProps<P, V, TT, Ctx>;
 };
 
 export type TFormControlPlain<Ctx> = TFormControlRenderInfoProps & {
@@ -103,20 +121,22 @@ export type TFormControlString<P, V, Type extends keyof P, Ctx> =
 export type TFormControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Type extends keyof P,
     Ctx,
 > =
     | TFormControlString<P, V, Type, Ctx>
-    | TFormControlTemplate<P, V, Ctx>
-    | TFormControlSubform<P, V, Ctx>
+    | TFormControlTemplate<P, V, TT, Ctx>
+    | TFormControlSubform<P, V, TT, Ctx>
     | TFormControlPlain<Ctx>;
 
 export type TFormControlList<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 > = {
-    [Type in keyof P]: TFormControl<P, V, Type, Ctx>;
+    [Type in keyof P]: TFormControl<P, V, TT, Type, Ctx>;
 }[keyof P][];
 
 export type TFormControlCommonProps = {
@@ -171,5 +191,9 @@ export type TFormControlBaseProps = TFormControlCommonProps & {
 export type TFormControlSpecificProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
-> = P[keyof P] | TFormTemplateProps<P, V, Ctx> | TFormSubformProps<P, V, Ctx>;
+> =
+    | P[keyof P]
+    | TFormTemplateProps<P, V, TT, Ctx>
+    | TFormSubformProps<P, V, TT, Ctx>;

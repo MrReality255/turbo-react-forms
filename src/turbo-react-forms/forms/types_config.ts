@@ -10,13 +10,14 @@ export type TFormConfig<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
     SubmitType,
 > = {
     form: F | ((state: TFormState<Ctx>) => F);
     controls:
-        | TFormControlList<P, V, Ctx>
-        | ((state: TFormState<Ctx>) => TFormControlList<P, V, Ctx>);
+        | TFormControlList<P, V, TT, Ctx>
+        | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, Ctx>);
     onRenderMainWrapper?: (
         content: React.ReactNode,
         ctx: Ctx,
@@ -26,7 +27,7 @@ export type TFormConfig<
     onTranslateHint?: (
         hint: string,
         id: string,
-        props: TFormControlSpecificProps<P, V, Ctx> | null
+        props: TFormControlSpecificProps<P, V, TT, Ctx> | null
     ) => string;
     onUpdate?: (
         command: string | null,

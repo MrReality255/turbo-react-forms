@@ -17,9 +17,13 @@ export function TFormWrapper<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
     SubmitType,
->({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, Ctx, SubmitType>) {
+>({
+    strictMode = false,
+    ...p
+}: TFormWrapperProps<P, V, F, TT, Ctx, SubmitType>) {
     const { config, formCtx, lib } = p;
     const handleProvider = useMemo(() => {
         return DataUtils.newHandleProvider();
@@ -87,6 +91,7 @@ export function TFormWrapper<
                     FormUtils.createRenderContent(p.config, state),
                     state,
                     lib,
+                    config,
                     state.data
                 )
             )}
@@ -135,13 +140,14 @@ function createUpdateUpdateHandler<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
     SubmitType,
 >(
     updateInternalState: (
         fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>
     ) => void,
-    config: TFormConfig<P, V, F, Ctx, SubmitType>,
+    config: TFormConfig<P, V, F, TT, Ctx, SubmitType>,
     eventInfo: TDataObjectEvent,
     updateFct: (prev: TDataObject) => TDataObject
 ): void {

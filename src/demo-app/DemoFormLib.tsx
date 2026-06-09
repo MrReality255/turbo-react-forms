@@ -14,6 +14,9 @@ export const DemoFormLib = createFormHook({
     onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps) => {
         return <DemoFormWrapper {...form}>{content}</DemoFormWrapper>;
     },
+    onRenderTemplateItems: (items, props) => {
+        return items;
+    },
     onRenderControl: (content, controlProps, hintTranslator) => {
         return (
             <React.Fragment>
@@ -80,6 +83,7 @@ export const DemoFormLib = createFormHook({
             },
         },
     },
+    templateTypes: {},
     validators: {
         number: (x: string, props: unknown) =>
             isNaN(parseFloat(x))

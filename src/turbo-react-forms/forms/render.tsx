@@ -25,9 +25,10 @@ export const RenderUtils = {
 function newBaseRenderWrapperProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
-    item: TFormControl<P, V, keyof P, Ctx>,
+    item: TFormControl<P, V, TT, keyof P, Ctx>,
     state: TFormState<Ctx>,
     rawData: IDataObject
 ): TFormControlWrapperBaseProps {
@@ -58,12 +59,13 @@ function newBaseProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
     item: TFormControlString<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
     rawData: IDataObject,
-    lib: TFormControlLib<P, V, F>
+    lib: TFormControlLib<P, V, F, TT>
 ): TFormControlBaseProps {
     return {
         ...newBaseRenderWrapperProps(item, state, rawData),
@@ -85,12 +87,13 @@ function renderContent<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
-    list: TFormControlList<P, V, Ctx>,
+    list: TFormControlList<P, V, TT, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
-    config: TFormConfig<P, V, F, Ctx, any>,
+    lib: TFormControlLib<P, V, F, TT>,
+    config: TFormConfig<P, V, F, TT, Ctx, any>,
     rawData: IDataObject
 ) {
     return (
@@ -111,12 +114,13 @@ function renderControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
-    item: TFormControl<P, V, keyof P, Ctx>,
+    item: TFormControl<P, V, TT, keyof P, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
-    config: TFormConfig<P, V, F, Ctx, any>,
+    lib: TFormControlLib<P, V, F, TT>,
+    config: TFormConfig<P, V, F, TT, Ctx, any>,
     rawData: IDataObject
 ): React.ReactNode {
     // an invisible / removed control should not be there anyway, but just to allow universal use :-)
@@ -161,11 +165,12 @@ function renderControlContent<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
-    item: TFormControl<P, V, keyof P, Ctx>,
+    item: TFormControl<P, V, TT, keyof P, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
+    lib: TFormControlLib<P, V, F, TT>,
     rawData: IDataObject
 ) {
     switch (item.class) {
@@ -188,11 +193,12 @@ function renderTemplateControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
-    ctrl: TFormControlTemplate<P, V, Ctx>,
+    ctrl: TFormControlTemplate<P, V, TT, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
+    lib: TFormControlLib<P, V, F, TT>,
     rawData: IDataObject
 ) {
     const items = rawData.listItems(ctrl.id);
@@ -209,7 +215,16 @@ function renderTemplateControl<
         disableDelete,
     };
 
-    const node = FormUtils.wrap(
+    const templateRenderFct = ctrl.type
+        ? (itemsContent: React.ReactNode, tsp: TFormTemplateStateProps) =>
+              lib.templateTypes[ctrl.type!].onRenderTemplateItems(
+                  itemsContent,
+                  tsp,
+                  ctrl.props!
+              )
+        : lib.onRenderTemplateItems;
+
+    const contentNode = FormUtils.wrap(
         FormUtils.wrap(
             content,
             DataUtils.orNone(
@@ -219,24 +234,25 @@ function renderTemplateControl<
             )
         ),
         DataUtils.orNone(
-            lib.onRenderTemplateItems,
+            templateRenderFct,
             (fct) => (content: React.ReactNode) =>
                 fct(content, templateStateProps)
         )
     );
 
-    return wrapControl(ctrl, node);
+    return wrapControl(ctrl, contentNode);
 }
 
 function renderTemplateControls<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
-    ctrl: TFormControlTemplate<P, V, Ctx>,
+    ctrl: TFormControlTemplate<P, V, TT, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
+    lib: TFormControlLib<P, V, F, TT>,
     items: IDataObject[]
 ): React.ReactNode {
     return <div>TODO</div>;
@@ -246,11 +262,12 @@ function renderTypedControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
     item: TFormControlTyped<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
+    lib: TFormControlLib<P, V, F, TT>,
     rawData: IDataObject
 ) {
     return wrapControl(
@@ -266,11 +283,12 @@ function renderDynamicControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
     item: TFormControlDynamic<Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
+    lib: TFormControlLib<P, V, F, TT>,
     rawData: IDataObject
 ) {
     return renderTypedControl(
@@ -289,11 +307,12 @@ function renderCustomControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends Record<string, unknown>,
     Ctx,
 >(
     item: TFormControlCustom<V, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F>,
+    lib: TFormControlLib<P, V, F, TT>,
     rawData: IDataObject
 ) {
     return wrapControl(
