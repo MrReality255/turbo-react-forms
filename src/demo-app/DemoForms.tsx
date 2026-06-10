@@ -15,6 +15,7 @@ export function DemoForms() {
             prop: { maxLen: 30 },
             label: 'Text box1',
             validation: 'number',
+            defaultValue: 'bla',
         },
         {
             id: 'cb1',
@@ -64,6 +65,9 @@ export function DemoForms() {
         {
             id: 'list1',
             class: 'template',
+            props: {
+                addText: 'Add new item',
+            },
             template: {
                 minCount: 1,
                 controls: () => {
@@ -72,8 +76,14 @@ export function DemoForms() {
                             id: 'listItemName',
                             type: 'text',
                             prop: { maxLen: 200 },
+                            defaultValue: 'empty',
                         },
                     ];
+                },
+                onNewItem: (idx, state) => {
+                    return {
+                        listItemName: 'item ' + idx,
+                    };
                 },
             },
         },

@@ -4,6 +4,7 @@ import {
     TFormInternalState,
     TFormMode,
     TFormState,
+    TFormTemplatePropsType,
     TFormUpdateContext,
     TFormWrapperProps,
 } from '.';
@@ -17,7 +18,7 @@ export function TFormWrapper<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
     SubmitType,
 >({
@@ -140,7 +141,7 @@ function createUpdateUpdateHandler<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
     SubmitType,
 >(

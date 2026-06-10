@@ -13,6 +13,7 @@ import {
     TFormControlTyped,
     TFormControlWrapperBaseProps,
     TFormState,
+    TFormTemplatePropsType,
     TFormTemplateStateProps,
 } from '.';
 import { DataUtils, FormUtils, IDataObject } from '..';
@@ -25,7 +26,7 @@ export const RenderUtils = {
 function newBaseRenderWrapperProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     item: TFormControl<P, V, TT, keyof P, Ctx>,
@@ -59,7 +60,7 @@ function newBaseProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     item: TFormControlString<P, V, keyof P, Ctx>,
@@ -87,7 +88,7 @@ function renderContent<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     list: TFormControlList<P, V, TT, Ctx>,
@@ -114,7 +115,7 @@ function renderControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     item: TFormControl<P, V, TT, keyof P, Ctx>,
@@ -165,7 +166,7 @@ function renderControlContent<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     item: TFormControl<P, V, TT, keyof P, Ctx>,
@@ -193,7 +194,7 @@ function renderTemplateControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     ctrl: TFormControlTemplate<P, V, TT, Ctx>,
@@ -213,16 +214,17 @@ function renderTemplateControl<
     const templateStateProps: TFormTemplateStateProps = {
         disableAdd,
         disableDelete,
-    };
 
-    const templateRenderFct = ctrl.type
-        ? (itemsContent: React.ReactNode, tsp: TFormTemplateStateProps) =>
-              lib.templateTypes[ctrl.type!].onRenderTemplateItems(
-                  itemsContent,
-                  tsp,
-                  ctrl.props!
-              )
-        : lib.onRenderTemplateItems;
+        triggerAdd: () => {
+            rawData.listAdd(
+                ctrl.id,
+                DataUtils.orNone(
+                    ctrl.template.onNewItem,
+                    (n) => () => n(items.length, state)
+                )
+            );
+        },
+    };
 
     const contentNode = FormUtils.wrap(
         FormUtils.wrap(
@@ -234,9 +236,9 @@ function renderTemplateControl<
             )
         ),
         DataUtils.orNone(
-            templateRenderFct,
+            lib.onRenderTemplateItems,
             (fct) => (content: React.ReactNode) =>
-                fct(content, templateStateProps)
+                fct(content, templateStateProps, ctrl.props)
         )
     );
 
@@ -247,7 +249,7 @@ function renderTemplateControls<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     ctrl: TFormControlTemplate<P, V, TT, Ctx>,
@@ -255,14 +257,14 @@ function renderTemplateControls<
     lib: TFormControlLib<P, V, F, TT>,
     items: IDataObject[]
 ): React.ReactNode {
-    return <div>TODO</div>;
+    return <div>Item count: {items.length}</div>;
 }
 
 function renderTypedControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     item: TFormControlTyped<P, V, keyof P, Ctx>,
@@ -283,7 +285,7 @@ function renderDynamicControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     item: TFormControlDynamic<Ctx>,
@@ -307,7 +309,7 @@ function renderCustomControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
 >(
     item: TFormControlCustom<V, Ctx>,

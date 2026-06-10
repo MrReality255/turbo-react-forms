@@ -4,6 +4,7 @@ import {
     TFormControlList,
     TFormSubmitCtx,
     TFormSubmitFct,
+    TFormTemplatePropsType,
 } from '.';
 import { ILayers, TDataObjectMap, useLayersOrNull } from '../hooks';
 import { TFormWrapper } from './FormWrapper';
@@ -12,7 +13,7 @@ export function createFormHook<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
 >(lib: TFormControlLib<P, V, F, TT>) {
     return {
         newEmptyList: function <Ctx>() {
@@ -30,7 +31,7 @@ function useForm<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
     SubmitType,
 >(
@@ -50,7 +51,7 @@ function useForm<
                     const showMethod =
                         lib.showMethod ?? getDefaultShowMethod(lc);
                     showMethod((handle) => (
-                        <TFormWrapper<P, V, F, Ctx, SubmitType>
+                        <TFormWrapper<P, V, F, TT, Ctx, SubmitType>
                             config={config}
                             formCtx={ctx}
                             handle={handle}

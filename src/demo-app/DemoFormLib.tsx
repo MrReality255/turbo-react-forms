@@ -3,6 +3,8 @@ import {
     createFormHook,
     DataUtils,
     TFormControlBaseProps,
+    TFormTemplatePropsType,
+    TFormTemplateStateProps,
 } from '../turbo-react-forms';
 import { DemoFormWrapper, TDemoFormProps } from './DemoFormWrapper';
 
@@ -10,12 +12,27 @@ type TTextProps = {
     maxLen: number;
 };
 
+type TTemplateProps = {
+    addText: string;
+};
+
 export const DemoFormLib = createFormHook({
     onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps) => {
         return <DemoFormWrapper {...form}>{content}</DemoFormWrapper>;
     },
-    onRenderTemplateItems: (items, props) => {
-        return items;
+    onRenderTemplateItems: (
+        items: React.ReactNode,
+        props: TFormTemplateStateProps,
+        customProps: TTemplateProps
+    ) => {
+        return (
+            <div style={{ backgroundColor: '#033', padding: '1em' }}>
+                {items}
+                <button onClick={() => props.triggerAdd()}>
+                    {customProps.addText}{' '}
+                </button>
+            </div>
+        );
     },
     onRenderControl: (content, controlProps, hintTranslator) => {
         return (
@@ -27,6 +44,7 @@ export const DemoFormLib = createFormHook({
                         paddingTop: '1em',
                         paddingBottom: '1em',
                         paddingLeft: '2em',
+                        paddingRight: '2em',
                     }}
                 >
                     {controlProps.context?.before}
@@ -83,7 +101,6 @@ export const DemoFormLib = createFormHook({
             },
         },
     },
-    templateTypes: {},
     validators: {
         number: (x: string, props: unknown) =>
             isNaN(parseFloat(x))

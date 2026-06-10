@@ -3,6 +3,7 @@ import {
     TFormControlLib,
     TFormSubmitCtx,
     TFormSubmitFct,
+    TFormTemplatePropsType,
 } from '.';
 import { TDataObjectMap, TKey } from '..';
 
@@ -10,7 +11,7 @@ export type TFormWrapperProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
-    TT extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
     Ctx,
     SubmitType,
 > = {
