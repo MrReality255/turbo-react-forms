@@ -1,5 +1,10 @@
 import { PropsWithChildren } from 'react';
-import { useClosingEffect, useFormContext } from '../turbo-react-forms';
+import {
+    useClosingEffect,
+    useFormContext,
+    useLayer,
+    useLayers,
+} from '../turbo-react-forms';
 
 export type TDemoFormProps = {
     title: string;
@@ -8,6 +13,8 @@ export type TDemoFormProps = {
 
 export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
     const ctx = useFormContext();
+    const l = useLayers();
+
     const closer = useClosingEffect({ mode: 'resize', delay: 300 });
     ctx.hideMethodRef.current = (prev) => {
         closer.hide(prev);
@@ -27,7 +34,7 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
             <h1>{p.title}</h1>
             <button onClick={() => ctx.close()}>Close()</button>
             <h2>Raw data</h2>
-            <p>{JSON.stringify(ctx.data.getRef())}</p>
+            <button onClick={() => showRawData()}>Show</button>
             {p.children}
             {p.isLoading && (
                 <div
@@ -46,6 +53,31 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
                     Loading
                 </div>
             )}
+        </div>
+    );
+
+    function showRawData() {
+        l.main.showNotification(() => (
+            <Noticiation>{JSON.stringify(ctx.data.getRef())}</Noticiation>
+        ));
+    }
+}
+
+function Noticiation(p: PropsWithChildren) {
+    const l = useLayer();
+    const closer = useClosingEffect({ mode: 'resize', delay: 300 });
+    return (
+        <div
+            onClick={() => closer.hide(() => l.hide())}
+            style={{
+                ...closer.get(),
+                backgroundColor: '#033',
+                padding: '0.5em',
+                maxWidth: '390px',
+                overflow: 'auto',
+            }}
+        >
+            {p.children}
         </div>
     );
 }

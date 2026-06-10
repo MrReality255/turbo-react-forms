@@ -77,6 +77,7 @@ export function DemoForms() {
                             type: 'text',
                             prop: { maxLen: 200 },
                             defaultValue: 'empty',
+                            validation: 'number',
                         },
                     ];
                 },

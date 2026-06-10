@@ -229,10 +229,10 @@ function createInitDataStringControl<
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, Ctx>
 ) {
-    const rawValue = DataObjectUtils.getRawValue(
-        () => initData[control.id],
-        false
-    );
+    const rawValue =
+        DataObjectUtils.getRawValue(() => initData[control.id], false) ||
+        (control.defaultValue ?? '');
+
     result[control.id] = DataObjectUtils.newValue(
         rawValue,
         validate(rawValue, control, stateLibCtx)
