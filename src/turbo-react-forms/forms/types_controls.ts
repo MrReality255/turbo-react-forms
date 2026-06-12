@@ -36,16 +36,18 @@ export type TFormSubformProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 > = {
     controls:
-        | TFormControlList<P, V, TT, Ctx>
-        | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, Ctx>);
+        | TFormControlList<P, V, TT, SFT, Ctx>
+        | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
 };
 
 export type TFormTemplateStateProps = {
     disableAdd: boolean;
     disableDelete: boolean;
+    count: number;
 
     triggerAdd: () => void;
 };
@@ -54,15 +56,16 @@ export type TFormTemplateProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 > = {
     controls:
-        | TFormControlList<P, V, TT, Ctx>
+        | TFormControlList<P, V, TT, SFT, Ctx>
         | ((
               state: TFormState<Ctx>,
               idx: number,
               handle: number
-          ) => TFormControlList<P, V, TT, Ctx>);
+          ) => TFormControlList<P, V, TT, SFT, Ctx>);
 
     minCount?: number;
     maxCount?: number;
@@ -73,29 +76,29 @@ export type TFormTemplateProps<
         state: TFormState<Ctx>
     ) => React.ReactNode;
     onWrapItem?: (item: React.ReactNode, idx: number) => React.ReactNode;
-    onWrapItemControl?: (item: React.ReactNode, idx: number) => React.ReactNode;
 };
 
 export type TFormControlTemplate<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 > = TFormControlCommonPropsDef & {
     class: 'template';
-    template: TFormTemplateProps<P, V, TT, Ctx>;
-    props: TT;
+    template: TFormTemplateProps<P, V, TT, SFT, Ctx> & TT;
 };
 
 export type TFormControlSubform<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 > = TFormControlCommonPropsDef & {
     class: 'subform';
     useOwnDataObject?: boolean;
-    subform: TFormSubformProps<P, V, TT, Ctx>;
+    subform: TFormSubformProps<P, V, TT, SFT, Ctx> & SFT;
 };
 
 export type TFormControlPlain<Ctx> = TFormControlRenderInfoProps & {
@@ -112,21 +115,23 @@ export type TFormControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Type extends keyof P,
     Ctx,
 > =
     | TFormControlString<P, V, Type, Ctx>
-    | TFormControlTemplate<P, V, TT, Ctx>
-    | TFormControlSubform<P, V, TT, Ctx>
+    | TFormControlTemplate<P, V, TT, SFT, Ctx>
+    | TFormControlSubform<P, V, TT, SFT, Ctx>
     | TFormControlPlain<Ctx>;
 
 export type TFormControlList<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 > = {
-    [Type in keyof P]: TFormControl<P, V, TT, Type, Ctx>;
+    [Type in keyof P]: TFormControl<P, V, TT, SFT, Type, Ctx>;
 }[keyof P][];
 
 export type TFormControlCommonProps = {
@@ -179,13 +184,15 @@ export type TFormControlBaseProps = TFormControlCommonProps & {
 };
 
 export type TFormTemplatePropsType = Record<string, unknown>;
+export type TFormSubformPropsType = number; // Record<string, unknown>;
 
 export type TFormControlSpecificProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 > =
     | P[keyof P]
-    | TFormTemplateProps<P, V, TT, Ctx>
-    | TFormSubformProps<P, V, TT, Ctx>;
+    | TFormTemplateProps<P, V, TT, SFT, Ctx>
+    | TFormSubformProps<P, V, TT, SFT, Ctx>;

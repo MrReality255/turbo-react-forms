@@ -21,6 +21,7 @@ export function DemoForms() {
             id: 'cb1',
             class: undefined,
             type: 'checkBox',
+            optional: true,
             prop: {
                 aaa: 3,
             },

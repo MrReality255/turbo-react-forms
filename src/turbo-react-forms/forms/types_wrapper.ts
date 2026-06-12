@@ -12,10 +12,11 @@ export type TFormWrapperProps<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormTemplatePropsType,
     Ctx,
     SubmitType,
 > = {
-    config: TFormConfig<P, V, F, TT, Ctx, SubmitType>;
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>;
     formCtx: Ctx;
     handle: number;
     initData: TDataObjectMap | null;

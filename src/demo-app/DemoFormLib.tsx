@@ -34,6 +34,22 @@ export const DemoFormLib = createFormHook({
             </div>
         );
     },
+    onRenderTemplateItem: (item, data, props, customProps) => {
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1em',
+                }}
+            >
+                <div style={{ width: '200px' }}>
+                    Content of the item {data.getID()}
+                </div>
+                <div style={{ flex: 1 }}>{item}</div>
+            </div>
+        );
+    },
     onRenderControl: (content, controlProps, hintTranslator) => {
         return (
             <React.Fragment>

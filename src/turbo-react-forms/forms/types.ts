@@ -1,10 +1,5 @@
-import {
-    IDataObject,
-    TDataObject,
-    TDataObjectEvent,
-    TDataObjectMap,
-} from '../hooks';
-import { THandleProvider, TKey, TValidity } from '../utils';
+import { IDataObject, TDataObject } from '../hooks';
+import { THandleProvider, TKey } from '../utils';
 
 export type TFormMode = 'ready' | 'loading' | 'waiting';
 export type TFormModalResult = 'submit' | 'cancel';
@@ -24,9 +19,7 @@ export type TFormState<Ctx> = TFormInternalState<Ctx> & {
 
 // LIB
 
-
 // SUBMIT
-
 
 // LIB
 

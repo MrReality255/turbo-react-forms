@@ -9,10 +9,12 @@ import {
     TFormControlLib,
     TFormControlList,
     TFormControlString,
+    TFormControlSubform,
     TFormControlTemplate,
     TFormControlTyped,
     TFormControlWrapperBaseProps,
     TFormState,
+    TFormSubformPropsType,
     TFormTemplatePropsType,
     TFormTemplateStateProps,
 } from '.';
@@ -27,9 +29,10 @@ function newBaseRenderWrapperProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
-    item: TFormControl<P, V, TT, keyof P, Ctx>,
+    item: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     state: TFormState<Ctx>,
     rawData: IDataObject
 ): TFormControlWrapperBaseProps {
@@ -61,12 +64,13 @@ function newBaseProps<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
     item: TFormControlString<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
     rawData: IDataObject,
-    lib: TFormControlLib<P, V, F, TT>
+    lib: TFormControlLib<P, V, F, TT, SFT>
 ): TFormControlBaseProps {
     return {
         ...newBaseRenderWrapperProps(item, state, rawData),
@@ -74,11 +78,15 @@ function newBaseProps<
         valid: rawData.getValidity(item.id),
         onValueChange: (newValue) => {
             newValue = prepareValue(newValue, item);
-            const isValid = FormUtils.validate<P, V, any, Ctx>(newValue, item, {
-                ctx: state.ctx,
-                lib: lib,
-                state: state,
-            });
+            const isValid = FormUtils.validate<P, V, F, TT, Ctx>(
+                newValue,
+                item,
+                {
+                    ctx: state.ctx,
+                    lib: lib,
+                    state: state,
+                }
+            );
             rawData.setValue(item.id, newValue, isValid);
         },
     };
@@ -89,12 +97,13 @@ function renderContent<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
-    list: TFormControlList<P, V, TT, Ctx>,
+    list: TFormControlList<P, V, TT, SFT, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
-    config: TFormConfig<P, V, F, TT, Ctx, any>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, any>,
     rawData: IDataObject
 ) {
     return (
@@ -116,12 +125,13 @@ function renderControl<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
-    item: TFormControl<P, V, TT, keyof P, Ctx>,
+    item: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
-    config: TFormConfig<P, V, F, TT, Ctx, any>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, any>,
     rawData: IDataObject
 ): React.ReactNode {
     // an invisible / removed control should not be there anyway, but just to allow universal use :-)
@@ -167,11 +177,12 @@ function renderControlContent<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
-    item: TFormControl<P, V, TT, keyof P, Ctx>,
+    item: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject
 ) {
     switch (item.class) {
@@ -182,7 +193,7 @@ function renderControlContent<
         case 'dynamic':
             return renderDynamicControl(item, state, lib, rawData);
         case 'subform':
-            throw 'not implemented';
+            return renderSubformControl(item, state, lib, rawData);
         case 'template':
             return renderTemplateControl(item, state, lib, rawData);
         default:
@@ -190,16 +201,33 @@ function renderControlContent<
     }
 }
 
+function renderSubformControl<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
+    Ctx,
+>(
+    ctrl: TFormControlSubform<P, V, TT, SFT, Ctx>,
+    state: TFormState<Ctx>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    rawData: IDataObject
+) {
+    ctrl.subform.controls;
+}
+
 function renderTemplateControl<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
-    ctrl: TFormControlTemplate<P, V, TT, Ctx>,
+    ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject
 ) {
     const items = rawData.listItems(ctrl.id);
@@ -210,10 +238,10 @@ function renderTemplateControl<
         ctrl.template.minCount !== undefined &&
         items.length <= ctrl.template.minCount;
 
-    const content = renderTemplateControls(ctrl, state, lib, items);
     const templateStateProps: TFormTemplateStateProps = {
         disableAdd,
         disableDelete,
+        count: items.length,
 
         triggerAdd: () => {
             rawData.listAdd(
@@ -225,7 +253,13 @@ function renderTemplateControl<
             );
         },
     };
-
+    const content = renderTemplateControls(
+        ctrl,
+        state,
+        lib,
+        items,
+        templateStateProps
+    );
     const contentNode = FormUtils.wrap(
         FormUtils.wrap(
             content,
@@ -250,14 +284,30 @@ function renderTemplateControls<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
-    ctrl: TFormControlTemplate<P, V, TT, Ctx>,
+    ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
-    items: IDataObject[]
-): React.ReactNode {
-    return <div>Item count: {items.length}</div>;
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    items: IDataObject[],
+    props: TFormTemplateStateProps
+): React.ReactNode[] {
+    return items.map((item, idx) => {
+        const content: React.ReactNode = <div>ITEM {item.getID()}</div>;
+
+        return lib.onRenderTemplateItem(
+            FormUtils.wrap(
+                content,
+                ctrl.template.onWrapItem
+                    ? (c) => ctrl.template.onWrapItem!(c, idx)
+                    : undefined
+            ),
+            item,
+            props,
+            ctrl.props
+        );
+    });
 }
 
 function renderTypedControl<
@@ -265,11 +315,12 @@ function renderTypedControl<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
     item: TFormControlTyped<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject
 ) {
     return wrapControl(
@@ -286,11 +337,12 @@ function renderDynamicControl<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
     item: TFormControlDynamic<Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject
 ) {
     return renderTypedControl(
@@ -310,11 +362,12 @@ function renderCustomControl<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 >(
     item: TFormControlCustom<V, Ctx>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject
 ) {
     return wrapControl(

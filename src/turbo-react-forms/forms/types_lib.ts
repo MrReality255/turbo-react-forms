@@ -2,10 +2,11 @@ import {
     TFormControlBaseProps,
     TFormControlWrapperProps,
     TFormState,
+    TFormSubformPropsType,
     TFormTemplatePropsType,
     TFormTemplateStateProps,
 } from '.';
-import { TValidity } from '..';
+import { IDataObject, TValidity } from '..';
 
 export type TFormControlLibTemplateDef<T> = {
     onRenderTemplateItems: (
@@ -20,6 +21,7 @@ export type TFormControlLib<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
 > = {
     controls: {
         [K in keyof P]: TFormControlDef<P[K]>;
@@ -43,6 +45,17 @@ export type TFormControlLib<
         props: TFormTemplateStateProps,
         customProps: TT
     ) => React.ReactNode;
+    onRenderTemplateItem: (
+        item: React.ReactNode,
+        data: IDataObject,
+        props: TFormTemplateStateProps,
+        customProps: TT
+    ) => React.ReactNode;
+    onRenderSubform: (
+        content: React.ReactNode,
+        data: IDataObject,
+        props: SFT
+    ) => React.ReactNode;
     onTranslateHint?: (hint: string) => string;
 };
 
@@ -58,9 +71,10 @@ export type TFormStateLibCtx<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
 > = {
     state: TFormState<Ctx>;
     ctx: Ctx;
-    lib: TFormControlLib<P, V, F, TT>;
+    lib: TFormControlLib<P, V, F, TT, SFT>;
 };
