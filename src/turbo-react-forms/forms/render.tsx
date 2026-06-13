@@ -78,7 +78,7 @@ function newBaseProps<
         valid: rawData.getValidity(item.id),
         onValueChange: (newValue) => {
             newValue = prepareValue(newValue, item);
-            const isValid = FormUtils.validate<P, V, F, TT, Ctx>(
+            const isValid = FormUtils.validate<P, V, F, TT, SFT, Ctx>(
                 newValue,
                 item,
                 {
@@ -214,7 +214,7 @@ function renderSubformControl<
     lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject
 ) {
-    ctrl.subform.controls;
+    return <div>TODO: Subform</div>;
 }
 
 function renderTemplateControl<
@@ -272,7 +272,7 @@ function renderTemplateControl<
         DataUtils.orNone(
             lib.onRenderTemplateItems,
             (fct) => (content: React.ReactNode) =>
-                fct(content, templateStateProps, ctrl.props)
+                fct(content, templateStateProps, ctrl.template)
         )
     );
 
@@ -305,7 +305,7 @@ function renderTemplateControls<
             ),
             item,
             props,
-            ctrl.props
+            ctrl.template
         );
     });
 }

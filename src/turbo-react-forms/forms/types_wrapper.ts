@@ -1,6 +1,7 @@
 import {
     TFormConfig,
     TFormControlLib,
+    TFormSubformPropsType,
     TFormSubmitCtx,
     TFormSubmitFct,
     TFormTemplatePropsType,
@@ -12,7 +13,7 @@ export type TFormWrapperProps<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
-    SFT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
 > = {
@@ -20,7 +21,7 @@ export type TFormWrapperProps<
     formCtx: Ctx;
     handle: number;
     initData: TDataObjectMap | null;
-    lib: TFormControlLib<P, V, F, TT>;
+    lib: TFormControlLib<P, V, F, TT, SFT>;
     section?: TKey;
     strictMode?: boolean;
 

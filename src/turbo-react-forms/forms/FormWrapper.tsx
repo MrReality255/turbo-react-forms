@@ -4,6 +4,7 @@ import {
     TFormInternalState,
     TFormMode,
     TFormState,
+    TFormSubformPropsType,
     TFormTemplatePropsType,
     TFormUpdateContext,
     TFormWrapperProps,
@@ -19,12 +20,13 @@ export function TFormWrapper<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
 >({
     strictMode = false,
     ...p
-}: TFormWrapperProps<P, V, F, TT, Ctx, SubmitType>) {
+}: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType>) {
     const { config, formCtx, lib } = p;
     const handleProvider = useMemo(() => {
         return DataUtils.newHandleProvider();
@@ -142,13 +144,14 @@ function createUpdateUpdateHandler<
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
 >(
     updateInternalState: (
         fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>
     ) => void,
-    config: TFormConfig<P, V, F, TT, Ctx, SubmitType>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     eventInfo: TDataObjectEvent,
     updateFct: (prev: TDataObject) => TDataObject
 ): void {

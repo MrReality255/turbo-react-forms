@@ -1,4 +1,4 @@
-import { TStateHandle, TStateUpdateHandle, TValidity } from '..';
+import { TStateHandle, TValidity } from '..';
 
 export type TDataObjectMap = Record<string, TDataObjectValue>;
 export type TDataObject = {

@@ -1,6 +1,11 @@
 import { useContext, useMemo } from 'react';
 import { TFormContext } from '../contexts/types';
-import { TFormStateLibCtx, TFormSubmitCtx } from '../forms';
+import {
+    TFormStateLibCtx,
+    TFormSubformPropsType,
+    TFormSubmitCtx,
+    TFormTemplatePropsType,
+} from '../forms';
 import { DataUtils } from '..';
 import { ctxLayer } from '../contexts/LayersContext';
 
@@ -8,10 +13,12 @@ export function useNewFormContext<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
 >(
-    { state, lib }: TFormStateLibCtx<P, V, F, Ctx>,
+    { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void
 ) {
     const hideMethodRef = useMemo(() => {
@@ -21,6 +28,7 @@ export function useNewFormContext<
 
     return useMemo<TFormContext<Ctx>>(() => {
         return {
+            ctx: state.ctx,
             data: state.data,
             hideMethodRef,
             close: function () {
