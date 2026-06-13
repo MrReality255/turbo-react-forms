@@ -184,7 +184,7 @@ export type TFormControlBaseProps = TFormControlCommonProps & {
 };
 
 export type TFormTemplatePropsType = Record<string, unknown>;
-export type TFormSubformPropsType = number; // Record<string, unknown>;
+export type TFormSubformPropsType = Record<string, unknown>; // Record<string, unknown>;
 
 export type TFormControlSpecificProps<
     P extends Record<string, unknown>,

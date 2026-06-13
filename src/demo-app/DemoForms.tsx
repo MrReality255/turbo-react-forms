@@ -9,6 +9,17 @@ export function DemoForms() {
     const el = newEmptyList();
     const items: typeof el = [
         {
+            id: 'subform1',
+            class: 'subform',
+            subform: {
+                controls: () => {
+                    return [
+                        { id: 'subtext1', type: 'text', prop: { maxLen: 40 } },
+                    ];
+                },
+            },
+        },
+        {
             id: 'tb1',
             type: 'text',
             class: undefined,
@@ -66,10 +77,8 @@ export function DemoForms() {
         {
             id: 'list1',
             class: 'template',
-            props: {
-                addText: 'Add new item',
-            },
             template: {
+                addText: 'add new item',
                 minCount: 1,
                 controls: () => {
                     return [

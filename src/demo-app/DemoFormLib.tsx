@@ -50,10 +50,29 @@ export const DemoFormLib = createFormHook({
             </div>
         );
     },
+    onRenderSubform: (content, data, props) => {
+        return <div>SUBFORM</div>;
+    },
     onRenderControl: (content, controlProps, hintTranslator) => {
         return (
             <React.Fragment>
                 {controlProps.context?.top}
+                <div
+                    style={{
+                        width: '100%',
+                        backgroundColor: '#600',
+                        color: '#ff0',
+                        padding: '0em',
+                    }}
+                >
+                    <div style={{ padding: '1em', width: '100%' }}>
+                        ** CONTROL {controlProps.id} **
+                        <div>
+                            {controlProps.label} - {controlProps.type}/
+                            {controlProps.class}
+                        </div>
+                    </div>
+                </div>
                 <div
                     style={{
                         backgroundColor: '#000',
@@ -64,13 +83,8 @@ export const DemoFormLib = createFormHook({
                     }}
                 >
                     {controlProps.context?.before}
-                    <div>
-                        {controlProps.label} - {controlProps.type}/
-                        {controlProps.class}
-                    </div>
                     {content}
                     {controlProps.context?.after}
-                    {JSON.stringify(controlProps.valid)}
                     {controlProps.valid ? (
                         <div style={{ color: 'red' }}>
                             {hintTranslator(

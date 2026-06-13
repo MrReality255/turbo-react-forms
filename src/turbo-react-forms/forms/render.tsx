@@ -214,7 +214,9 @@ function renderSubformControl<
     lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject
 ) {
-    return <div>TODO: Subform</div>;
+    const data = ctrl.useOwnDataObject ? rawData.objectGet(ctrl.id) : rawData;
+    const content = <div>TODO: Subform</div>;
+    return lib.onRenderSubform ? lib.onRenderSubform(content, data, ctrl.subform) 
 }
 
 function renderTemplateControl<
