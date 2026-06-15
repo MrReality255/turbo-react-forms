@@ -65,12 +65,10 @@ export const DemoFormLib = createFormHook({
                         padding: '0em',
                     }}
                 >
-                    <div style={{ padding: '1em', width: '100%' }}>
-                        ** CONTROL {controlProps.id} **
-                        <div>
-                            {controlProps.label} - {controlProps.type}/
-                            {controlProps.class}
-                        </div>
+                    ** CONTROL {controlProps.id} **
+                    <div>
+                        {controlProps.label} - {controlProps.type}/
+                        {controlProps.class}
                     </div>
                 </div>
                 <div

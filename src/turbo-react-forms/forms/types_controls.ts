@@ -1,4 +1,4 @@
-import { TDataObjectMap, TFormState, TKey, TValidity } from '..';
+import { IDataObject, TDataObjectMap, TFormState, TKey, TValidity } from '..';
 
 export type TFormControlTyped<
     P,
@@ -42,6 +42,14 @@ export type TFormSubformProps<
     controls:
         | TFormControlList<P, V, TT, SFT, Ctx>
         | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
+    onWrapControls?: (
+        content: React.ReactNode,
+        data: IDataObject
+    ) => React.ReactNode;
+    onWrapControl?: (
+        content: React.ReactNode,
+        data: IDataObject
+    ) => React.ReactNode;
 };
 
 export type TFormTemplateStateProps = {

@@ -216,7 +216,17 @@ function renderSubformControl<
 ) {
     const data = ctrl.useOwnDataObject ? rawData.objectGet(ctrl.id) : rawData;
     const content = <div>TODO: Subform</div>;
-    return lib.onRenderSubform ? lib.onRenderSubform(content, data, ctrl.subform) 
+    return wrapControl(
+        FormUtils.wrap(
+            ctrl,
+            ctrl.subform.onWrapControls
+                ? (c) => ctrl.subform.onWrapControls(c, data)
+                : undefined
+        ),
+        lib.onRenderSubform
+            ? lib.onRenderSubform(content, data, ctrl.subform)
+            : content
+    );
 }
 
 function renderTemplateControl<
