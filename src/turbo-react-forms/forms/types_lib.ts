@@ -56,6 +56,11 @@ export type TFormControlLib<
         data: IDataObject,
         props: SFT
     ) => React.ReactNode;
+    onRenderSubformControl: (
+        content: React.ReactNode,
+        data: IDataObject,
+        idx: number
+    ) => React.ReactNode;
     onTranslateHint?: (hint: string) => string;
 };
 

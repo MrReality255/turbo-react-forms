@@ -9,6 +9,7 @@ import {
 import { DemoFormWrapper, TDemoFormProps } from './DemoFormWrapper';
 
 type TTextProps = {
+    label: string;
     maxLen: number;
 };
 
@@ -16,7 +17,7 @@ type TTemplateProps = {
     addText: string;
 };
 
-export const DemoFormLib = createFormHook({
+const DemoFormLib = createFormHook({
     onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps) => {
         return <DemoFormWrapper {...form}>{content}</DemoFormWrapper>;
     },
@@ -51,7 +52,10 @@ export const DemoFormLib = createFormHook({
         );
     },
     onRenderSubform: (content, data, props) => {
-        return <div>SUBFORM</div>;
+        return <div>{content}</div>;
+    },
+    onRenderSubformControl: (content, data, idx) => {
+        return <React.Fragment key={idx}>{content}</React.Fragment>;
     },
     onRenderControl: (content, controlProps, hintTranslator) => {
         return (
@@ -99,14 +103,28 @@ export const DemoFormLib = createFormHook({
         text: {
             onRender: function (bp: TFormControlBaseProps, p: TTextProps) {
                 return (
-                    <input
-                        type="text"
-                        max={p.maxLen}
-                        value={bp.value}
-                        onChange={(e) =>
-                            bp.onValueChange(e.currentTarget.value)
-                        }
-                    ></input>
+                    <div
+                        style={{
+                            width: '100%',
+                            margin: 0,
+                            padding: 0,
+                            backgroundColor: 'blue',
+                        }}
+                    >
+                        <label>{p.label}</label>
+                        <input
+                            disabled={bp.disabled}
+                            readOnly={bp.readOnly}
+                            name={bp.id}
+                            max={p.maxLen}
+                            style={{ width: '100%', margin: 0, padding: 0 }}
+                            type="text"
+                            value={bp.value}
+                            onChange={(e) =>
+                                bp.onValueChange(e.currentTarget.value)
+                            }
+                        ></input>
+                    </div>
                 );
             },
         },
@@ -144,3 +162,6 @@ export const DemoFormLib = createFormHook({
         },
     },
 });
+
+export type TDemoLibControls = ReturnType<typeof DemoFormLib.newEmptyList>;
+export const useForm = DemoFormLib.useForm;

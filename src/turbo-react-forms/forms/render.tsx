@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     TFormConfig,
     TFormControl,
@@ -6,6 +7,7 @@ import {
     TFormControlCommonPropsDef,
     TFormControlCustom,
     TFormControlDynamic,
+    TFormControlInheritedStateProps,
     TFormControlLib,
     TFormControlList,
     TFormControlString,
@@ -33,24 +35,24 @@ function newBaseRenderWrapperProps<
     Ctx,
 >(
     item: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
-    state: TFormState<Ctx>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
 ): TFormControlWrapperBaseProps {
     if (item.class === 'plain') {
         return {
             id: '',
             valid: null,
             value: null,
-            disabled: state.mode == 'loading',
-            readOnly: state.mode !== 'ready',
+            disabled: inheritedProps.disabled,
+            readOnly: inheritedProps.readOnly,
             optional: false,
         };
     }
 
     return {
         id: item.id,
-        disabled: item.disabled || state.mode == 'loading',
-        readOnly: item.readOnly || state.mode !== 'ready',
+        disabled: item.disabled || inheritedProps.disabled,
+        readOnly: item.readOnly || inheritedProps.readOnly,
         value: rawData.getRawValue(item.id),
         valid: rawData.getValidity(item.id),
         optional: item.optional ?? false,
@@ -70,10 +72,11 @@ function newBaseProps<
     item: TFormControlString<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
     rawData: IDataObject,
-    lib: TFormControlLib<P, V, F, TT, SFT>
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    inheritedProps: TFormControlInheritedStateProps
 ): TFormControlBaseProps {
     return {
-        ...newBaseRenderWrapperProps(item, state, rawData),
+        ...newBaseRenderWrapperProps(item, rawData, inheritedProps),
         value: rawData.getRawValue(item.id),
         valid: rawData.getValidity(item.id),
         onValueChange: (newValue) => {
@@ -104,7 +107,8 @@ function renderContent<
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, any>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
 ) {
     return (
         <>
@@ -112,7 +116,14 @@ function renderContent<
                 const key = item.class !== 'plain' ? item.id : 'plain' + idx;
                 return (
                     <TFormControlContainer control={item} key={key}>
-                        {renderControl(item, state, lib, config, rawData)}
+                        {renderControl(
+                            item,
+                            state,
+                            lib,
+                            config,
+                            rawData,
+                            inheritedProps
+                        )}
                     </TFormControlContainer>
                 );
             })}
@@ -132,19 +143,26 @@ function renderControl<
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, any>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
 ): React.ReactNode {
     // an invisible / removed control should not be there anyway, but just to allow universal use :-)
     if (item.hidden || item.removed) {
         return <></>;
     }
-    const content = renderControlContent(item, state, lib, rawData);
+    const content = renderControlContent(
+        item,
+        state,
+        lib,
+        rawData,
+        inheritedProps
+    );
 
     if (lib.onRenderControl) {
         return lib.onRenderControl(
             content,
             {
-                ...newBaseRenderWrapperProps(item, state, rawData),
+                ...newBaseRenderWrapperProps(item, rawData, inheritedProps),
                 class: item.class as string | undefined,
                 type:
                     item.class === 'dynamic' || item.class === undefined
@@ -183,21 +201,46 @@ function renderControlContent<
     item: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
 ) {
     switch (item.class) {
         case 'plain':
             return item.onRender(state.ctx);
         case 'custom':
-            return renderCustomControl(item, state, lib, rawData);
+            return renderCustomControl(
+                item,
+                state,
+                lib,
+                rawData,
+                inheritedProps
+            );
         case 'dynamic':
-            return renderDynamicControl(item, state, lib, rawData);
+            return renderDynamicControl(
+                item,
+                state,
+                lib,
+                rawData,
+                inheritedProps
+            );
         case 'subform':
-            return renderSubformControl(item, state, lib, rawData);
+            return renderSubformControl(
+                item,
+                state,
+                lib,
+                rawData,
+                inheritedProps
+            );
         case 'template':
             return renderTemplateControl(item, state, lib, rawData);
         default:
-            return renderTypedControl(item, state, lib, rawData);
+            return renderTypedControl(
+                item,
+                state,
+                lib,
+                rawData,
+                inheritedProps
+            );
     }
 }
 
@@ -212,20 +255,37 @@ function renderSubformControl<
     ctrl: TFormControlSubform<P, V, TT, SFT, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
-    rawData: IDataObject
-) {
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
+): React.ReactNode {
     const data = ctrl.useOwnDataObject ? rawData.objectGet(ctrl.id) : rawData;
-    const content = <div>TODO: Subform</div>;
+    const controls =
+        typeof ctrl.subform.controls === 'function'
+            ? ctrl.subform.controls(state, rawData)
+            : ctrl.subform.controls;
+    const content = controls.map((child, idx) => {
+        const controlContent = renderControlContent(child, state, lib, data, {
+            disabled: ctrl.disabled || inheritedProps.disabled,
+            readOnly: ctrl.readOnly || inheritedProps.readOnly,
+        });
+        const renderedContent = lib.onRenderSubformControl(
+            controlContent,
+            data,
+            idx
+        );
+        const wrappedContent = ctrl.subform.onWrapControl
+            ? ctrl.subform.onWrapControl(renderedContent, rawData)
+            : renderedContent;
+        return <React.Fragment key={idx}>{wrappedContent}</React.Fragment>;
+    });
+
+    const wrappedContent = ctrl.subform.onWrapControls
+        ? ctrl.subform.onWrapControls(content, rawData)
+        : content;
+
     return wrapControl(
-        FormUtils.wrap(
-            ctrl,
-            ctrl.subform.onWrapControls
-                ? (c) => ctrl.subform.onWrapControls(c, data)
-                : undefined
-        ),
-        lib.onRenderSubform
-            ? lib.onRenderSubform(content, data, ctrl.subform)
-            : content
+        ctrl,
+        lib.onRenderSubform(wrappedContent, data, ctrl.subform)
     );
 }
 
@@ -333,12 +393,13 @@ function renderTypedControl<
     item: TFormControlTyped<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
 ) {
     return wrapControl(
         item,
         lib.controls[item.type].onRender(
-            newBaseProps(item, state, rawData, lib),
+            newBaseProps(item, state, rawData, lib, inheritedProps),
             item.prop
         )
     );
@@ -355,7 +416,8 @@ function renderDynamicControl<
     item: TFormControlDynamic<Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
 ) {
     return renderTypedControl(
         {
@@ -365,7 +427,8 @@ function renderDynamicControl<
         },
         state,
         lib,
-        rawData
+        rawData,
+        inheritedProps
     );
 }
 
@@ -380,12 +443,13 @@ function renderCustomControl<
     item: TFormControlCustom<V, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheritedProps: TFormControlInheritedStateProps
 ) {
     return wrapControl(
         item,
         item.onRender({
-            ...newBaseProps(item, state, rawData, lib),
+            ...newBaseProps(item, state, rawData, lib, inheritedProps),
             ctx: state.ctx,
         })
     );

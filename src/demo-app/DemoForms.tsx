@@ -1,24 +1,78 @@
 import { useState } from 'react';
-import { DataUtils } from '../turbo-react-forms';
+import { DataUtils, TFormState } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
-import { DemoFormLib } from './DemoFormLib';
+import { TDemoLibControls, useForm } from './DemoFormLib';
 
-const { useForm, newEmptyList } = DemoFormLib;
+function getControls(state: TFormState<any>): TDemoLibControls {
+    const isActivated = state.data.getValue('activator') == 'true';
 
-export function DemoForms() {
-    const el = newEmptyList();
-    const items: typeof el = [
+    return [
+        {
+            id: 'activator',
+            class: undefined,
+            type: 'checkBox',
+            prop: { aaa: 3 },
+        },
         {
             id: 'subform1',
             class: 'subform',
+            useOwnDataObject: true,
+            disabled: !isActivated,
             subform: {
                 controls: () => {
                     return [
-                        { id: 'subtext1', type: 'text', prop: { maxLen: 40 } },
+                        {
+                            id: 'subtext1',
+                            type: 'text',
+                            prop: { label: 'Option 1', maxLen: 40 },
+                        },
+                        {
+                            id: 'subtext2',
+                            type: 'text',
+                            prop: { label: 'Option 2', maxLen: 40 },
+                        },
+                        {
+                            id: 'subtext3',
+                            type: 'text',
+                            prop: { label: 'Option 3', maxLen: 40 },
+                        },
                     ];
+                },
+                onWrapControl: (c) => {
+                    return (
+                        <div
+                            style={{
+                                width: '100%',
+                                backgroundColor: 'blue',
+                                display: 'flex',
+                            }}
+                        >
+                            <div style={{ flex: 1, padding: '1em' }}>{c}</div>
+                        </div>
+                    );
+                },
+                onWrapControls: (c) => {
+                    return (
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1fr 1fr',
+                                gap: '1em',
+                            }}
+                        >
+                            {c}
+                        </div>
+                    );
                 },
             },
         },
+    ];
+}
+
+export function DemoForms() {
+    /*
+    const el = newEmptyList();
+    const items: typeof el = [
         {
             id: 'tb1',
             type: 'text',
@@ -99,10 +153,13 @@ export function DemoForms() {
             },
         },
     ];
+        */
     const [formResponse, setFormResponse] = useState('-');
 
     const frm = useForm<{ id: number }, any>({
-        controls: () => items,
+        controls: (state) => {
+            return getControls(state);
+        },
         form: (state) => {
             return {
                 title: 'My demo form',

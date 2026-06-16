@@ -41,7 +41,10 @@ export type TFormSubformProps<
 > = {
     controls:
         | TFormControlList<P, V, TT, SFT, Ctx>
-        | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
+        | ((
+              state: TFormState<Ctx>,
+              rawData: IDataObject
+          ) => TFormControlList<P, V, TT, SFT, Ctx>);
     onWrapControls?: (
         content: React.ReactNode,
         data: IDataObject
@@ -141,6 +144,11 @@ export type TFormControlList<
 > = {
     [Type in keyof P]: TFormControl<P, V, TT, SFT, Type, Ctx>;
 }[keyof P][];
+
+export type TFormControlInheritedStateProps = {
+    disabled: boolean;
+    readOnly: boolean;
+};
 
 export type TFormControlCommonProps = {
     id: string;

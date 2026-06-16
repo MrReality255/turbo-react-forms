@@ -95,7 +95,11 @@ export function TFormWrapper<
                     state,
                     lib,
                     config,
-                    state.data
+                    state.data,
+                    {
+                        disabled: state.mode == 'loading',
+                        readOnly: state.mode != 'ready',
+                    }
                 )
             )}
         </ctxForm.Provider>
