@@ -19,38 +19,20 @@ type TTemplateProps = {
 
 const DemoFormLib = createFormHook({
     onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps) => {
-        return <DemoFormWrapper {...form}>{content}</DemoFormWrapper>;
+        return <DemoFormWrapper isLoading={form.isLoading} title={form.title}>{content}</DemoFormWrapper>;
     },
-    onRenderTemplateItems: (
-        items: React.ReactNode,
-        props: TFormTemplateStateProps,
-        customProps: TTemplateProps
-    ) => {
-        return (
-            <div style={{ backgroundColor: '#033', padding: '1em' }}>
-                {items}
-                <button onClick={() => props.triggerAdd()}>
-                    {customProps.addText}{' '}
-                </button>
-            </div>
-        );
+    onRenderTemplate: (content: React.ReactNode, stateProps: TFormTemplateStateProps, props: TTemplateProps) => {
+        return <div style={{ backgroundColor: '#033', padding: '1em' }}>
+            {content}
+            <button onClick={() => stateProps.triggerAdd()}>
+                {props.addText}
+            </button>
+        </div>
+
     },
-    onRenderTemplateItem: (item, data, props, customProps) => {
-        return (
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1em',
-                }}
-            >
-                <div style={{ width: '200px' }}>
-                    Content of the item {data.getID()}
-                </div>
-                <div style={{ flex: 1 }}>{item}</div>
-            </div>
-        );
-    },
+    onRenderTemplateRowControl: (content, rowIdx, stateProps) => content,
+    onRenderTemplateRow: (content, idx, handle, stateProps) => <>{content}</>,
+
     onRenderSubform: (content, data, props) => {
         return <div>{content}</div>;
     },
@@ -151,9 +133,9 @@ const DemoFormLib = createFormHook({
         number: (x: string, props: unknown) =>
             isNaN(parseFloat(x))
                 ? {
-                      hint: 'not_a_number_' + JSON.stringify(props),
-                      valid: false,
-                  }
+                    hint: 'not_a_number_' + JSON.stringify(props),
+                    valid: false,
+                }
                 : true,
         too_long: (x: string, props: unknown | null) => {
             return props !== null && x.length > (props as TTextProps).maxLen

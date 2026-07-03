@@ -148,7 +148,7 @@ function renderControl<
 ): React.ReactNode {
     // an invisible / removed control should not be there anyway, but just to allow universal use :-)
     if (item.hidden || item.removed) {
-        return <></>;
+        return null;
     }
     const content = renderControlContent(
         item,
@@ -232,7 +232,7 @@ function renderControlContent<
                 inheritedProps
             );
         case 'template':
-            return renderTemplateControl(item, state, lib, rawData);
+            return renderTemplateControl(item, state, lib, rawData, inheritedProps);
         default:
             return renderTypedControl(
                 item,
@@ -300,7 +300,8 @@ function renderTemplateControl<
     ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
-    rawData: IDataObject
+    rawData: IDataObject,
+    inheriedProps: TFormControlInheritedStateProps,
 ) {
     const items = rawData.listItems(ctrl.id);
     const disableAdd =
@@ -325,33 +326,23 @@ function renderTemplateControl<
             );
         },
     };
-    const content = renderTemplateControls(
-        ctrl,
-        state,
-        lib,
-        items,
-        templateStateProps
-    );
-    const contentNode = FormUtils.wrap(
-        FormUtils.wrap(
-            content,
-            DataUtils.orNone(
-                ctrl.template.onWrapItems,
-                (fct) => (content: React.ReactNode) =>
-                    fct(content, templateStateProps, state)
-            )
-        ),
-        DataUtils.orNone(
-            lib.onRenderTemplateItems,
-            (fct) => (content: React.ReactNode) =>
-                fct(content, templateStateProps, ctrl.template)
-        )
-    );
 
-    return wrapControl(ctrl, contentNode);
+    const content =
+        FormUtils.wrap(
+            FormUtils.wrap(
+                renderTemplateRows(ctrl, state, lib, items, templateStateProps, inheriedProps),
+                DataUtils.orNone(
+                    ctrl.template.onWrapTemplate,
+                    fct => (c: React.ReactNode) => fct(c, templateStateProps, state)
+                ),
+            ),
+            (c: React.ReactNode) => lib.onRenderTemplate(c, templateStateProps, ctrl.template)
+        )
+
+    return wrapControl(ctrl, content);
 }
 
-function renderTemplateControls<
+function renderTemplateRows<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
@@ -363,23 +354,62 @@ function renderTemplateControls<
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
     items: IDataObject[],
-    props: TFormTemplateStateProps
+    props: TFormTemplateStateProps,
+    inheritedProps: TFormControlInheritedStateProps,
 ): React.ReactNode[] {
     return items.map((item, idx) => {
-        const content: React.ReactNode = <div>ITEM {item.getID()}</div>;
-
-        return lib.onRenderTemplateItem(
-            FormUtils.wrap(
-                content,
-                ctrl.template.onWrapItem
-                    ? (c) => ctrl.template.onWrapItem!(c, idx)
-                    : undefined
-            ),
+        const controlDef = typeof ctrl.template.controls === 'function' ?
+            ctrl.template.controls(state, idx, item.getID()) : ctrl.template.controls
+        const rowControls = controlDef.map((def) => renderTemplateRowControl(
+            def,
             item,
+            ctrl,
+            state,
+            lib,
             props,
-            ctrl.template
-        );
-    });
+            inheritedProps, idx))
+        return FormUtils.wrap(
+            FormUtils.wrap(
+                rowControls,
+                DataUtils.orNone(
+                    ctrl.template.onWrapRow,
+                    fct => (c: React.ReactNode) => fct(c, props, state, idx),
+                )
+            ),
+            c => lib.onRenderTemplateRow(c, idx, item.getID(), props, ctrl.template)
+        )
+    })
+}
+
+function renderTemplateRowControl<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
+    Ctx,
+>
+    (
+        def: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
+        item: IDataObject,
+        ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx>,
+        state: TFormState<Ctx>,
+        lib: TFormControlLib<P, V, F, TT, SFT>,
+        props: TFormTemplateStateProps,
+        inheritedProps: TFormControlInheritedStateProps,
+        rowIdx: number
+    ) {
+    const c = renderControlContent(def, state, lib, item, inheritedProps)
+    return FormUtils.wrap(
+        FormUtils.wrap(
+            c,
+            DataUtils.orNone(
+                ctrl.template.onWrapRowControl,
+                fct => (content: React.ReactNode) => fct(content, state, rowIdx)
+            )
+        ),
+        c => lib.onRenderTemplateRowControl(c, rowIdx, props, ctrl.template)
+    )
 }
 
 function renderTypedControl<

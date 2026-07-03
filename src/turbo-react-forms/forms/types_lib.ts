@@ -40,6 +40,26 @@ export type TFormControlLib<
         content: React.ReactNode,
         props: F
     ) => React.ReactNode;
+    onRenderTemplate: (
+        content: React.ReactNode,
+        stateProps: TFormTemplateStateProps,
+        props: TT
+    ) => React.ReactNode
+    onRenderTemplateRow: (
+        content: React.ReactNode,
+        idx: number,
+        handle: number,
+        stateProps: TFormTemplateStateProps,
+        props: TT
+    ) => React.ReactNode
+    onRenderTemplateRowControl: (
+        content: React.ReactNode,
+        rowIdx: number,
+        stateProps: TFormTemplateStateProps,
+        props: TT
+    ) => React.ReactNode,
+
+    /*
     onRenderTemplateItems: (
         items: React.ReactNode,
         props: TFormTemplateStateProps,
@@ -51,6 +71,7 @@ export type TFormControlLib<
         props: TFormTemplateStateProps,
         customProps: TT
     ) => React.ReactNode;
+     */
     onRenderSubform: (
         content: React.ReactNode,
         data: IDataObject,

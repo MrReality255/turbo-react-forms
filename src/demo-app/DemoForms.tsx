@@ -8,6 +8,34 @@ function getControls(state: TFormState<any>): TDemoLibControls {
 
     return [
         {
+            id: 'list1',
+            class: 'template',
+            template: {
+                addText: 'add item',
+                controls: [
+                    {
+                        id: 'name',
+                        class: undefined,
+                        type: 'text',
+                        prop: { maxLen: 20, label: 'my label' },
+
+                    },
+                    {
+                        id: 'value',
+                        class: undefined,
+                        type: 'text',
+                        prop: { maxLen: 20, label: 'the value' },
+                    }
+                ],
+                onWrapRowControl: (item) => {
+                    return <div>{item}</div>
+                },
+                onWrapRow: (item) => {
+                    return <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr' }}>{item}</div>
+                }
+            }
+        },
+        {
             id: 'activator',
             class: undefined,
             type: 'checkBox',
