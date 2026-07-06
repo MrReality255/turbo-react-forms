@@ -31,7 +31,7 @@ function getControls(state: TFormState<any>): TDemoLibControls {
                     return <div>{item}</div>
                 },
                 onWrapRow: (item) => {
-                    return <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr' }}>{item}</div>
+                    return <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '15px' }}>{item}</div>
                 }
             }
         },

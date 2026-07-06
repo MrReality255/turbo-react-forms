@@ -61,6 +61,7 @@ export type TFormTemplateStateProps = {
     count: number;
 
     triggerAdd: () => void;
+    triggerDelete: (idx: number) => void
 };
 
 export type TFormTemplateProps<

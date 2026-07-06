@@ -31,7 +31,14 @@ const DemoFormLib = createFormHook({
 
     },
     onRenderTemplateRowControl: (content, rowIdx, stateProps) => content,
-    onRenderTemplateRow: (content, idx, handle, stateProps) => <>{content}</>,
+    onRenderTemplateRow: (content, idx, handle, stateProps) => <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ flexGrow: 1 }}>{content}</div>
+        <div style={{ flexShrink: 0, backgroundColor: '#000', alignSelf: 'center', height: '100%' }}>
+            <button onClick={() => {
+                stateProps.triggerDelete(idx)
+            }}>Delete</button>
+        </div>
+    </div>,
 
     onRenderSubform: (content, data, props) => {
         return <div>{content}</div>;

@@ -325,6 +325,9 @@ function renderTemplateControl<
                 )
             );
         },
+        triggerDelete: (idx: number) => {
+            rawData.listRemove(ctrl.id, idx)
+        }
     };
 
     const content =
