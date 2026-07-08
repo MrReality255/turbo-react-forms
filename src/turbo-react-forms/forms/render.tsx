@@ -112,7 +112,7 @@ function renderContent<
 ) {
     return (
         <>
-            {list.map((item, idx) => {
+            {list.filter(item => item !== null).map((item, idx) => {
                 const key = item.class !== 'plain' ? item.id : 'plain' + idx;
                 return (
                     <TFormControlContainer control={item} key={key}>
@@ -263,7 +263,7 @@ function renderSubformControl<
         typeof ctrl.subform.controls === 'function'
             ? ctrl.subform.controls(state, rawData)
             : ctrl.subform.controls;
-    const content = controls.map((child, idx) => {
+    const content = controls.filter(item => item !== null).map((child, idx) => {
         const controlContent = renderControlContent(child, state, lib, data, {
             disabled: ctrl.disabled || inheritedProps.disabled,
             readOnly: ctrl.readOnly || inheritedProps.readOnly,
@@ -363,7 +363,7 @@ function renderTemplateRows<
     return items.map((item, idx) => {
         const controlDef = typeof ctrl.template.controls === 'function' ?
             ctrl.template.controls(state, idx, item.getID()) : ctrl.template.controls
-        const rowControls = controlDef.map((def) => renderTemplateRowControl(
+        const rowControls = controlDef.filter(def => def !== null).map((def) => renderTemplateRowControl(
             def,
             item,
             ctrl,

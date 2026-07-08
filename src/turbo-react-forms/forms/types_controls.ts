@@ -139,9 +139,9 @@ export type TFormControlList<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
-> = {
+> = (({
     [Type in keyof P]: TFormControl<P, V, TT, SFT, Type, Ctx>;
-}[keyof P][];
+}[keyof P]) | null)[];
 
 export type TFormControlInheritedStateProps = {
     disabled: boolean;

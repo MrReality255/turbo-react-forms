@@ -7,10 +7,12 @@ function getControls(state: TFormState<any>): TDemoLibControls {
     const isActivated = state.data.getValue('activator') == 'true';
 
     return [
+        null,
         {
             id: 'list1',
             class: 'template',
             template: {
+                minCount: 2,
                 addText: 'add item',
                 controls: [
                     {
@@ -98,90 +100,6 @@ function getControls(state: TFormState<any>): TDemoLibControls {
 }
 
 export function DemoForms() {
-    /*
-    const el = newEmptyList();
-    const items: typeof el = [
-        {
-            id: 'tb1',
-            type: 'text',
-            class: undefined,
-            prop: { maxLen: 30 },
-            label: 'Text box1',
-            validation: 'number',
-            defaultValue: 'bla',
-        },
-        {
-            id: 'cb1',
-            class: undefined,
-            type: 'checkBox',
-            optional: true,
-            prop: {
-                aaa: 3,
-            },
-            label: 'check box 1',
-            context: {
-                after: 'Some text after',
-                before: 'Some text before',
-                bottom: 'Some text at the final bottom',
-                top: 'Some text at the top',
-            },
-        },
-        {
-            id: 'custom1',
-            class: 'custom',
-            onWrap: (c) => {
-                return (
-                    <div>
-                        custom control:
-                        {c}
-                    </div>
-                );
-            },
-            onRender: (p) => {
-                return (
-                    <div>
-                        Custom control
-                        <input
-                            readOnly={p.readOnly}
-                            disabled={p.disabled}
-                            value={p.value}
-                            onChange={(e) =>
-                                p.onValueChange(e.currentTarget.value)
-                            }
-                            type="text"
-                            style={{ color: p.valid ? undefined : 'red' }}
-                        ></input>
-                        {DataUtils.Validity.getHint(p.valid)}
-                    </div>
-                );
-            },
-        },
-        {
-            id: 'list1',
-            class: 'template',
-            template: {
-                addText: 'add new item',
-                minCount: 1,
-                controls: () => {
-                    return [
-                        {
-                            id: 'listItemName',
-                            type: 'text',
-                            prop: { maxLen: 200 },
-                            defaultValue: 'empty',
-                            validation: 'number',
-                        },
-                    ];
-                },
-                onNewItem: (idx, state) => {
-                    return {
-                        listItemName: 'item ' + idx,
-                    };
-                },
-            },
-        },
-    ];
-        */
     const [formResponse, setFormResponse] = useState('-');
 
     const frm = useForm<{ id: number }, any>({

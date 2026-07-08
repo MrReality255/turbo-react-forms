@@ -49,7 +49,7 @@ function createInitData<
     const result: TDataObjectMap = {};
     createInitDataForControlList<P, V, F, TT, SFT, Ctx>(
         result,
-        myControlList,
+        myControlList.filter(item => item !== null),
         initData,
         stateLibCtx,
         DataUtils.newHandleProvider()
@@ -211,15 +211,18 @@ function createInitDataForSubform<
         typeof control.subform.controls === 'function'
             ? control.subform.controls
             : () =>
-                  control.subform.controls as TFormControlList<
-                      P,
-                      V,
-                      TT,
-                      SFT,
-                      Ctx
-                  >;
+                control.subform.controls as TFormControlList<
+                    P,
+                    V,
+                    TT,
+                    SFT,
+                    Ctx
+                >;
 
-    const actualList = listFct(stateLibCtx.state);
+    const actualList = listFct(stateLibCtx.state, DataObjectUtils.create({
+        state: { data: {}, id: 0, type: 'obj' },
+        updateState: () => { },
+    }, true, () => 0)).filter(item => item !== null);
 
     createInitDataForControlList(
         targetObj,
@@ -369,7 +372,7 @@ function createRenderContent<
         typeof config.controls === 'function'
             ? config.controls(state)
             : config.controls;
-    return controls.filter(
+    return controls.filter(ctrl => ctrl !== null).filter(
         (ctrl) =>
             (ctrl.sectionID === undefined ||
                 state.section === undefined ||

@@ -53,6 +53,7 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
                     Loading
                 </div>
             )}
+            <button disabled={true}>SUBMIT</button>
         </div>
     );
 

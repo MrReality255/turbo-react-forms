@@ -1,7 +1,6 @@
 import { TRef, TValidity } from '.';
 
 export const DataUtils = {
-    DataObject: {},
     Validity: {
         isValid,
         getHint,

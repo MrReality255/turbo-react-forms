@@ -19,8 +19,8 @@ export type TFormConfig<
 > = {
     form: F | ((state: TFormState<Ctx>) => F);
     controls:
-        | TFormControlList<P, V, TT, SFT, Ctx>
-        | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
+    | TFormControlList<P, V, TT, SFT, Ctx>
+    | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
     onRenderMainWrapper?: (
         content: React.ReactNode,
         ctx: Ctx,
