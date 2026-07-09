@@ -13,7 +13,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/turbo-react/index.ts'),
+      entry: resolve(__dirname, 'src/turbo-react-forms/index.ts'),
       name: 'TurboReact',
       fileName: (format) => `index.${format}.js`,
     },

@@ -49,7 +49,7 @@ function createInitData<
     const result: TDataObjectMap = {};
     createInitDataForControlList<P, V, F, TT, SFT, Ctx>(
         result,
-        myControlList.filter(item => item !== null),
+        myControlList.filter((item) => item !== null),
         initData,
         stateLibCtx,
         DataUtils.newHandleProvider()
@@ -219,10 +219,17 @@ function createInitDataForSubform<
                     Ctx
                 >;
 
-    const actualList = listFct(stateLibCtx.state, DataObjectUtils.create({
-        state: { data: {}, id: 0, type: 'obj' },
-        updateState: () => { },
-    }, true, () => 0)).filter(item => item !== null);
+    const actualList = listFct(
+        stateLibCtx.state,
+        DataObjectUtils.create(
+            {
+                state: { data: {}, id: 0, type: 'obj' },
+                updateState: () => { },
+            },
+            true,
+            () => 0
+        )
+    ).filter((item) => item !== null);
 
     createInitDataForControlList(
         targetObj,
@@ -339,7 +346,7 @@ function newTemplateSubForm<
     idx: number,
     handle: number,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>
-): TFormControlSubform<P, V, TT, SFT, Ctx> {
+): TFormControlSubform<P, V, TT, any, Ctx> {
     const template = control.template;
     const actualControls =
         typeof template.controls === 'function'
@@ -372,14 +379,16 @@ function createRenderContent<
         typeof config.controls === 'function'
             ? config.controls(state)
             : config.controls;
-    return controls.filter(ctrl => ctrl !== null).filter(
-        (ctrl) =>
-            (ctrl.sectionID === undefined ||
-                state.section === undefined ||
-                ctrl.sectionID === state.section) &&
-            !ctrl.removed &&
-            !ctrl.hidden
-    );
+    return controls
+        .filter((ctrl) => ctrl !== null)
+        .filter(
+            (ctrl) =>
+                (ctrl.sectionID === undefined ||
+                    state.section === undefined ||
+                    ctrl.sectionID === state.section) &&
+                !ctrl.removed &&
+                !ctrl.hidden
+        );
 }
 
 function getControlID<
