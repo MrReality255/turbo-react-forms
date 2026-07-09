@@ -39,8 +39,8 @@ export const DataObjectUtils = {
         return v.type == 'invalid'
             ? v.value
             : objectAsJSON
-              ? JSON.stringify(v)
-              : '';
+                ? JSON.stringify(v)
+                : '';
     },
     getString: function (get: () => TDataObjectValue) {
         return DataUtils.using(get(), (v) =>
@@ -61,10 +61,10 @@ export const DataObjectUtils = {
         return typeof isValid == 'boolean' && isValid
             ? value
             : {
-                  type: 'invalid',
-                  value: value,
-                  hint: DataUtils.Validity.getHint(isValid),
-              };
+                type: 'invalid',
+                value: value,
+                hint: DataUtils.Validity.getHint(isValid),
+            };
     },
     updateUniqueID,
 };
@@ -260,8 +260,8 @@ function create(
                                             (prevListItem, prevItemIdx) =>
                                                 prevItemIdx == itemIdx
                                                     ? itemUpdaterFct(
-                                                          prevListItem
-                                                      )
+                                                        prevListItem
+                                                    )
                                                     : prevListItem
                                         ),
                                     };

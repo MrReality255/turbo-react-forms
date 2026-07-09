@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import {
     TFormConfig,
+    TFormControlLib,
     TFormInternalState,
     TFormMode,
     TFormState,
+    TFormStateLibCtx,
     TFormSubformPropsType,
     TFormTemplatePropsType,
     TFormUpdateContext,
@@ -37,7 +39,7 @@ export function TFormWrapper<
     }, []);
 
     const initState = useMemo(() => {
-        return newFormState(initInternalState, () => {}, strictMode);
+        return newFormState(initInternalState, () => { }, strictMode);
     }, [initInternalState]);
 
     const initDataMap = useMemo(() => {
@@ -63,7 +65,7 @@ export function TFormWrapper<
                     updateInternalState,
                     config,
                     eventInfo,
-                    updateFct
+                    updateFct,
                 ),
             strictMode
         );
@@ -83,9 +85,9 @@ export function TFormWrapper<
 
     const mainWrapper = config.onRenderMainWrapper
         ? (content: React.ReactNode) =>
-              config.onRenderMainWrapper?.(content, formCtx, state)
+            config.onRenderMainWrapper?.(content, formCtx, state)
         : (content: React.ReactNode) =>
-              lib.onRenderMainWrapper(content, formConfig);
+            lib.onRenderMainWrapper(content, formConfig);
 
     return (
         <ctxForm.Provider value={formContext}>
@@ -143,6 +145,9 @@ function newFormState<Ctx>(
         ),
     };
 }
+
+
+
 function createUpdateUpdateHandler<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
@@ -157,7 +162,7 @@ function createUpdateUpdateHandler<
     ) => void,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     eventInfo: TDataObjectEvent,
-    updateFct: (prev: TDataObject) => TDataObject
+    updateFct: (prev: TDataObject) => TDataObject,
 ): void {
     updateInternalState((prevInternalState) => {
         const newDataObj = updateFct(prevInternalState.rawData);
@@ -181,22 +186,47 @@ function createUpdateUpdateHandler<
                         ...nextState,
                         mode: 'ready',
                     };
-                    updateNextState(newNextState, newUpdateResult);
+                    updateNextState(newNextState, newUpdateResult, config);
                     updateInternalState(() => newNextState);
                 });
                 return nextState;
             }
 
-            updateNextState(nextState, result);
+            updateNextState(nextState, result, config);
         }
 
         return nextState;
     });
 }
-function updateNextState<Ctx, SubmitType>(
+function updateNextState<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
+    Ctx,
+    SubmitType,
+>(
     nextState: TFormInternalState<Ctx>,
-    updateResult: TFormUpdateContext<Ctx, SubmitType> | undefined
+    updateResult: TFormUpdateContext<Ctx, SubmitType> | undefined,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
+    lib: TFormControlLib<P, V, F, TT, SFT>
 ) {
+
+    const stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx> = {
+        ctx: nextState.ctx,
+        lib: lib,
+        state: {
+            ...nextState,
+            data: DataObjectUtils.create({
+                state: nextState.rawData,
+                updateState: () => {
+                    throw 'this object is read only'
+                }
+            }, false, DataUtils.newHandleProvider())
+        }
+    }
+
     if (!updateResult) {
         return;
     }

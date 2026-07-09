@@ -62,6 +62,7 @@ function useForm<
                             lib={lib}
                             onSubmit={submitFct}
                             onResolve={resolve}
+                            strictMode
                         ></TFormWrapper>
                     ));
                 }

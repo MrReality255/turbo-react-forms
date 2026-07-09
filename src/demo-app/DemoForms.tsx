@@ -37,6 +37,12 @@ function getControls(state: TFormState<any>): TDemoLibControls {
                 }
             }
         },
+        isActivated ? {
+            id: 't1',
+            class: undefined,
+            type: 'text',
+            prop: { label: 'text 1', maxLen: 20 },
+        } : null,
         {
             id: 'activator',
             class: undefined,
@@ -126,7 +132,7 @@ export function DemoForms() {
                     console.log('triggered event: ' + JSON.stringify(event));
             }
         },
-    });
+    },);
     return (
         <DemoPage>
             <h1>Demo forms</h1>
