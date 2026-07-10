@@ -66,6 +66,7 @@ export function TFormWrapper<
                     config,
                     eventInfo,
                     updateFct,
+                    lib,
                 ),
             strictMode
         );
@@ -163,6 +164,7 @@ function createUpdateUpdateHandler<
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     eventInfo: TDataObjectEvent,
     updateFct: (prev: TDataObject) => TDataObject,
+    lib: TFormControlLib<P, V, F, TT, SFT>
 ): void {
     updateInternalState((prevInternalState) => {
         const newDataObj = updateFct(prevInternalState.rawData);
@@ -186,13 +188,13 @@ function createUpdateUpdateHandler<
                         ...nextState,
                         mode: 'ready',
                     };
-                    updateNextState(newNextState, newUpdateResult, config);
+                    updateNextState(newNextState, newUpdateResult, config, lib);
                     updateInternalState(() => newNextState);
                 });
                 return nextState;
             }
 
-            updateNextState(nextState, result, config);
+            updateNextState(nextState, result, config, lib);
         }
 
         return nextState;
@@ -212,7 +214,36 @@ function updateNextState<
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     lib: TFormControlLib<P, V, F, TT, SFT>
 ) {
+    reinitializeRawData(nextState, config, lib)
 
+    if (!updateResult) {
+        return;
+    }
+
+    if (updateResult.ctx) {
+        nextState.ctx = updateResult.ctx;
+    }
+    if (updateResult.onUpdateData) {
+        nextState.rawData = updateResult.onUpdateData(nextState.rawData);
+    }
+    if (updateResult.modalResult) {
+        throw 'modal result';
+    }
+}
+
+function reinitializeRawData<
+    P extends Record<string, unknown>,
+    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
+    TT extends TFormTemplatePropsType,
+    SFT extends TFormSubformPropsType,
+    Ctx,
+    SubmitType,
+>(
+    nextState: TFormInternalState<Ctx>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
+    lib: TFormControlLib<P, V, F, TT, SFT>
+) {
     const stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx> = {
         ctx: nextState.ctx,
         lib: lib,
@@ -227,17 +258,10 @@ function updateNextState<
         }
     }
 
-    if (!updateResult) {
-        return;
-    }
-
-    if (updateResult.ctx) {
-        nextState.ctx = updateResult.ctx;
-    }
-    if (updateResult.onUpdateData) {
-        nextState.rawData = updateResult.onUpdateData(nextState.rawData);
-    }
-    if (updateResult.modalResult) {
-        throw 'modal result';
+    const newInitData = FormUtils.createInitData(nextState.rawData.data, config, stateLibCtx)
+    nextState.rawData = {
+        type: 'obj',
+        id: nextState.rawData.id,
+        data: newInitData
     }
 }
