@@ -45,7 +45,8 @@ export interface IDataObject {
     getValue: (key: string) => string | null;
     getValidity: (key: string) => TValidity;
     getRawValue: (key: string, objectAsJson?: boolean) => string;
-    isValid: (key: string) => boolean;
+    isValueValid: (key: string) => boolean;
+    isValid: () => boolean;
     setValue: (key: string, value: string, isValid: TValidity) => void;
 
     listAdd: (key: string, initFct?: () => TDataObjectMap) => void;

@@ -67,7 +67,32 @@ export const DataObjectUtils = {
             };
     },
     updateUniqueID,
+    isValid,
+    isValidValue,
 };
+
+function isValid(obj: TDataObjectMap): boolean {
+    return Object.values(obj).every(isValidValue);
+}
+
+function isValidValue(value: TDataObjectValue): boolean {
+    if (value === undefined || value === null) {
+        return true;
+    }
+    if (typeof value === 'string') {
+        return true;
+    }
+    switch (value.type) {
+        case 'invalid':
+            return false;
+        case 'obj':
+            return isValid(value.data);
+        case 'list':
+            return value.items.every((item) => isValid(item.data));
+        default:
+            return true;
+    }
+}
 
 function cloneDataObject(src: TDataObject): TDataObject {
     return {
@@ -159,7 +184,11 @@ function create(
             );
         },
 
-        isValid: (key: string) => {
+        isValid: () => {
+            return isValid(os.state.data);
+        },
+
+        isValueValid: (key: string) => {
             return DataUtils.using(
                 get(key),
                 (v) => typeof v !== 'object' || v.type !== 'invalid'
