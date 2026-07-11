@@ -7,12 +7,17 @@ export function useNewDataObject(source: TDataObjectNew) {
         return source.initFct?.() ?? {};
     }, []);
 
+    const initMetaData = useMemo(() => {
+        return source.initMeta?.() ?? {};
+    }, [])
+
     const initRootObject = useMemo(() => {
         const initRootObj: TDataRootObject = {
             type: 'obj',
             data: DataObjectUtils.cloneDataObjectMap(initData),
             id: 1,
             maxID: 2,
+            metaInfo: { ...initMetaData }
         };
         const provider = DataUtils.newHandleProvider();
         DataObjectUtils.updateUniqueID(initRootObj, provider);

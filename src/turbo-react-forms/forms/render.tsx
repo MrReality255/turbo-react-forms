@@ -27,6 +27,10 @@ export const RenderUtils = {
     renderContent,
 };
 
+const keys = {
+    isNew: '__TRF__IsNew'
+}
+
 function newBaseRenderWrapperProps<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
@@ -148,7 +152,7 @@ function renderControl<
     inheritedProps: TFormControlInheritedStateProps
 ): React.ReactNode {
     // an invisible / removed control should not be there anyway, but just to allow universal use :-)
-    if (item.hidden || item.removed) {
+    if (item.removed) {
         return null;
     }
     const content = renderControlContent(
@@ -162,6 +166,7 @@ function renderControl<
     if (lib.onRenderControl) {
         return lib.onRenderControl(
             content,
+            !item.hidden,
             {
                 ...newBaseRenderWrapperProps(item, rawData, inheritedProps),
                 class: item.class as string | undefined,
@@ -325,7 +330,10 @@ function renderTemplateControl<
                 DataUtils.orNone(
                     ctrl.template.onNewItem,
                     (n) => () => n(items.length, state)
-                )
+                ),
+                {
+                    [keys.isNew]: true
+                }
             );
         },
         triggerDelete: (idx: number) => {
@@ -382,7 +390,7 @@ function renderTemplateRows<
                     fct => (c: React.ReactNode) => fct(c, props, state, idx),
                 )
             ),
-            c => lib.onRenderTemplateRow(c, idx, item.getID(), props, ctrl.template)
+            c => lib.onRenderTemplateRow(c, idx, item.getID(), props, ctrl.template, item.getMetaBool(keys.isNew))
         )
     })
 }

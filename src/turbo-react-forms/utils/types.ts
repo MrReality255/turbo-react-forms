@@ -22,5 +22,6 @@ export type TWrapperFct = (content: React.ReactNode) => React.ReactNode;
 export type TClosingEffectProps = {
     mode?: TClosingEffect;
     delay?: number;
-    onClose?: () => void;
+    initialState?: boolean;
+    // onClose?: () => void;
 };

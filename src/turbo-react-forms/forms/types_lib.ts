@@ -33,8 +33,9 @@ export type TFormControlLib<
     hideMethod?: () => void;
     onRenderControl?: (
         content: React.ReactNode,
+        visible: boolean,
         controlProps: TFormControlWrapperProps,
-        hintTranslator: (hint: string | undefined) => string | undefined
+        hintTranslator: (hint: string | undefined) => string | undefined,
     ) => React.ReactNode;
     onRenderMainWrapper: (
         content: React.ReactNode,
@@ -50,7 +51,8 @@ export type TFormControlLib<
         idx: number,
         handle: number,
         stateProps: TFormTemplateStateProps,
-        props: TT
+        props: TT,
+        isNew: boolean,
     ) => React.ReactNode
     onRenderTemplateRowControl: (
         content: React.ReactNode,
@@ -58,20 +60,6 @@ export type TFormControlLib<
         stateProps: TFormTemplateStateProps,
         props: TT
     ) => React.ReactNode,
-
-    /*
-    onRenderTemplateItems: (
-        items: React.ReactNode,
-        props: TFormTemplateStateProps,
-        customProps: TT
-    ) => React.ReactNode;
-    onRenderTemplateItem: (
-        item: React.ReactNode,
-        data: IDataObject,
-        props: TFormTemplateStateProps,
-        customProps: TT
-    ) => React.ReactNode;
-     */
     onRenderSubform: (
         content: React.ReactNode,
         data: IDataObject,
@@ -86,7 +74,8 @@ export type TFormControlLib<
 };
 
 export type TFormControlDef<Props> = {
-    forcedDefaultValue?: string
+    forcedDefaultValue?: string;
+    renderHidden?: boolean
     onRender: (
         baseProps: TFormControlBaseProps,
         customProps: Props

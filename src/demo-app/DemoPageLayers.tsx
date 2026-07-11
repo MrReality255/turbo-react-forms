@@ -174,11 +174,11 @@ function Notification({ h }: { h: number }) {
     const ce = useClosingEffect({
         mode: 'opacity',
         delay: 200,
-        onClose: () => l.hideNotification(),
+        initialState: false,
     });
     useEffect(() => {
         setTimeout(() => {
-            ce.hide();
+            ce.hide(() => l.hideNotification());
         }, 2000);
     }, []);
     return (
@@ -190,7 +190,7 @@ function Notification({ h }: { h: number }) {
                 width: '200px',
             }}
             onClick={() => {
-                ce.hide();
+                ce.hide(() => l.hideNotification());
             }}
         >
             My notification. Handle: {h}

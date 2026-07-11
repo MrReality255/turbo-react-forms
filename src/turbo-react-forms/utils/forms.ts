@@ -3,6 +3,7 @@ import {
     DataUtils,
     TDataObject,
     TDataObjectMap,
+    TDataObjectMetaMap,
     TFormConfig,
     TFormControl,
     TFormControlInheritedStateProps,
@@ -40,9 +41,10 @@ function createInitData<
     SubmitType,
 >(
     initData: TDataObjectMap | null,
+    initMetaData: TDataObjectMetaMap | null,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>
-): TDataObjectMap {
+): { data: TDataObjectMap, metaInfo: TDataObjectMetaMap } {
     initData = initData ?? {};
     const myControlList =
         typeof config.controls === 'function'
@@ -50,15 +52,22 @@ function createInitData<
             : config.controls;
 
     const result: TDataObjectMap = {};
+    const resultMetaData: TDataObjectMetaMap = {}
+
     createInitDataForControlList<P, V, F, TT, SFT, Ctx>(
         result,
+        resultMetaData,
         myControlList.filter((item) => item !== null),
         initData,
+        initMetaData ?? {},
         stateLibCtx,
         DataUtils.newHandleProvider(),
         getFormControlInheritedProps(stateLibCtx.state)
     );
-    return result;
+    return {
+        data: result,
+        metaInfo: resultMetaData
+    }
 }
 
 function createInitDataForControlList<
@@ -70,8 +79,10 @@ function createInitDataForControlList<
     Ctx,
 >(
     result: TDataObjectMap,
+    resultMetaData: TDataObjectMetaMap,
     controlList: TFormControl<P, V, TT, SFT, keyof P, Ctx>[],
     initData: TDataObjectMap,
+    initMetaData: TDataObjectMetaMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     handleProvider: THandleProvider,
     inheritedStateProps: TFormControlInheritedStateProps
@@ -79,8 +90,10 @@ function createInitDataForControlList<
     controlList.forEach((control) => {
         createInitDataForControl(
             result,
+            resultMetaData,
             control,
             initData,
+            initMetaData,
             stateLibCtx,
             handleProvider,
             inheritedStateProps,
@@ -97,8 +110,10 @@ function createInitDataForControl<
     Ctx,
 >(
     result: TDataObjectMap,
+    resultMetaData: TDataObjectMetaMap,
     control: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     initData: TDataObjectMap,
+    initMetaData: TDataObjectMetaMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     handleProvider: THandleProvider,
     inheritedStateProps: TFormControlInheritedStateProps,
@@ -121,8 +136,10 @@ function createInitDataForControl<
         case 'subform':
             createInitDataForSubform(
                 result,
+                resultMetaData,
                 control,
                 initData,
+                initMetaData,
                 stateLibCtx,
                 handleProvider,
                 inheritedStateProps,
@@ -157,6 +174,10 @@ function createInitDataForTemplate<
         items: [],
     };
 
+    if (initList.items.length > 0) {
+        DataUtils.shiftHandleProvider(handleProvider, initList.items.map(a => a.id).reduce((a, b) => Math.max(a, b), 0))
+    }
+
     const items = initList.items
         .filter(
             (_item, idx) =>
@@ -166,13 +187,16 @@ function createInitDataForTemplate<
             const newObj: TDataObject = {
                 type: 'obj',
                 data: {},
-                id: handleProvider(),
+                id: item.id || handleProvider(),
+                metaInfo: {}
             };
 
             createInitDataForSubform(
                 newObj.data,
+                newObj.metaInfo,
                 newTemplateSubForm(control, idx, newObj.id, stateLibCtx),
                 item.data,
+                item.metaInfo,
                 stateLibCtx,
                 handleProvider,
                 inheritedProps,
@@ -205,22 +229,37 @@ function createInitDataForSubform<
     Ctx,
 >(
     result: TDataObjectMap,
+    resultMetaData: TDataObjectMetaMap,
     control: TFormControlSubform<P, V, TT, SFT, Ctx>,
     initData: TDataObjectMap,
+    initMetaData: TDataObjectMetaMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     handleProvider: THandleProvider,
     inheritedProps: TFormControlInheritedStateProps
 ) {
     if (control.useOwnDataObject) {
-        result[control.id] = { type: 'obj', data: {}, id: 0 };
+        const initObj = (initData[control.id] as TDataObject | undefined)
+        DataUtils.shiftHandleProvider(handleProvider, initObj?.id ?? 0)
+        result[control.id] = { type: 'obj', data: {}, id: initObj?.id ?? 0, metaInfo: { ...(initObj?.metaInfo ?? {}) } };
     }
     const srcDataObject =
         (control.useOwnDataObject
             ? (initData[control.id] as TDataObject)?.data
             : initData) ?? {};
+
+    const srcMetaData = { ...(control.useOwnDataObject ? ((initData[control.id] as TDataObject)?.metaInfo ?? {}) : { ...initMetaData }) }
+
     const targetObj = control.useOwnDataObject
         ? (result[control.id] as TDataObject).data
         : result;
+
+    const targetMetaData = control.useOwnDataObject
+        ? (result[control.id] as TDataObject).metaInfo
+        : resultMetaData;
+
+    Object.entries(srcMetaData).forEach(([key, value]) => {
+        targetMetaData[key] = value;
+    });
 
     const listFct =
         typeof control.subform.controls === 'function'
@@ -238,7 +277,7 @@ function createInitDataForSubform<
         stateLibCtx.state,
         DataObjectUtils.create(
             {
-                state: { data: {}, id: 0, type: 'obj' },
+                state: { data: {}, id: 0, type: 'obj', metaInfo: { ...(initMetaData ?? {}) } },
                 updateState: () => { },
             },
             true,
@@ -248,8 +287,10 @@ function createInitDataForSubform<
 
     createInitDataForControlList(
         targetObj,
+        targetMetaData,
         actualList,
         srcDataObject,
+        srcMetaData,
         stateLibCtx,
         handleProvider,
         combineInheritedProps(inheritedProps, control),
@@ -362,12 +403,14 @@ function newTemplateItem<
         type: 'obj',
         id: handleProvider(),
         data: {},
+        metaInfo: {}
     };
 
     createInitDataForSubform(
         newObj.data,
+        newObj.metaInfo,
         newTemplateSubForm(control, idx, newObj.id, stateLibCtx),
-        {},
+        {}, {},
         stateLibCtx,
         handleProvider,
         combineInheritedProps(inheritedProps, control)
@@ -428,8 +471,7 @@ function createRenderContent<
                 (ctrl.sectionID === undefined ||
                     state.section === undefined ||
                     ctrl.sectionID === state.section) &&
-                !ctrl.removed &&
-                !ctrl.hidden
+                !ctrl.removed
         );
 }
 

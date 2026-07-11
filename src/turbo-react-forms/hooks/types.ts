@@ -1,8 +1,13 @@
 import { TStateHandle, TValidity } from '..';
 
+export type TDataObjectMetaValue = boolean
+
 export type TDataObjectMap = Record<string, TDataObjectValue>;
+export type TDataObjectMetaMap = Record<string, TDataObjectMetaValue>;
+
 export type TDataObject = {
     data: TDataObjectMap;
+    metaInfo: TDataObjectMetaMap;
     type: 'obj';
     id: number;
 };
@@ -49,7 +54,7 @@ export interface IDataObject {
     isValid: () => boolean;
     setValue: (key: string, value: string, isValid: TValidity) => void;
 
-    listAdd: (key: string, initFct?: () => TDataObjectMap) => void;
+    listAdd: (key: string, initFct?: () => TDataObjectMap, metaData?: TDataObjectMetaMap) => void;
     listGet: (key: string, idx: number) => IDataObject;
     listRemove: (key: string, idx?: number) => void;
     listItems: (key: string) => IDataObject[];
@@ -58,6 +63,8 @@ export interface IDataObject {
     clone: () => TDataObject;
     getID: () => number;
     getRef: () => TDataObject;
+
+    getMetaBool(key: string): boolean;
 }
 
 export interface ILayerManager {
@@ -79,6 +86,7 @@ export interface ILayers {
 export type TDataObjectNew = {
     strictMode?: boolean;
     initFct?: () => TDataObjectMap;
+    initMeta?: () => TDataObjectMetaMap
 };
 
 export type TDataObjectStateUpdateHandle = {

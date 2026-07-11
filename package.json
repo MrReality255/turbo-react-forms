@@ -39,6 +39,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "happy-dom": "^20.10.6",
     "prettier": "^3.6.2",
     "rollup": "^4.52.5",
     "typescript": "~5.9.3",

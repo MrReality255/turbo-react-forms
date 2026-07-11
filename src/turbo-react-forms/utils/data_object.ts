@@ -7,8 +7,10 @@ import {
     TDataObjectMap,
     TDataObjectStateUpdateHandle,
     TDataObjectValue,
+    TDataObjectMetaValue,
     THandleProvider,
     TValidity,
+    TDataObjectMetaMap,
 } from '..';
 
 export const DataObjectUtils = {
@@ -99,6 +101,7 @@ function cloneDataObject(src: TDataObject): TDataObject {
         id: src.id,
         type: 'obj',
         data: cloneDataObjectMap(src.data),
+        metaInfo: cloneMetaData(src.metaInfo)
     };
 }
 
@@ -164,6 +167,8 @@ function create(
         get,
         set,
         update,
+
+        getMetaBool,
 
         getHint: (key: string) => {
             const result = get(key);
@@ -232,6 +237,7 @@ function create(
                                         type: 'obj',
                                         data: {},
                                         id: nextHandleProvider(),
+                                        metaInfo: {},
                                     };
                                 }
                                 return fct(prev as TDataObject);
@@ -245,7 +251,7 @@ function create(
             );
         },
 
-        listAdd: function (key: string, initFct?: () => TDataObjectMap) {
+        listAdd: function (key: string, initFct?: () => TDataObjectMap, metaData?: TDataObjectMetaMap) {
             const newValue = initFct?.() ?? {};
             update(
                 key,
@@ -260,6 +266,7 @@ function create(
                                 id: nextHandleProvider(),
                                 type: 'obj',
                                 data: newValue,
+                                metaInfo: metaData ?? {}
                             },
                         ],
                     };
@@ -359,6 +366,14 @@ function create(
         getID: () => os.state.id,
     };
 
+    function getMetaBool(key: string): boolean {
+        return (getMeta(key) as boolean | undefined) ?? false
+    }
+
+    function getMeta(key: string): TDataObjectMetaValue | undefined {
+        return os.state.metaInfo[key]
+    }
+
     function get(key: string) {
         return os.state.data[key];
     }
@@ -396,3 +411,10 @@ function create(
         }, eventInfo);
     }
 }
+
+function cloneMetaData(data: TDataObjectMetaMap): TDataObjectMetaMap {
+    return {
+        ...data
+    }
+}
+

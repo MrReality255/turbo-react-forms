@@ -6,7 +6,7 @@ import {
     TFormSubmitFct,
     TFormTemplatePropsType,
 } from '.';
-import { TDataObjectMap, TKey } from '..';
+import { TDataObjectMap, TDataObjectMetaMap, TKey } from '..';
 
 export type TFormWrapperProps<
     P extends Record<string, unknown>,
@@ -21,6 +21,7 @@ export type TFormWrapperProps<
     formCtx: Ctx;
     handle: number;
     initData: TDataObjectMap | null;
+    initMetaData: TDataObjectMetaMap | null;
     lib: TFormControlLib<P, V, F, TT, SFT>;
     section?: TKey;
     strictMode?: boolean;

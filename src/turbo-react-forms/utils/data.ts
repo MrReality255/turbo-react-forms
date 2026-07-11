@@ -1,4 +1,4 @@
-import { TRef, TValidity } from '.';
+import { THandleProvider, TRef, TValidity } from '.';
 
 export const DataUtils = {
     Validity: {
@@ -12,6 +12,9 @@ export const DataUtils = {
         return function () {
             return handleRef.current++;
         };
+    },
+    shiftHandleProvider: function (provider: THandleProvider, maxID: number) {
+        while (provider() < maxID) { }
     },
     newRef: function <T>(initValue: T): TRef<T> {
         return {

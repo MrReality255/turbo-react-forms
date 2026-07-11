@@ -43,7 +43,7 @@ export function TFormWrapper<
     }, [initInternalState]);
 
     const initDataMap = useMemo(() => {
-        return FormUtils.createInitData(p.initData, p.config, {
+        return FormUtils.createInitData(p.initData, p.initMetaData, p.config, {
             ctx: p.formCtx,
             lib: p.lib,
             state: initState,
@@ -51,7 +51,7 @@ export function TFormWrapper<
     }, [initInternalState]);
 
     const initializedDataMap = useMemo(() => {
-        return newFormInternalState(initDataMap);
+        return newFormInternalState(initDataMap.data);
     }, []);
 
     const [internalState, updateInternalState] =
@@ -118,6 +118,7 @@ export function TFormWrapper<
                 data: rawData,
                 id: handleProvider(),
                 type: 'obj',
+                metaInfo: {},
             },
         };
     }
@@ -255,10 +256,14 @@ function reinitializeRawData<
         }
     }
 
-    const newInitData = FormUtils.createInitData(nextState.rawData.data, config, stateLibCtx)
+    const newInitData = FormUtils.createInitData(
+        nextState.rawData.data,
+        nextState.rawData.metaInfo,
+        config, stateLibCtx)
     nextState.rawData = {
         type: 'obj',
         id: nextState.rawData.id,
-        data: newInitData
+        data: newInitData.data,
+        metaInfo: newInitData.metaInfo
     }
 }

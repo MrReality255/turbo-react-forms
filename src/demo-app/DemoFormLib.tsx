@@ -7,6 +7,9 @@ import {
     TFormTemplateStateProps,
 } from '../turbo-react-forms';
 import { DemoFormWrapper, TDemoFormProps } from './DemoFormWrapper';
+import { DemoCollapse } from './components/DemoCollapse';
+import { DemoTemplateRow } from './DemoTemplateRow';
+import { DemoControl } from './DemoControl';
 
 type TTextProps = {
     label: string;
@@ -31,14 +34,7 @@ const DemoFormLib = createFormHook({
 
     },
     onRenderTemplateRowControl: (content, rowIdx, stateProps) => content,
-    onRenderTemplateRow: (content, idx, handle, stateProps) => <div style={{ display: 'flex', gap: '10px' }}>
-        <div style={{ flexGrow: 1 }}>{content}</div>
-        <div style={{ flexShrink: 0, backgroundColor: '#000', alignSelf: 'center', height: '100%' }}>
-            <button onClick={() => {
-                stateProps.triggerDelete(idx)
-            }}>Delete</button>
-        </div>
-    </div>,
+    onRenderTemplateRow: (content, idx, handle, stateProps, _, isNew) => <DemoTemplateRow key={handle} idx={idx} handle={handle} content={content} stateProps={stateProps} isNew={isNew} />,
 
     onRenderSubform: (content, data, props) => {
         return <div>{content}</div>;
@@ -46,48 +42,9 @@ const DemoFormLib = createFormHook({
     onRenderSubformControl: (content, data, idx) => {
         return <React.Fragment key={idx}>{content}</React.Fragment>;
     },
-    onRenderControl: (content, controlProps, hintTranslator) => {
-        return (
-            <React.Fragment>
-                {controlProps.context?.top}
-                <div
-                    style={{
-                        width: '100%',
-                        backgroundColor: '#600',
-                        color: '#ff0',
-                        padding: '0em',
-                    }}
-                >
-                    ** CONTROL {controlProps.id} **
-                    <div>
-                        {controlProps.label} - {controlProps.type}/
-                        {controlProps.class}
-                    </div>
-                </div>
-                <div
-                    style={{
-                        backgroundColor: '#000',
-                        paddingTop: '1em',
-                        paddingBottom: '1em',
-                        paddingLeft: '2em',
-                        paddingRight: '2em',
-                    }}
-                >
-                    {controlProps.context?.before}
-                    {content}
-                    {controlProps.context?.after}
-                    {controlProps.valid ? (
-                        <div style={{ color: 'red' }}>
-                            {hintTranslator(
-                                DataUtils.Validity.getHint(controlProps.valid)
-                            )}
-                        </div>
-                    ) : null}
-                </div>
-                {controlProps.context?.bottom}
-            </React.Fragment>
-        );
-    },
+    onRenderControl: (content, visible, controlProps, hintTranslator) => <DemoControl
+        visible={visible}
+        hintTranslator={hintTranslator} controlProps={controlProps}>{content}</DemoControl>,
     controls: {
         text: {
             onRender: function (bp: TFormControlBaseProps, p: TTextProps) {

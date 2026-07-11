@@ -40,12 +40,13 @@ function getControls(state: TFormState<any>): TDemoLibControls {
                 }
             }
         },
-        isActivated ? {
+        {
             id: 't1',
             class: undefined,
             type: 'text',
             prop: { label: 'text 1', maxLen: 20 },
-        } : null,
+            hidden: !isActivated,
+        },
         {
             id: 'activator',
             class: undefined,

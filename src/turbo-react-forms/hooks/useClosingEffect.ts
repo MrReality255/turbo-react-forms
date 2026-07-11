@@ -1,60 +1,23 @@
-import { CSSProperties, useEffect, useMemo, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState, } from 'react';
 import { TClosingEffect, TClosingEffectProps } from '../utils';
 
 const defaultAnimationDuration = 200;
 const defaultMode = 'resize';
 
-export function useClosingEffect({
-    mode = defaultMode,
-    delay = defaultAnimationDuration,
-    onClose,
-}: TClosingEffectProps) {
-    const transition = useMemo(() => {
-        return getTransition(mode, delay);
-    }, [mode, delay]);
-
-    const initState = useMemo(() => {
-        return {
-            transition,
-            transform: mode == 'resize' ? 'scale(0.5)' : undefined,
-            opacity: mode == 'opacity' ? 0.25 : undefined,
-        };
-    }, []);
-
-    const [style, setStyle] = useState<CSSProperties>(initState);
-
-    useEffect(() => {
-        setStyle({
-            transition,
-            transform: mode == 'resize' ? 'scale(1)' : undefined,
-            opacity: mode == 'opacity' ? 1 : undefined,
-        });
-    }, []);
-
-    return {
-        get: function (): CSSProperties {
-            return style;
-        },
-        hide: function (customCloser?: () => void) {
-            setStyle(initState);
-            setTimeout(() => {
-                if (customCloser) {
-                    customCloser();
-                    return;
-                }
-
-                if (onClose) {
-                    onClose();
-                    return;
-                }
-
-                console.warn(
-                    'you need to specify either onClose or customCloser'
-                );
-            }, delay);
-        },
-    };
+function getTransitionStyles(mode: TClosingEffect, visible: boolean): CSSProperties {
+    switch (mode) {
+        case 'resize':
+            return {
+                transform: visible ? 'scale(1)' : 'scale(0.5)',
+            };
+        case 'opacity':
+            return {
+                opacity: visible ? 1 : 0.25,
+            };
+    }
+    return {}
 }
+
 function getTransition(mode: TClosingEffect, delay: number) {
     switch (mode) {
         case 'resize':
@@ -63,3 +26,82 @@ function getTransition(mode: TClosingEffect, delay: number) {
             return `opacity ${delay}ms ease`;
     }
 }
+
+
+export function useClosingEffect({
+    mode = defaultMode,
+    delay = defaultAnimationDuration,
+    initialState
+}: TClosingEffectProps) {
+    const transition = useMemo(() => {
+        return getTransition(mode, delay);
+    }, [mode, delay]);
+
+    const [state, setState] = useState({
+        visible: initialState ?? true,
+        addTransition: false,
+        wantChange: false,
+    });
+
+    useEffect(() => {
+        if (!initialState && !state.visible) {
+            show();
+        }
+    }, [initialState])
+
+    useEffect(() => {
+        if (state.wantChange) {
+            if (state.visible) {
+                setState({
+                    addTransition: true,
+                    visible: false,
+                    wantChange: false,
+                })
+
+            } else {
+                setTimeout(() => {
+                    setState({
+                        addTransition: true,
+                        visible: true,
+                        wantChange: false,
+                    })
+
+                }, delay / 10)
+
+            }
+        }
+
+    }, [state.wantChange])
+
+    return { get, show, hide }
+
+    function get(): CSSProperties {
+        return {
+            transition: state.addTransition ? transition : undefined,
+            ...getTransitionStyles(mode, state.visible),
+        }
+    }
+
+    function show() {
+        setState({
+            addTransition: false,
+            visible: false,
+            wantChange: true,
+        })
+    }
+
+    function hide(closer: () => void) {
+        setState({
+            addTransition: true,
+            visible: true,
+            wantChange: true
+        })
+
+        setTimeout(() => {
+            closer()
+        }, delay)
+    }
+
+}
+
+
