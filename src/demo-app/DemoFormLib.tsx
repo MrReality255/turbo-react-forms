@@ -118,6 +118,7 @@ const DemoFormLib = createFormHook({
             },
         },
         checkBox: {
+            forcedDefaultValue: 'false',
             onRender: function (
                 bp: TFormControlBaseProps,
                 props: { aaa: number }

@@ -7,7 +7,10 @@ function getControls(state: TFormState<any>): TDemoLibControls {
     const isActivated = state.data.getValue('activator') == 'true';
 
     return [
-        null,
+        state.data.isValid() ? {
+            class: 'plain',
+            onRender: () => <div>Alles valide</div>,
+        } : null,
         {
             id: 'list1',
             class: 'template',

@@ -86,6 +86,7 @@ export type TFormControlLib<
 };
 
 export type TFormControlDef<Props> = {
+    forcedDefaultValue?: string
     onRender: (
         baseProps: TFormControlBaseProps,
         customProps: Props

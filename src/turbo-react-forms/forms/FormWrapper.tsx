@@ -99,10 +99,7 @@ export function TFormWrapper<
                     lib,
                     config,
                     state.data,
-                    {
-                        disabled: state.mode == 'loading',
-                        readOnly: state.mode != 'ready',
-                    }
+                    FormUtils.getFormControlInheritedProps(state),
                 )
             )}
         </ctxForm.Provider>

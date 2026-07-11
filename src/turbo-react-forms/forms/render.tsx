@@ -88,7 +88,8 @@ function newBaseProps<
                     ctx: state.ctx,
                     lib: lib,
                     state: state,
-                }
+                },
+                FormUtils.getFormControlInheritedProps(state)
             );
             rawData.setValue(item.id, newValue, isValid);
         },
@@ -267,6 +268,8 @@ function renderSubformControl<
         const controlContent = renderControlContent(child, state, lib, data, {
             disabled: ctrl.disabled || inheritedProps.disabled,
             readOnly: ctrl.readOnly || inheritedProps.readOnly,
+            hidden: ctrl.hidden || inheritedProps.hidden,
+            removed: ctrl.removed || inheritedProps.removed,
         });
         const renderedContent = lib.onRenderSubformControl(
             controlContent,

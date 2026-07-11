@@ -145,7 +145,9 @@ export type TFormControlList<
 
 export type TFormControlInheritedStateProps = {
     disabled: boolean;
+    hidden: boolean;
     readOnly: boolean;
+    removed: boolean;
 };
 
 export type TFormControlCommonProps = {

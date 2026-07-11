@@ -5,11 +5,13 @@ import {
     TDataObjectMap,
     TFormConfig,
     TFormControl,
+    TFormControlInheritedStateProps,
     TFormControlList,
     TFormControlSpecificProps,
     TFormControlString,
     TFormControlSubform,
     TFormControlTemplate,
+    TFormInternalState,
     TFormState,
     TFormStateLibCtx,
     TFormSubformPropsType,
@@ -23,6 +25,7 @@ export const FormUtils = {
     createRenderContent,
     getControlID,
     getControlProps,
+    getFormControlInheritedProps,
     validate,
     wrap,
 };
@@ -52,7 +55,8 @@ function createInitData<
         myControlList.filter((item) => item !== null),
         initData,
         stateLibCtx,
-        DataUtils.newHandleProvider()
+        DataUtils.newHandleProvider(),
+        getFormControlInheritedProps(stateLibCtx.state)
     );
     return result;
 }
@@ -69,7 +73,8 @@ function createInitDataForControlList<
     controlList: TFormControl<P, V, TT, SFT, keyof P, Ctx>[],
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
-    handleProvider: THandleProvider
+    handleProvider: THandleProvider,
+    inheritedStateProps: TFormControlInheritedStateProps
 ) {
     controlList.forEach((control) => {
         createInitDataForControl(
@@ -77,7 +82,8 @@ function createInitDataForControlList<
             control,
             initData,
             stateLibCtx,
-            handleProvider
+            handleProvider,
+            inheritedStateProps,
         );
     });
 }
@@ -94,7 +100,8 @@ function createInitDataForControl<
     control: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
-    handleProvider: THandleProvider
+    handleProvider: THandleProvider,
+    inheritedStateProps: TFormControlInheritedStateProps,
 ) {
     if (control.class == 'plain' || control.removed) {
         return;
@@ -102,12 +109,13 @@ function createInitDataForControl<
 
     switch (control.class) {
         case 'template':
-            createInitDateForTemplate<P, V, F, TT, SFT, Ctx>(
+            createInitDataForTemplate<P, V, F, TT, SFT, Ctx>(
                 result,
                 control,
                 initData,
                 stateLibCtx,
-                handleProvider
+                handleProvider,
+                inheritedStateProps,
             );
             return;
         case 'subform':
@@ -116,16 +124,17 @@ function createInitDataForControl<
                 control,
                 initData,
                 stateLibCtx,
-                handleProvider
+                handleProvider,
+                inheritedStateProps,
             );
             return;
         default:
-            createInitDataStringControl(result, control, initData, stateLibCtx);
+            createInitDataStringControl(result, control, initData, stateLibCtx, inheritedStateProps);
             return;
     }
 }
 
-function createInitDateForTemplate<
+function createInitDataForTemplate<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
@@ -137,8 +146,11 @@ function createInitDateForTemplate<
     control: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
-    handleProvider: THandleProvider
+    handleProvider: THandleProvider,
+    inheritedProps: TFormControlInheritedStateProps,
 ) {
+    inheritedProps = combineInheritedProps(inheritedProps, control);
+
     const template = control.template;
     const initList = DataObjectUtils.getList(() => initData[control.id]) ?? {
         type: 'list',
@@ -162,7 +174,9 @@ function createInitDateForTemplate<
                 newTemplateSubForm(control, idx, newObj.id, stateLibCtx),
                 item.data,
                 stateLibCtx,
-                handleProvider
+                handleProvider,
+                inheritedProps,
+
             );
             return newObj;
         });
@@ -171,7 +185,7 @@ function createInitDateForTemplate<
     if (template.minCount && items.length < template.minCount) {
         for (let i = items.length; i < template.minCount; i++) {
             items.push(
-                newTemplateItem(control, i, stateLibCtx, handleProvider)
+                newTemplateItem(control, i, stateLibCtx, handleProvider, inheritedProps)
             );
         }
     }
@@ -194,7 +208,8 @@ function createInitDataForSubform<
     control: TFormControlSubform<P, V, TT, SFT, Ctx>,
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
-    handleProvider: THandleProvider
+    handleProvider: THandleProvider,
+    inheritedProps: TFormControlInheritedStateProps
 ) {
     if (control.useOwnDataObject) {
         result[control.id] = { type: 'obj', data: {}, id: 0 };
@@ -236,7 +251,8 @@ function createInitDataForSubform<
         actualList,
         srcDataObject,
         stateLibCtx,
-        handleProvider
+        handleProvider,
+        combineInheritedProps(inheritedProps, control),
     );
 }
 
@@ -251,16 +267,33 @@ function createInitDataStringControl<
     result: TDataObjectMap,
     control: TFormControlString<P, V, keyof P, Ctx>,
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    inheritedStateProps: TFormControlInheritedStateProps,
 ) {
+    const controlDef = control.class !== 'custom' ? stateLibCtx.lib.controls[control.type] : undefined
     const rawValue =
         DataObjectUtils.getRawValue(() => initData[control.id], false) ||
-        (control.defaultValue ?? '');
+        control.defaultValue || controlDef?.forcedDefaultValue || '';
 
     result[control.id] = DataObjectUtils.newValue(
         rawValue,
-        validate(rawValue, control, stateLibCtx)
+        validate(rawValue, control, stateLibCtx, inheritedStateProps)
     );
+}
+
+function combineInheritedProps(
+    owner: TFormControlInheritedStateProps, ctrlProps: Partial<TFormControlInheritedStateProps>,
+): TFormControlInheritedStateProps {
+    return {
+        disabled: ctrlProps.disabled || owner.disabled || false,
+        hidden: ctrlProps.hidden || owner.hidden || false,
+        readOnly: ctrlProps.readOnly || owner.readOnly || false,
+        removed: ctrlProps.removed || owner.removed || false,
+    }
+}
+
+function isUnavailable(props: TFormControlInheritedStateProps) {
+    return props.disabled || props.hidden || props.readOnly || props.removed
 }
 
 function validate<
@@ -273,10 +306,17 @@ function validate<
 >(
     value: string,
     control: TFormControlString<P, V, keyof P, Ctx>,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    inheritedProps: TFormControlInheritedStateProps
 ): TValidity {
+    inheritedProps = combineInheritedProps(inheritedProps, control)
+    const unavailable = isUnavailable(inheritedProps)
+    const optional = control.optional || unavailable
+    if (unavailable) {
+        return true
+    }
     if (!value) {
-        return control.optional ?? false;
+        return optional;
     }
 
     if (control.onValidate) {
@@ -315,7 +355,8 @@ function newTemplateItem<
     control: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     idx: number,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
-    handleProvider: THandleProvider
+    handleProvider: THandleProvider,
+    inheritedProps: TFormControlInheritedStateProps
 ): TDataObject {
     const newObj: TDataObject = {
         type: 'obj',
@@ -328,7 +369,8 @@ function newTemplateItem<
         newTemplateSubForm(control, idx, newObj.id, stateLibCtx),
         {},
         stateLibCtx,
-        handleProvider
+        handleProvider,
+        combineInheritedProps(inheritedProps, control)
     );
 
     return newObj;
@@ -420,6 +462,15 @@ function getControlProps<
             return item.template;
         default:
             return item.prop as P[keyof P];
+    }
+}
+
+function getFormControlInheritedProps(state: TFormInternalState<unknown>): TFormControlInheritedStateProps {
+    return {
+        disabled: state.mode == 'loading',
+        readOnly: state.mode != 'ready',
+        hidden: false,
+        removed: false,
     }
 }
 
