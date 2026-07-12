@@ -1,107 +1,132 @@
-import { CSSProperties, useEffect, useMemo, useState, } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { TClosingEffect, TClosingEffectProps } from '../utils';
 
 const defaultAnimationDuration = 200;
 const defaultMode = 'resize';
 
-function getTransitionStyles(mode: TClosingEffect, visible: boolean): CSSProperties {
-    switch (mode) {
-        case 'resize':
+type TClosingEffectState = 'prepare' | 'animate' | 'finalize' | 'done';
+type TClosingEffectInternalState = {
+    state: TClosingEffectState;
+    wantOpen: boolean;
+    wasOpen: boolean;
+    newOpen: boolean;
+    height: number | null;
+};
+
+function getOpacityTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
+    switch (state.state) {
+        case 'prepare':
             return {
-                transform: visible ? 'scale(1)' : 'scale(0.5)',
+                opacity: state.wasOpen ? 1 : 0.25,
             };
-        case 'opacity':
+        case 'animate':
             return {
-                opacity: visible ? 1 : 0.25,
+                pointerEvents: 'none',
+                opacity: state.newOpen ? 1 : 0.25,
+                transition: `opacity ${delay}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+            };
+        case 'finalize':
+            return {
+                pointerEvents: 'none',
+                opacity: state.newOpen ? 1 : 0.25,
+            };
+        case 'done':
+            return {
+                opacity: state.wasOpen ? 1 : 0.25,
             };
     }
-    return {}
 }
 
-function getTransition(mode: TClosingEffect, delay: number) {
-    switch (mode) {
-        case 'resize':
-            return `transform ${delay}ms ease`;
-        case 'opacity':
-            return `opacity ${delay}ms ease`;
+function getResizeTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
+    switch (state.state) {
+        case 'prepare':
+            return {
+                scale: state.wasOpen ? 1 : 0.25,
+            };
+        case 'animate':
+            return {
+                scale: state.newOpen ? 1 : 0.25,
+                transition: `scale ${delay}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+            };
+        case 'finalize':
+            return {
+                scale: state.newOpen ? 1 : 0.25,
+            };
+        case 'done':
+            return {
+                scale: state.wasOpen ? 1 : 0.25,
+            };
     }
 }
 
+function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffectInternalState): CSSProperties {
+    switch (mode) {
+        case 'opacity':
+            return getOpacityTransition(state, delay);
+        case 'resize':
+            return getResizeTransition(state, delay);
+    }
+}
 
 export function useClosingEffect({
     mode = defaultMode,
     delay = defaultAnimationDuration,
-    initialState
+    initialState,
 }: TClosingEffectProps) {
-    const transition = useMemo(() => {
-        return getTransition(mode, delay);
-    }, [mode, delay]);
-
-    const [state, setState] = useState({
-        visible: initialState ?? true,
-        addTransition: false,
-        wantChange: false,
+    const [state, setState] = useState<TClosingEffectInternalState>({
+        state: 'done',
+        wantOpen: true,
+        wasOpen: initialState ?? true,
+        newOpen: initialState ?? true,
+        height: null,
     });
 
-    useEffect(() => {
-        if (!initialState && !state.visible) {
-            show();
-        }
-    }, [initialState])
+    const transition = useMemo(() => {
+        return getTransition(mode, delay, state);
+    }, [mode, delay, state]);
 
     useEffect(() => {
-        if (state.wantChange) {
-            if (state.visible) {
-                setState({
-                    addTransition: true,
-                    visible: false,
-                    wantChange: false,
-                })
-
-            } else {
+        switch (true) {
+            case state.state == 'done' && state.wasOpen != state.wantOpen:
+                setState({ ...state, state: 'prepare', newOpen: state.wantOpen });
+                return;
+            case state.state == 'prepare':
                 setTimeout(() => {
-                    setState({
-                        addTransition: true,
-                        visible: true,
-                        wantChange: false,
-                    })
-
-                }, delay / 10)
-
-            }
+                    setState({ ...state, state: 'animate' });
+                }, 1);
+                setTimeout(() => {
+                    setState({ ...state, state: 'finalize' });
+                }, 1 + delay);
+                return;
+            case state.state == 'finalize':
+                setTimeout(() => {
+                    setState({ ...state, wasOpen: state.newOpen, state: 'done' });
+                }, 1);
+                return;
         }
+    }, [state.state, state.wasOpen, state.wantOpen]);
 
-    }, [state.wantChange])
-
-    return { get, show, hide }
+    return { get, show, hide, getState: () => state };
 
     function get(): CSSProperties {
-        return {
-            transition: state.addTransition ? transition : undefined,
-            ...getTransitionStyles(mode, state.visible),
-        }
+        return transition;
     }
 
     function show() {
-        setState({
-            addTransition: false,
-            visible: false,
-            wantChange: true,
-        })
+        setState((state) => ({
+            ...state,
+            wantOpen: true,
+        }));
     }
 
     function hide(closer: () => void) {
-        setState({
-            addTransition: true,
-            visible: true,
-            wantChange: true
-        })
+        setState((state) => ({
+            ...state,
+            wantOpen: false,
+        }));
 
         setTimeout(() => {
-            closer()
-        }, delay)
+            closer();
+        }, delay + 1);
     }
-
 }
-
-

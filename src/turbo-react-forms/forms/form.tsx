@@ -59,6 +59,7 @@ function useForm<
                             formCtx={ctx}
                             handle={handle}
                             initData={data}
+                            initMetaData={{}}
                             lib={lib}
                             onSubmit={submitFct}
                             onResolve={resolve}
