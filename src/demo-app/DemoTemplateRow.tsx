@@ -7,7 +7,7 @@ export function DemoTemplateRow(p: {
     handle: number;
     isNew: boolean;
 }) {
-    const ce = useClosingEffect({ mode: 'opacity', delay: 2000, initialState: !p.isNew });
+    const ce = useClosingEffect({ mode: 'opacity', delay: 200, initialState: !p.isNew });
     return (
         <div style={{ ...ce.get(), display: 'flex', gap: '10px' }}>
             <div>{p.isNew ? 'NEW' : 'OLD'}</div>

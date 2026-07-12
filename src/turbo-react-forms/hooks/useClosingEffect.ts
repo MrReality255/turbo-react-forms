@@ -10,6 +10,7 @@ type TClosingEffectInternalState = {
     wantOpen: boolean;
     wasOpen: boolean;
     newOpen: boolean;
+    height: number | null;
 };
 
 function getOpacityTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
@@ -20,19 +21,42 @@ function getOpacityTransition(state: TClosingEffectInternalState, delay: number)
             };
         case 'animate':
             return {
+                pointerEvents: 'none',
                 opacity: state.newOpen ? 1 : 0.25,
-                transition: `opacity ${delay}ms ease`,
+                transition: `opacity ${delay}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+            };
+        case 'finalize':
+            return {
+                pointerEvents: 'none',
+                opacity: state.newOpen ? 1 : 0.25,
             };
         case 'done':
             return {
                 opacity: state.wasOpen ? 1 : 0.25,
             };
     }
-    return {};
 }
 
 function getResizeTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
-    return {};
+    switch (state.state) {
+        case 'prepare':
+            return {
+                scale: state.wasOpen ? 1 : 0.25,
+            };
+        case 'animate':
+            return {
+                scale: state.newOpen ? 1 : 0.25,
+                transition: `scale ${delay}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+            };
+        case 'finalize':
+            return {
+                scale: state.newOpen ? 1 : 0.25,
+            };
+        case 'done':
+            return {
+                scale: state.wasOpen ? 1 : 0.25,
+            };
+    }
 }
 
 function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffectInternalState): CSSProperties {
@@ -44,31 +68,6 @@ function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffec
     }
 }
 
-/*
-function getTransitionStyles(mode: TClosingEffect, visible: boolean): CSSProperties {
-    switch (mode) {
-        case 'resize':
-            return {
-                transform: visible ? 'scale(1)' : 'scale(0.5)',
-            };
-        case 'opacity':
-            return {
-                opacity: visible ? 1 : 0.25,
-            };
-    }
-    return {}
-}
-
-function getTransition(mode: TClosingEffect, delay: number) {
-    switch (mode) {
-        case 'resize':
-            return `transform ${delay}ms ease`;
-        case 'opacity':
-            return `opacity ${delay}ms ease`;
-    }
-}
-*/
-
 export function useClosingEffect({
     mode = defaultMode,
     delay = defaultAnimationDuration,
@@ -79,6 +78,7 @@ export function useClosingEffect({
         wantOpen: true,
         wasOpen: initialState ?? true,
         newOpen: initialState ?? true,
+        height: null,
     });
 
     const transition = useMemo(() => {
@@ -93,34 +93,40 @@ export function useClosingEffect({
             case state.state == 'prepare':
                 setTimeout(() => {
                     setState({ ...state, state: 'animate' });
-                }, 1000);
+                }, 1);
+                setTimeout(() => {
+                    setState({ ...state, state: 'finalize' });
+                }, 1 + delay);
+                return;
+            case state.state == 'finalize':
+                setTimeout(() => {
+                    setState({ ...state, wasOpen: state.newOpen, state: 'done' });
+                }, 1);
                 return;
         }
     }, [state.state, state.wasOpen, state.wantOpen]);
 
-    console.log('closingEffect', JSON.stringify(state, null, 2));
-
-    return { get, show, hide };
+    return { get, show, hide, getState: () => state };
 
     function get(): CSSProperties {
         return transition;
     }
 
     function show() {
-        setState({
+        setState((state) => ({
             ...state,
             wantOpen: true,
-        });
+        }));
     }
 
     function hide(closer: () => void) {
-        setState({
+        setState((state) => ({
             ...state,
             wantOpen: false,
-        });
+        }));
 
         setTimeout(() => {
             closer();
-        }, delay);
+        }, delay + 1);
     }
 }
