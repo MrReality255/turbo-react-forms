@@ -7,10 +7,13 @@ function getControls(state: TFormState<any>): TDemoLibControls {
     const isActivated = state.data.getValue('activator') == 'true';
 
     return [
+        /*
         state.data.isValid() ? {
             class: 'plain',
             onRender: () => <div>Alles valide</div>,
         } : null,
+         */
+        /*
         {
             id: 'list1',
             class: 'template',
@@ -23,29 +26,28 @@ function getControls(state: TFormState<any>): TDemoLibControls {
                         class: undefined,
                         type: 'text',
                         prop: { maxLen: 20, label: 'my label' },
-
                     },
                     {
                         id: 'value',
                         class: undefined,
                         type: 'text',
                         prop: { maxLen: 20, label: 'the value' },
-                    }
+                    },
                 ],
                 onWrapRowControl: (item) => {
-                    return <div>{item}</div>
+                    return <div>{item}</div>;
                 },
                 onWrapRow: (item) => {
-                    return <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '15px' }}>{item}</div>
-                }
-            }
-        },
+                    return <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '15px' }}>{item}</div>;
+                },
+            },
+        },*/
         {
             id: 't1',
             class: undefined,
             type: 'text',
             prop: { label: 'text 1', maxLen: 20 },
-            hidden: !isActivated,
+            // hidden: !isActivated,
         },
         {
             id: 'activator',
@@ -136,7 +138,7 @@ export function DemoForms() {
                     console.log('triggered event: ' + JSON.stringify(event));
             }
         },
-    },);
+    });
     return (
         <DemoPage>
             <h1>Demo forms</h1>
@@ -147,7 +149,10 @@ export function DemoForms() {
     );
 
     async function handleBtn() {
-        const result = await frm.show(null, { id: 324 });
+        const result = await frm.show(null, { id: 324 }, async (ctx) => {
+            console.log(ctx.id, JSON.stringify(ctx.rawData, null, 2));
+            return 1024;
+        });
         setFormResponse(JSON.stringify(result));
     }
 }

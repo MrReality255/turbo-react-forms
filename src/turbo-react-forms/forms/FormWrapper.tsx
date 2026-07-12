@@ -25,10 +25,7 @@ export function TFormWrapper<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
->({
-    strictMode = false,
-    ...p
-}: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType>) {
+>({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType>) {
     const { config, formCtx, lib } = p;
     const handleProvider = useMemo(() => {
         return DataUtils.newHandleProvider();
@@ -39,7 +36,7 @@ export function TFormWrapper<
     }, []);
 
     const initState = useMemo(() => {
-        return newFormState(initInternalState, () => { }, strictMode);
+        return newFormState(initInternalState, () => {}, strictMode);
     }, [initInternalState]);
 
     const initDataMap = useMemo(() => {
@@ -54,20 +51,12 @@ export function TFormWrapper<
         return newFormInternalState(initDataMap.data);
     }, []);
 
-    const [internalState, updateInternalState] =
-        useState<TFormInternalState<Ctx>>(initializedDataMap);
+    const [internalState, updateInternalState] = useState<TFormInternalState<Ctx>>(initializedDataMap);
 
     const state = useMemo(() => {
         return newFormState(
             internalState,
-            (updateFct, eventInfo) =>
-                createUpdateUpdateHandler(
-                    updateInternalState,
-                    config,
-                    eventInfo,
-                    updateFct,
-                    lib,
-                ),
+            (updateFct, eventInfo) => createUpdateUpdateHandler(updateInternalState, config, eventInfo, updateFct, lib),
             strictMode
         );
     }, [internalState]);
@@ -78,17 +67,16 @@ export function TFormWrapper<
             lib,
             ctx: p.formCtx,
         },
-        p.onResolve
+        updateInternalState,
+        p.onResolve,
+        p.onSubmit
     );
 
-    const formConfig =
-        typeof config.form === 'function' ? config.form(state) : config.form;
+    const formConfig = typeof config.form === 'function' ? config.form(state) : config.form;
 
     const mainWrapper = config.onRenderMainWrapper
-        ? (content: React.ReactNode) =>
-            config.onRenderMainWrapper?.(content, formCtx, state)
-        : (content: React.ReactNode) =>
-            lib.onRenderMainWrapper(content, formConfig);
+        ? (content: React.ReactNode) => config.onRenderMainWrapper?.(content, formCtx, state)
+        : (content: React.ReactNode) => lib.onRenderMainWrapper(content, formConfig);
 
     return (
         <ctxForm.Provider value={formContext}>
@@ -99,15 +87,13 @@ export function TFormWrapper<
                     lib,
                     config,
                     state.data,
-                    FormUtils.getFormControlInheritedProps(state),
+                    FormUtils.getFormControlInheritedProps(state)
                 )
             )}
         </ctxForm.Provider>
     );
 
-    function newFormInternalState(
-        rawData: TDataObjectMap
-    ): TFormInternalState<Ctx> {
+    function newFormInternalState(rawData: TDataObjectMap): TFormInternalState<Ctx> {
         return {
             ctx: p.formCtx,
             handle: p.handle,
@@ -126,10 +112,7 @@ export function TFormWrapper<
 
 function newFormState<Ctx>(
     state: TFormInternalState<Ctx>,
-    onUpdateData: (
-        fct: (prev: TDataObject) => TDataObject,
-        eventInfo: TDataObjectEvent
-    ) => void,
+    onUpdateData: (fct: (prev: TDataObject) => TDataObject, eventInfo: TDataObjectEvent) => void,
     strictMode: boolean
 ): TFormState<Ctx> {
     return {
@@ -145,8 +128,6 @@ function newFormState<Ctx>(
     };
 }
 
-
-
 function createUpdateUpdateHandler<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
@@ -156,9 +137,7 @@ function createUpdateUpdateHandler<
     Ctx,
     SubmitType,
 >(
-    updateInternalState: (
-        fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>
-    ) => void,
+    updateInternalState: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     eventInfo: TDataObjectEvent,
     updateFct: (prev: TDataObject) => TDataObject,
@@ -172,12 +151,7 @@ function createUpdateUpdateHandler<
         };
 
         if (config.onUpdate) {
-            const result = config.onUpdate(
-                null,
-                eventInfo,
-                prevInternalState.ctx,
-                newDataObj
-            );
+            const result = config.onUpdate(null, eventInfo, prevInternalState.ctx, newDataObj);
 
             if (result && 'then' in result) {
                 nextState.mode = 'waiting';
@@ -212,7 +186,7 @@ function updateNextState<
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     lib: TFormControlLib<P, V, F, TT, SFT>
 ) {
-    reinitializeRawData(nextState, config, lib)
+    reinitializeRawData(nextState, config, lib);
 
     if (!updateResult) {
         return;
@@ -247,23 +221,29 @@ function reinitializeRawData<
         lib: lib,
         state: {
             ...nextState,
-            data: DataObjectUtils.create({
-                state: nextState.rawData,
-                updateState: () => {
-                    throw 'this object is read only'
-                }
-            }, false, DataUtils.newHandleProvider())
-        }
-    }
+            data: DataObjectUtils.create(
+                {
+                    state: nextState.rawData,
+                    updateState: () => {
+                        throw 'this object is read only';
+                    },
+                },
+                false,
+                DataUtils.newHandleProvider()
+            ),
+        },
+    };
 
     const newInitData = FormUtils.createInitData(
         nextState.rawData.data,
         nextState.rawData.metaInfo,
-        config, stateLibCtx)
+        config,
+        stateLibCtx
+    );
     nextState.rawData = {
         type: 'obj',
         id: nextState.rawData.id,
         data: newInitData.data,
-        metaInfo: newInitData.metaInfo
-    }
+        metaInfo: newInitData.metaInfo,
+    };
 }

@@ -1,10 +1,5 @@
 import { PropsWithChildren } from 'react';
-import {
-    useClosingEffect,
-    useFormContext,
-    useLayer,
-    useLayers,
-} from '../turbo-react-forms';
+import { useClosingEffect, useFormContext, useLayer, useLayers } from '../turbo-react-forms';
 
 export type TDemoFormProps = {
     title: string;
@@ -15,7 +10,7 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
     const ctx = useFormContext();
     const l = useLayers();
 
-    const closer = useClosingEffect({ mode: 'resize', delay: 300 });
+    const closer = useClosingEffect({ mode: 'resize', delay: 150, initialState: false });
     ctx.hideMethodRef.current = (prev) => {
         closer.hide(prev);
     };
@@ -53,14 +48,19 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
                     Loading
                 </div>
             )}
-            <button disabled={true}>SUBMIT</button>
+            <button
+                disabled={!ctx.data.isValid()}
+                onClick={() => {
+                    ctx.submit(undefined);
+                }}
+            >
+                SUBMIT
+            </button>
         </div>
     );
 
     function showRawData() {
-        l.main.showNotification(() => (
-            <Noticiation>{JSON.stringify(ctx.data.getRef())}</Noticiation>
-        ));
+        l.main.showNotification(() => <Noticiation>{JSON.stringify(ctx.data.getRef())}</Noticiation>);
     }
 }
 

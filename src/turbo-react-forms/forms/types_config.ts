@@ -6,7 +6,7 @@ import {
     TFormSubformPropsType,
     TFormTemplatePropsType,
 } from '.';
-import { TDataObject, TDataObjectEvent, TDataObjectMap, TKey } from '..';
+import { IDataObject, TDataObject, TDataObjectEvent, TDataObjectMap, TKey } from '..';
 
 export type TFormConfig<
     P extends Record<string, unknown>,
@@ -18,45 +18,32 @@ export type TFormConfig<
     SubmitType,
 > = {
     form: F | ((state: TFormState<Ctx>) => F);
-    controls:
-    | TFormControlList<P, V, TT, SFT, Ctx>
-    | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
-    onRenderMainWrapper?: (
-        content: React.ReactNode,
-        ctx: Ctx,
-        state: TFormState<Ctx>
-    ) => React.ReactNode;
+    controls: TFormControlList<P, V, TT, SFT, Ctx> | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
+    onRenderMainWrapper?: (content: React.ReactNode, ctx: Ctx, state: TFormState<Ctx>) => React.ReactNode;
     onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
-    onTranslateHint?: (
-        hint: string,
-        id: string,
-        props: TFormControlSpecificProps<P, V, TT, SFT, Ctx> | null
-    ) => string;
+    onTranslateHint?: (hint: string, id: string, props: TFormControlSpecificProps<P, V, TT, SFT, Ctx> | null) => string;
     onUpdate?: (
         command: string | null,
         event: TDataObjectEvent,
         ctx: Ctx,
         data: TDataObject
-    ) =>
-        | TFormUpdateContext<Ctx, SubmitType>
-        | undefined
-        | Promise<TFormUpdateContext<Ctx, SubmitType> | undefined>;
+    ) => TFormUpdateContext<Ctx, SubmitType> | undefined | Promise<TFormUpdateContext<Ctx, SubmitType> | undefined>;
 };
 
 export type TFormSubmitFuncCtx<Ctx> = {
-    id: TKey;
+    id: TKey | undefined;
     ctx: Ctx;
-    rawData: TDataObjectMap;
-    validData: TDataObjectMap;
+    rawData: IDataObject;
+    customData: unknown;
 };
 
 export type TFormSubmitCtx<Ctx, SubmitType> = TFormSubmitFuncCtx<Ctx> & {
     submitData: SubmitType;
+    close: boolean;
+    ctxUpdateFct?: (prev: Ctx) => Ctx;
 };
 
-export type TFormSubmitFct<Ctx, SubmitType> = (
-    submitCtx: TFormSubmitFuncCtx<Ctx>
-) => Promise<TFormSubmitCtx<Ctx, SubmitType>>;
+export type TFormSubmitFct<Ctx, SubmitType> = (submitCtx: TFormSubmitFuncCtx<Ctx>) => Promise<SubmitType>;
 
 export type TFormUpdateContext<Ctx, SubmitType> = {
     ctx?: Ctx;
