@@ -6,6 +6,7 @@ export function DemoMenu() {
             <DemoMenuItem caption="Layers" url="layers"></DemoMenuItem>
             <DemoMenuItem caption="Data Object" url="dataobject"></DemoMenuItem>
             <DemoMenuItem caption="Forms" url="forms"></DemoMenuItem>
+            <DemoMenuItem caption="ClosingEffect" url="closing-effect"></DemoMenuItem>
         </div>
     );
 }
