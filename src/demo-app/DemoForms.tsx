@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DataUtils, TFormState } from '../turbo-react-forms';
+import { DataObjectUtils, DataUtils, TFormState } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
 import { TDemoLibControls, useForm } from './DemoFormLib';
 
@@ -126,13 +126,26 @@ export function DemoForms() {
         },
         onUpdate: function (cmd, event, ctx, data) {
             switch (event.id) {
-                case 'custom1':
+                case 't1':
+                    /*
                     if (event.type == 'value' && event.value.length > 4) {
                         return new Promise((resolve) => {
                             setTimeout(() => {
                                 resolve(undefined);
                             }, 500);
                         });
+                    }
+                        */
+
+                    if (event.type == 'value' && event.value.length > 4) {
+                        debugger;
+                        return {
+                            modalResult: {
+                                close: true,
+                                id: event.id,
+                                submitData: 999,
+                            },
+                        };
                     }
                 default:
                     console.log('triggered event: ' + JSON.stringify(event));
@@ -150,9 +163,17 @@ export function DemoForms() {
 
     async function handleBtn() {
         const result = await frm.show(null, { id: 324 }, async (ctx) => {
-            console.log(ctx.id, JSON.stringify(ctx.rawData, null, 2));
-            return 1024;
+            return {
+                id: 'bla',
+                close: false,
+                submitData: 777,
+            };
         });
-        setFormResponse(JSON.stringify(result));
+        setFormResponse(
+            JSON.stringify({
+                result,
+                raw: result?.rawData?.getRef(),
+            })
+        );
     }
 }

@@ -58,10 +58,7 @@ export type TFormSubmitFct<Ctx, SubmitType> = (
 
 export type TFormUpdateContext<Ctx, SubmitType> = {
     ctx?: Ctx;
-    modalResult?: {
-        result: TFormModalResult;
-        data: SubmitType;
-    };
+    modalResult?: TFormSubmitFctData<Ctx, SubmitType>;
 
     onUpdateData?: (prev: TDataObject) => TDataObject;
 };
