@@ -17,15 +17,10 @@ export const DataObjectUtils = {
     cloneDataObject,
     cloneDataObjectMap,
     create,
-    getList: function (
-        get: () => TDataObjectValue
-    ): TDataObjectList | undefined {
+    replace,
+    getList: function (get: () => TDataObjectValue): TDataObjectList | undefined {
         const value = get();
-        if (
-            value === undefined ||
-            typeof value === 'string' ||
-            value.type != 'list'
-        ) {
+        if (value === undefined || typeof value === 'string' || value.type != 'list') {
             return undefined;
         }
         return value;
@@ -38,16 +33,10 @@ export const DataObjectUtils = {
         if (v === undefined) {
             return '';
         }
-        return v.type == 'invalid'
-            ? v.value
-            : objectAsJSON
-                ? JSON.stringify(v)
-                : '';
+        return v.type == 'invalid' ? v.value : objectAsJSON ? JSON.stringify(v) : '';
     },
     getString: function (get: () => TDataObjectValue) {
-        return DataUtils.using(get(), (v) =>
-            typeof v === 'string' ? v : null
-        );
+        return DataUtils.using(get(), (v) => (typeof v === 'string' ? v : null));
     },
     getValidity: function (get: () => TDataObjectValue): TValidity {
         const v = get();
@@ -63,10 +52,10 @@ export const DataObjectUtils = {
         return typeof isValid == 'boolean' && isValid
             ? value
             : {
-                type: 'invalid',
-                value: value,
-                hint: DataUtils.Validity.getHint(isValid),
-            };
+                  type: 'invalid',
+                  value: value,
+                  hint: DataUtils.Validity.getHint(isValid),
+              };
     },
     updateUniqueID,
     isValid,
@@ -101,14 +90,12 @@ function cloneDataObject(src: TDataObject): TDataObject {
         id: src.id,
         type: 'obj',
         data: cloneDataObjectMap(src.data),
-        metaInfo: cloneMetaData(src.metaInfo)
+        metaInfo: cloneMetaData(src.metaInfo),
     };
 }
 
 function cloneDataObjectMap(src: TDataObjectMap): TDataObjectMap {
-    return Object.fromEntries(
-        Object.entries(src).map(([key, value]) => [key, cloneValue(value)])
-    );
+    return Object.fromEntries(Object.entries(src).map(([key, value]) => [key, cloneValue(value)]));
 }
 
 function cloneValue(value: TDataObjectValue): TDataObjectValue {
@@ -158,12 +145,23 @@ function updateUniqueID(value: TDataObject, handleProvider?: THandleProvider) {
     });
 }
 
-function create(
-    os: TDataObjectStateUpdateHandle,
-    strictMode: boolean,
-    nextHandleProvider: () => number
-): IDataObject {
+function replace(target: IDataObject, newData: TDataObject): IDataObject {
+    return create(
+        {
+            state: newData,
+            updateState: target.getUpdateMethod(),
+        },
+        target.isStrictMode(),
+        target.getHandleProvider()
+    );
+}
+
+function create(os: TDataObjectStateUpdateHandle, strictMode: boolean, nextHandleProvider: () => number): IDataObject {
     return {
+        isStrictMode: () => strictMode,
+        getHandleProvider: () => nextHandleProvider,
+        getUpdateMethod: () => os.updateState,
+
         get,
         set,
         update,
@@ -183,10 +181,7 @@ function create(
         },
 
         getRawValue: (key: string, objectAsJSON?: boolean) => {
-            return DataObjectUtils.getRawValue(
-                () => get(key),
-                objectAsJSON ?? false
-            );
+            return DataObjectUtils.getRawValue(() => get(key), objectAsJSON ?? false);
         },
 
         isValid: () => {
@@ -194,17 +189,12 @@ function create(
         },
 
         isValueValid: (key: string) => {
-            return DataUtils.using(
-                get(key),
-                (v) => typeof v !== 'object' || v.type !== 'invalid'
-            );
+            return DataUtils.using(get(key), (v) => typeof v !== 'object' || v.type !== 'invalid');
         },
 
         getValidity: (key: string) => {
             return DataUtils.using(get(key), (v) =>
-                typeof v !== 'object' || v.type !== 'invalid'
-                    ? true
-                    : { valid: false, hint: v.hint }
+                typeof v !== 'object' || v.type !== 'invalid' ? true : { valid: false, hint: v.hint }
             );
         },
 
@@ -221,14 +211,8 @@ function create(
         objectGet: (key: string) => {
             return create(
                 {
-                    state: (os.state.data[key] ??
-                        (strictMode
-                            ? undefined
-                            : { type: 'obj', data: {} })) as TDataObject,
-                    updateState: function (
-                        fct: (prev: TDataObject) => TDataObject,
-                        eventInfo: TDataObjectEvent
-                    ) {
+                    state: (os.state.data[key] ?? (strictMode ? undefined : { type: 'obj', data: {} })) as TDataObject,
+                    updateState: function (fct: (prev: TDataObject) => TDataObject, eventInfo: TDataObjectEvent) {
                         update(
                             key,
                             (prev) => {
@@ -266,7 +250,7 @@ function create(
                                 id: nextHandleProvider(),
                                 type: 'obj',
                                 data: newValue,
-                                metaInfo: metaData ?? {}
+                                metaInfo: metaData ?? {},
                             },
                         ],
                     };
@@ -288,17 +272,11 @@ function create(
                             update(
                                 key,
                                 (prevValue) => {
-                                    const prevListObj =
-                                        prevValue as TDataObjectList;
+                                    const prevListObj = prevValue as TDataObjectList;
                                     return {
                                         type: 'list',
-                                        items: prevListObj.items.map(
-                                            (prevListItem, prevItemIdx) =>
-                                                prevItemIdx == itemIdx
-                                                    ? itemUpdaterFct(
-                                                        prevListItem
-                                                    )
-                                                    : prevListItem
+                                        items: prevListObj.items.map((prevListItem, prevItemIdx) =>
+                                            prevItemIdx == itemIdx ? itemUpdaterFct(prevListItem) : prevListItem
                                         ),
                                     };
                                 },
@@ -343,9 +321,7 @@ function create(
                                 return {
                                     type: 'list',
                                     items: prevList.items.map((item, i) => {
-                                        return i == idx
-                                            ? ItemUpdaterFct(item)
-                                            : item;
+                                        return i == idx ? ItemUpdaterFct(item) : item;
                                     }),
                                 };
                             },
@@ -367,22 +343,18 @@ function create(
     };
 
     function getMetaBool(key: string): boolean {
-        return (getMeta(key) as boolean | undefined) ?? false
+        return (getMeta(key) as boolean | undefined) ?? false;
     }
 
     function getMeta(key: string): TDataObjectMetaValue | undefined {
-        return os.state.metaInfo[key]
+        return os.state.metaInfo[key];
     }
 
     function get(key: string) {
         return os.state.data[key];
     }
 
-    function set(
-        key: string,
-        value: TDataObjectValue,
-        eventInfo: TDataObjectEvent
-    ) {
+    function set(key: string, value: TDataObjectValue, eventInfo: TDataObjectEvent) {
         os.updateState((prev) => {
             return {
                 ...prev,
@@ -394,11 +366,7 @@ function create(
         }, eventInfo);
     }
 
-    function update(
-        key: string,
-        fct: (prev: TDataObjectValue) => TDataObjectValue,
-        eventInfo: TDataObjectEvent
-    ) {
+    function update(key: string, fct: (prev: TDataObjectValue) => TDataObjectValue, eventInfo: TDataObjectEvent) {
         os.updateState((prev) => {
             return {
                 ...prev,
@@ -414,7 +382,6 @@ function create(
 
 function cloneMetaData(data: TDataObjectMetaMap): TDataObjectMetaMap {
     return {
-        ...data
-    }
+        ...data,
+    };
 }
-

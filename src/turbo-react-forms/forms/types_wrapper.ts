@@ -1,6 +1,7 @@
 import {
     TFormConfig,
     TFormControlLib,
+    TFormError,
     TFormSubformPropsType,
     TFormSubmitCtx,
     TFormSubmitFct,
@@ -30,4 +31,5 @@ export type TFormWrapperProps<
 
     onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined;
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
+    onError?: (err: unknown) => TFormError;
 };

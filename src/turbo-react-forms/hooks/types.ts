@@ -1,6 +1,6 @@
-import { TStateHandle, TValidity } from '..';
+import { THandleProvider, TStateHandle, TValidity } from '..';
 
-export type TDataObjectMetaValue = boolean
+export type TDataObjectMetaValue = boolean;
 
 export type TDataObjectMap = Record<string, TDataObjectValue>;
 export type TDataObjectMetaMap = Record<string, TDataObjectMetaValue>;
@@ -24,27 +24,15 @@ export type TDataObjectInvalidValue = {
     type: 'invalid';
 };
 
-export type TDataObjectValue =
-    | string
-    | TDataObject
-    | TDataObjectList
-    | TDataObjectInvalidValue;
+export type TDataObjectValue = string | TDataObject | TDataObjectList | TDataObjectInvalidValue;
 
 export type TDataObjectWrapper = TDataObject & {};
 
 export interface IDataObject {
-    set: (
-        key: string,
-        value: TDataObjectValue,
-        eventInfo: TDataObjectEvent
-    ) => void;
+    set: (key: string, value: TDataObjectValue, eventInfo: TDataObjectEvent) => void;
     get: (key: string) => TDataObjectValue;
 
-    update: (
-        key: string,
-        fct: (prev: TDataObjectValue) => TDataObjectValue,
-        eventInfo: TDataObjectEvent
-    ) => void;
+    update: (key: string, fct: (prev: TDataObjectValue) => TDataObjectValue, eventInfo: TDataObjectEvent) => void;
 
     getHint: (key: string) => string | undefined;
     getValue: (key: string) => string | null;
@@ -65,6 +53,10 @@ export interface IDataObject {
     getRef: () => TDataObject;
 
     getMetaBool(key: string): boolean;
+
+    getUpdateMethod: () => (fct: (prev: TDataObject) => TDataObject, eventInfo: TDataObjectEvent) => void;
+    isStrictMode: () => boolean;
+    getHandleProvider: () => THandleProvider;
 }
 
 export interface ILayerManager {
@@ -86,21 +78,15 @@ export interface ILayers {
 export type TDataObjectNew = {
     strictMode?: boolean;
     initFct?: () => TDataObjectMap;
-    initMeta?: () => TDataObjectMetaMap
+    initMeta?: () => TDataObjectMetaMap;
 };
 
 export type TDataObjectStateUpdateHandle = {
     state: TDataObject;
-    updateState: (
-        fct: (prev: TDataObject) => TDataObject,
-        eventInfo: TDataObjectEvent
-    ) => void;
+    updateState: (fct: (prev: TDataObject) => TDataObject, eventInfo: TDataObjectEvent) => void;
 };
 
-export type TDataObjectEvent =
-    | TDataObjectValueEvent
-    | TDataObjectEventListAddEvent
-    | TDataObjectEventListRemoveEvent;
+export type TDataObjectEvent = TDataObjectValueEvent | TDataObjectEventListAddEvent | TDataObjectEventListRemoveEvent;
 
 export type TDataObjectValueEvent = {
     type: 'value';

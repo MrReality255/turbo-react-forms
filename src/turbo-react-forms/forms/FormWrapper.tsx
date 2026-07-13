@@ -17,6 +17,8 @@ import { DataObjectUtils, DataUtils, FormUtils } from '..';
 import { useNewFormContext } from '../hooks/useNewFormContext';
 import { RenderUtils } from './render';
 
+const errUnknown = 'error_unknown';
+
 export function TFormWrapper<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
@@ -69,7 +71,8 @@ export function TFormWrapper<
         },
         updateInternalState,
         p.onResolve,
-        p.onSubmit
+        p.onSubmit,
+        p.onError ?? ((err) => ({ message: errUnknown, data: err }))
     );
 
     const formConfig = typeof config.form === 'function' ? config.form(state) : config.form;
@@ -95,6 +98,7 @@ export function TFormWrapper<
 
     function newFormInternalState(rawData: TDataObjectMap): TFormInternalState<Ctx> {
         return {
+            error: undefined,
             ctx: p.formCtx,
             handle: p.handle,
             mode: 'ready' as TFormMode,

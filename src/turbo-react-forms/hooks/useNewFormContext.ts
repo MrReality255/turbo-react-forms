@@ -1,6 +1,7 @@
 import { useContext, useMemo } from 'react';
 import { TFormContext } from '../contexts/types';
 import {
+    TFormError,
     TFormInternalState,
     TFormStateLibCtx,
     TFormSubformPropsType,
@@ -23,7 +24,8 @@ export function useNewFormContext<
     { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     updateFct: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
-    onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined
+    onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined,
+    onError: (err: unknown) => TFormError
 ) {
     const hideMethodRef = useMemo(() => {
         return DataUtils.newRef((prev: () => void) => prev());
@@ -38,10 +40,10 @@ export function useNewFormContext<
             close,
             submit: function (id?: TKey, customData?: unknown) {
                 if (!onSubmit) {
-                    debugger;
                     close();
                     return;
                 }
+                debugger;
                 updateFct((prev) => ({ ...prev, mode: 'loading' }));
                 onSubmit({
                     ctx: state.ctx,
@@ -50,16 +52,37 @@ export function useNewFormContext<
                     customData,
                 })
                     .then((submitValue) => {
-                        debugger;
+                        const newCtx = submitValue.ctxUpdateFct ? submitValue.ctxUpdateFct(state.ctx) : state.ctx;
+                        if (submitValue.close) {
+                            hide(() =>
+                                onResolve({
+                                    rawData: submitValue.rawData ?? state.data,
+                                    ctx: newCtx,
+                                    submitData: submitValue.submitData,
+                                    id: submitValue.id,
+                                })
+                            );
+                            return;
+                        }
+                        updateFct((prev) => ({
+                            ...prev,
+                            mode: 'ready',
+                            ctx: newCtx,
+                            rawData: submitValue.rawData?.getRef() ?? prev.rawData,
+                        }));
                     })
                     .catch((err) => {
-                        debugger;
+                        updateFct((prev) => ({
+                            ...prev,
+                            mode: 'ready',
+                            error: onError(err),
+                        }));
                     });
             },
         };
     }, [state, onSubmit, updateFct, hideMethodRef]);
 
-    function close() {
+    function hide(callback: () => void) {
         const hideMethod = lib.hideMethod ?? lctx?.hide;
         if (!hideMethod) {
             throw 'unable to find hide method - use either layers or define hideMethod';
@@ -67,7 +90,11 @@ export function useNewFormContext<
         const customHideRef = hideMethodRef.current;
         customHideRef(function () {
             hideMethod();
-            onResolve(null);
+            callback();
         });
+    }
+
+    function close() {
+        hide(() => onResolve(null));
     }
 }
