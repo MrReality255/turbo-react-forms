@@ -1,4 +1,4 @@
-import { IDataObject, TKey, TRef, TStateHandle } from '..';
+import { IDataObject, TFormSubmitFctData, TKey, TRef, TStateHandle } from '..';
 
 export type TLayerRec = {
     handle: number;
@@ -21,13 +21,14 @@ export type TLayerContext = {
     hide: () => void;
 };
 
-export type TFormContext<Ctx> = {
+export type TFormContext<Ctx, SubmitType> = {
     ctx: Ctx;
     data: IDataObject;
     hideMethodRef: TRef<(origHide: () => void) => void>;
 
     close: () => void;
     submit: (id?: TKey, customData?: unknown) => void;
+    submitEx: (submitValue: TFormSubmitFctData<Ctx, SubmitType>) => void;
 };
 
 export type TFormControlContext = {

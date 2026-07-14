@@ -7,6 +7,7 @@ import {
     TFormSubformPropsType,
     TFormSubmitCtx,
     TFormSubmitFct,
+    TFormSubmitFctData,
     TFormTemplatePropsType,
 } from '../forms';
 import { DataUtils, TKey } from '..';
@@ -32,44 +33,30 @@ export function useNewFormContext<
     }, []);
     const lctx = useContext(ctxLayer);
 
-    return useMemo<TFormContext<Ctx>>(() => {
+    return useMemo<TFormContext<Ctx, SubmitType>>(() => {
         return {
             ctx: state.ctx,
             data: state.data,
             hideMethodRef,
             close,
+            submitEx: handleSubmitResult,
             submit: function (id?: TKey, customData?: unknown) {
                 if (!onSubmit) {
                     close();
                     return;
                 }
-                debugger;
                 updateFct((prev) => ({ ...prev, mode: 'loading' }));
-                onSubmit({
+                const submitResult = onSubmit({
                     ctx: state.ctx,
                     id: id,
                     rawData: state.data,
                     customData,
-                })
+                });
+                debugger;
+
+                submitResult
                     .then((submitValue) => {
-                        const newCtx = submitValue.ctxUpdateFct ? submitValue.ctxUpdateFct(state.ctx) : state.ctx;
-                        if (submitValue.close) {
-                            hide(() =>
-                                onResolve({
-                                    rawData: submitValue.rawData ?? state.data,
-                                    ctx: newCtx,
-                                    submitData: submitValue.submitData,
-                                    id: submitValue.id,
-                                })
-                            );
-                            return;
-                        }
-                        updateFct((prev) => ({
-                            ...prev,
-                            mode: 'ready',
-                            ctx: newCtx,
-                            rawData: submitValue.rawData?.getRef() ?? prev.rawData,
-                        }));
+                        handleSubmitResult(submitValue);
                     })
                     .catch((err) => {
                         updateFct((prev) => ({
@@ -81,6 +68,31 @@ export function useNewFormContext<
             },
         };
     }, [state, onSubmit, updateFct, hideMethodRef]);
+
+    function handleSubmitResult(submitValue: TFormSubmitFctData<Ctx, SubmitType>) {
+        const newCtx = submitValue.ctxUpdateFct ? submitValue.ctxUpdateFct(state.ctx) : state.ctx;
+        if (submitValue.close) {
+            hide(() =>
+                onResolve(
+                    submitValue.cancel
+                        ? null
+                        : {
+                              rawData: submitValue.rawData ?? state.data,
+                              ctx: newCtx,
+                              submitData: submitValue.submitData,
+                              id: submitValue.id,
+                          }
+                )
+            );
+            return;
+        }
+        updateFct((prev) => ({
+            ...prev,
+            mode: 'ready',
+            ctx: newCtx,
+            rawData: submitValue.rawData?.getRef() ?? prev.rawData,
+        }));
+    }
 
     function hide(callback: () => void) {
         const hideMethod = lib.hideMethod ?? lctx?.hide;

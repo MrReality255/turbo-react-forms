@@ -1,7 +1,6 @@
 import {
     TFormControlList,
     TFormControlSpecificProps,
-    TFormModalResult,
     TFormState,
     TFormSubformPropsType,
     TFormTemplatePropsType,
@@ -41,6 +40,7 @@ export type TFormSubmitFctData<Ctx, SubmitType> = {
     id: TKey | undefined;
     submitData: SubmitType;
     rawData?: IDataObject;
+    cancel?: boolean;
     close: boolean;
     ctxUpdateFct?: (prev: Ctx) => Ctx;
 };

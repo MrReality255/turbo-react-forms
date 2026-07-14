@@ -137,11 +137,11 @@ export function DemoForms() {
                     }
                         */
 
-                    if (event.type == 'value' && event.value.length > 4) {
-                        debugger;
+                    if (event.type == 'value' && event.value == 'cancel') {
                         return {
                             modalResult: {
                                 close: true,
+                                cancel: true,
                                 id: event.id,
                                 submitData: 999,
                             },
@@ -165,7 +165,7 @@ export function DemoForms() {
         const result = await frm.show(null, { id: 324 }, async (ctx) => {
             return {
                 id: 'bla',
-                close: false,
+                close: true,
                 submitData: 777,
             };
         });

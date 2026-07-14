@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { RefObject, useMemo, useRef, useState } from 'react';
 import {
     TFormConfig,
     TFormControlLib,
@@ -16,6 +16,7 @@ import { TDataObject, TDataObjectEvent, TDataObjectMap } from '../hooks';
 import { DataObjectUtils, DataUtils, FormUtils } from '..';
 import { useNewFormContext } from '../hooks/useNewFormContext';
 import { RenderUtils } from './render';
+import { TFormContext } from '../contexts/types';
 
 const errUnknown = 'error_unknown';
 
@@ -53,12 +54,15 @@ export function TFormWrapper<
         return newFormInternalState(initDataMap.data);
     }, []);
 
+    const formCtxRef = useRef<TFormContext<Ctx, SubmitType> | null>(null);
+
     const [internalState, updateInternalState] = useState<TFormInternalState<Ctx>>(initializedDataMap);
 
     const state = useMemo(() => {
         return newFormState(
             internalState,
-            (updateFct, eventInfo) => createUpdateUpdateHandler(updateInternalState, config, eventInfo, updateFct, lib),
+            (updateFct, eventInfo) =>
+                createUpdateUpdateHandler(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef),
             strictMode
         );
     }, [internalState]);
@@ -75,6 +79,7 @@ export function TFormWrapper<
         p.onError ?? ((err) => ({ message: errUnknown, data: err }))
     );
 
+    formCtxRef.current = formContext;
     const formConfig = typeof config.form === 'function' ? config.form(state) : config.form;
 
     const mainWrapper = config.onRenderMainWrapper
@@ -145,7 +150,8 @@ function createUpdateUpdateHandler<
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     eventInfo: TDataObjectEvent,
     updateFct: (prev: TDataObject) => TDataObject,
-    lib: TFormControlLib<P, V, F, TT, SFT>
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>
 ): void {
     updateInternalState((prevInternalState) => {
         const newDataObj = updateFct(prevInternalState.rawData);
@@ -164,13 +170,13 @@ function createUpdateUpdateHandler<
                         ...nextState,
                         mode: 'ready',
                     };
-                    updateNextState(newNextState, newUpdateResult, config, lib);
+                    updateNextState(newNextState, newUpdateResult, config, lib, frmCtxRef);
                     updateInternalState(() => newNextState);
                 });
                 return nextState;
             }
 
-            updateNextState(nextState, result, config, lib);
+            updateNextState(nextState, result, config, lib, frmCtxRef);
         }
 
         return nextState;
@@ -188,7 +194,8 @@ function updateNextState<
     nextState: TFormInternalState<Ctx>,
     updateResult: TFormUpdateContext<Ctx, SubmitType> | undefined,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
-    lib: TFormControlLib<P, V, F, TT, SFT>
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>
 ) {
     reinitializeRawData(nextState, config, lib);
 
@@ -202,8 +209,8 @@ function updateNextState<
     if (updateResult.onUpdateData) {
         nextState.rawData = updateResult.onUpdateData(nextState.rawData);
     }
-    if (updateResult.modalResult) {
-        throw 'modal result';
+    if (updateResult.modalResult && frmCtxRef.current !== null) {
+        frmCtxRef.current.submitEx(updateResult.modalResult);
     }
 }
 
