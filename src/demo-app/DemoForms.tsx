@@ -13,7 +13,6 @@ function getControls(state: TFormState<any>): TDemoLibControls {
             onRender: () => <div>Alles valide</div>,
         } : null,
          */
-        /*
         {
             id: 'list1',
             class: 'template',
@@ -41,13 +40,13 @@ function getControls(state: TFormState<any>): TDemoLibControls {
                     return <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '15px' }}>{item}</div>;
                 },
             },
-        },*/
+        },
         {
             id: 't1',
             class: undefined,
             type: 'text',
             prop: { label: 'text 1', maxLen: 20 },
-            // hidden: !isActivated,
+            hidden: !isActivated,
         },
         {
             id: 'activator',

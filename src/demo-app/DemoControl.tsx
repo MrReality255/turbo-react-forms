@@ -1,14 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
-import { DataUtils, TFormControlWrapperProps, useClosingEffect } from "../turbo-react-forms";
+import React, { useState, useEffect, useRef } from 'react';
+import { DataUtils, TFormControlWrapperProps, useClosingEffect } from '../turbo-react-forms';
 
-export function DemoControl({ controlProps, children, hintTranslator, visible }: {
-    hintTranslator: (h: string | undefined) => string | undefined,
-    controlProps: TFormControlWrapperProps, children?: React.ReactNode,
-    visible: boolean,
+export function DemoControl({
+    controlProps,
+    children,
+    hintTranslator,
+    visible,
+}: {
+    hintTranslator: (h: string | undefined) => string | undefined;
+    controlProps: TFormControlWrapperProps;
+    children?: React.ReactNode;
+    visible: boolean;
 }) {
-    const ce = useClosingEffect({ mode: 'opacity', delay: 200 });
-
-
+    const ce = useClosingEffect({
+        mode: 'resize',
+        delay: 100,
+        initialState: visible,
+        initialTargetState: visible,
+        id: controlProps.id == 't1' ? 't1' : undefined,
+    });
     const [renderContent, setRenderContent] = useState(visible);
     const isFirstRender = useRef(true);
 
@@ -45,8 +55,7 @@ export function DemoControl({ controlProps, children, hintTranslator, visible }:
             >
                 ** CONTROL {controlProps.id} **
                 <div>
-                    {controlProps.label} - {controlProps.type}/
-                    {controlProps.class}
+                    {controlProps.label} - {controlProps.type}/{controlProps.class}
                 </div>
             </div>
             <div
@@ -62,11 +71,7 @@ export function DemoControl({ controlProps, children, hintTranslator, visible }:
                 {children}
                 {controlProps.context?.after}
                 {controlProps.valid ? (
-                    <div style={{ color: 'red' }}>
-                        {hintTranslator(
-                            DataUtils.Validity.getHint(controlProps.valid)
-                        )}
-                    </div>
+                    <div style={{ color: 'red' }}>{hintTranslator(DataUtils.Validity.getHint(controlProps.valid))}</div>
                 ) : null}
             </div>
             {controlProps.context?.bottom}

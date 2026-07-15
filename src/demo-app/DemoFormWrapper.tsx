@@ -60,11 +60,11 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
     );
 
     function showRawData() {
-        l.main.showNotification(() => <Noticiation>{JSON.stringify(ctx.data.getRef())}</Noticiation>);
+        l.main.showNotification(() => <Notification>{JSON.stringify(ctx.data.getRef())}</Notification>);
     }
 }
 
-function Noticiation(p: PropsWithChildren) {
+function Notification(p: PropsWithChildren) {
     const l = useLayer();
     const closer = useClosingEffect({ mode: 'resize', delay: 300 });
     return (

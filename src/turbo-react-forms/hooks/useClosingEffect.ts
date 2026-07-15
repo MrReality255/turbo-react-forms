@@ -71,19 +71,37 @@ function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffec
 export function useClosingEffect({
     mode = defaultMode,
     delay = defaultAnimationDuration,
-    initialState,
+    initialState = true,
+    initialTargetState = true,
+    id,
 }: TClosingEffectProps) {
     const [state, setState] = useState<TClosingEffectInternalState>({
         state: 'done',
-        wantOpen: true,
-        wasOpen: initialState ?? true,
-        newOpen: initialState ?? true,
+        wantOpen: initialTargetState,
+        wasOpen: initialState,
+        newOpen: initialState,
         height: null,
     });
 
     const transition = useMemo(() => {
         return getTransition(mode, delay, state);
     }, [mode, delay, state]);
+
+    if (id) {
+        console.log(
+            'closing effect state',
+            id,
+            ':',
+            JSON.stringify(
+                {
+                    state,
+                    css: get(),
+                },
+                null,
+                2
+            )
+        );
+    }
 
     useEffect(() => {
         switch (true) {
@@ -93,7 +111,7 @@ export function useClosingEffect({
             case state.state == 'prepare':
                 setTimeout(() => {
                     setState({ ...state, state: 'animate' });
-                }, 1);
+                }, delay / 10);
                 setTimeout(() => {
                     setState({ ...state, state: 'finalize' });
                 }, 1 + delay);

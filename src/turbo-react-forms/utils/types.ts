@@ -23,5 +23,7 @@ export type TClosingEffectProps = {
     mode?: TClosingEffect;
     delay?: number;
     initialState?: boolean;
+    initialTargetState?: boolean;
+    id?: string;
     // onClose?: () => void;
 };
