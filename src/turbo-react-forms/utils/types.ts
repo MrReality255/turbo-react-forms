@@ -1,3 +1,5 @@
+import { RefObject } from 'react';
+
 // General
 export type TKey = number | string;
 export type TRef<T> = { current: T };
@@ -15,7 +17,7 @@ export type TStateHandle<T> = TStateUpdateHandle<T> & {
 export type TValidity = boolean | { valid: false; hint: string | undefined };
 
 // UI
-export type TClosingEffect = 'resize' | 'opacity';
+export type TClosingEffect = 'resize' | 'opacity' | 'fall' | 'slide';
 export type TRenderFct<T> = (src: T) => React.ReactNode;
 export type TWrapperFct = (content: React.ReactNode) => React.ReactNode;
 
@@ -25,5 +27,5 @@ export type TClosingEffectProps = {
     initialState?: boolean;
     initialTargetState?: boolean;
     id?: string;
-    // onClose?: () => void;
+    ref?: RefObject<HTMLElement | null>;
 };

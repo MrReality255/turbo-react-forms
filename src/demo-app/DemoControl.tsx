@@ -12,12 +12,14 @@ export function DemoControl({
     children?: React.ReactNode;
     visible: boolean;
 }) {
+    const ref = useRef<HTMLDivElement>(null);
     const ce = useClosingEffect({
         mode: 'resize',
-        delay: 100,
+        delay: 250,
         initialState: visible,
         initialTargetState: visible,
         id: controlProps.id == 't1' ? 't1' : undefined,
+        ref: ref,
     });
     const [renderContent, setRenderContent] = useState(visible);
     const isFirstRender = useRef(true);
@@ -43,7 +45,7 @@ export function DemoControl({
     }
 
     return (
-        <div style={{ ...ce.get() }}>
+        <div ref={ref} style={{ ...ce.get() }}>
             {controlProps.context?.top}
             <div
                 style={{

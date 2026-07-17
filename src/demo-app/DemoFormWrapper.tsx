@@ -10,7 +10,7 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
     const ctx = useFormContext();
     const l = useLayers();
 
-    const closer = useClosingEffect({ mode: 'resize', delay: 150, initialState: false });
+    const closer = useClosingEffect({ mode: 'resize', delay: 350, initialState: false });
     ctx.hideMethodRef.current = (prev) => {
         closer.hide(prev);
     };

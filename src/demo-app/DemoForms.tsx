@@ -42,17 +42,17 @@ function getControls(state: TFormState<any>): TDemoLibControls {
             },
         },
         {
+            id: 'activator',
+            class: undefined,
+            type: 'checkBox',
+            prop: { aaa: 3 },
+        },
+        {
             id: 't1',
             class: undefined,
             type: 'text',
             prop: { label: 'text 1', maxLen: 20 },
             hidden: !isActivated,
-        },
-        {
-            id: 'activator',
-            class: undefined,
-            type: 'checkBox',
-            prop: { aaa: 3 },
         },
         {
             id: 'subform1',

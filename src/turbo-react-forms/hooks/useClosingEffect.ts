@@ -4,9 +4,9 @@ import { TClosingEffect, TClosingEffectProps } from '../utils';
 const defaultAnimationDuration = 200;
 const defaultMode = 'resize';
 
-type TClosingEffectState = 'prepare' | 'animate' | 'finalize' | 'done';
+type TClosingEffectPhase = 'measure' | 'prepare' | 'animate' | 'finalize' | 'done';
 type TClosingEffectInternalState = {
-    state: TClosingEffectState;
+    phase: TClosingEffectPhase;
     wantOpen: boolean;
     wasOpen: boolean;
     newOpen: boolean;
@@ -14,7 +14,7 @@ type TClosingEffectInternalState = {
 };
 
 function getOpacityTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
-    switch (state.state) {
+    switch (state.phase) {
         case 'prepare':
             return {
                 opacity: state.wasOpen ? 1 : 0.25,
@@ -34,11 +34,37 @@ function getOpacityTransition(state: TClosingEffectInternalState, delay: number)
             return {
                 opacity: state.wasOpen ? 1 : 0.25,
             };
+        default:
+            return {};
+    }
+}
+
+function getFallTranslation(state: TClosingEffectInternalState, delay: number): CSSProperties {
+    switch (state.phase) {
+        case 'prepare':
+            return {
+                transform: state.wasOpen ? 'translateY(0)' : 'translateY(-150%)',
+            };
+        case 'animate':
+            return {
+                transform: state.newOpen ? 'translateY(0)' : 'translateY(-150%)',
+                transition: `transform ${delay}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+            };
+        case 'finalize':
+            return {
+                transform: state.newOpen ? 'translateY(0)' : 'translateY(-150%)',
+            };
+        case 'done':
+            return {
+                transform: state.newOpen ? 'translateY(0)' : 'translateY(-150%)',
+            };
+        default:
+            return {};
     }
 }
 
 function getResizeTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
-    switch (state.state) {
+    switch (state.phase) {
         case 'prepare':
             return {
                 scale: state.wasOpen ? 1 : 0.25,
@@ -56,6 +82,31 @@ function getResizeTransition(state: TClosingEffectInternalState, delay: number):
             return {
                 scale: state.wasOpen ? 1 : 0.25,
             };
+        default:
+            return {};
+    }
+}
+
+function getSlideTranslation(state: TClosingEffectInternalState, delay: number): CSSProperties {
+    switch (state.phase) {
+        case 'measure':
+            return {};
+        case 'prepare':
+            return {
+                height: (state.height ?? 0) + 'px',
+            };
+        case 'animate':
+            return {
+                height: (state.height ?? 0) + 'px',
+            };
+        case 'finalize':
+            return {
+                height: (state.height ?? 0) + 'px',
+            };
+        case 'done':
+            return {
+                height: (state.height ?? 0) + 'px',
+            };
     }
 }
 
@@ -65,6 +116,10 @@ function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffec
             return getOpacityTransition(state, delay);
         case 'resize':
             return getResizeTransition(state, delay);
+        case 'fall':
+            return getFallTranslation(state, delay);
+        case 'slide':
+            return getSlideTranslation(state, delay);
     }
 }
 
@@ -74,9 +129,10 @@ export function useClosingEffect({
     initialState = true,
     initialTargetState = true,
     id,
+    ref,
 }: TClosingEffectProps) {
     const [state, setState] = useState<TClosingEffectInternalState>({
-        state: 'done',
+        phase: 'done',
         wantOpen: initialTargetState,
         wasOpen: initialState,
         newOpen: initialState,
@@ -105,24 +161,29 @@ export function useClosingEffect({
 
     useEffect(() => {
         switch (true) {
-            case state.state == 'done' && state.wasOpen != state.wantOpen:
-                setState({ ...state, state: 'prepare', newOpen: state.wantOpen });
+            case state.phase == 'done' && state.wasOpen != state.wantOpen:
+                setState({ ...state, phase: needMeasure(mode) ? 'measure' : 'prepare', newOpen: state.wantOpen });
                 return;
-            case state.state == 'prepare':
+            case state.phase == 'measure':
+                const height = ref?.current?.getBoundingClientRect().height;
+                console.log('measure', height, ' ref: ', ref, ' current: ', ref?.current);
+                setState({ ...state, phase: 'prepare', height: height ?? null });
+                return;
+            case state.phase == 'prepare':
                 setTimeout(() => {
-                    setState({ ...state, state: 'animate' });
+                    setState({ ...state, phase: 'animate' });
                 }, delay / 10);
                 setTimeout(() => {
-                    setState({ ...state, state: 'finalize' });
+                    setState({ ...state, phase: 'finalize' });
                 }, 1 + delay);
                 return;
-            case state.state == 'finalize':
+            case state.phase == 'finalize':
                 setTimeout(() => {
-                    setState({ ...state, wasOpen: state.newOpen, state: 'done' });
+                    setState({ ...state, wasOpen: state.newOpen, phase: 'done' });
                 }, 1);
                 return;
         }
-    }, [state.state, state.wasOpen, state.wantOpen]);
+    }, [state.phase, state.wasOpen, state.wantOpen]);
 
     return { get, show, hide, getState: () => state };
 
@@ -147,4 +208,8 @@ export function useClosingEffect({
             closer();
         }, delay + 1);
     }
+}
+
+function needMeasure(mode: TClosingEffect) {
+    return mode == 'slide';
 }
