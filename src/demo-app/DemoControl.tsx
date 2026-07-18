@@ -14,7 +14,7 @@ export function DemoControl({
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const ce = useClosingEffect({
-        mode: 'resize',
+        mode: 'opacity',
         delay: 250,
         initialState: visible,
         initialTargetState: visible,

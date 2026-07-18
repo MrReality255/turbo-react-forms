@@ -7,7 +7,9 @@ export function DemoClosingEffect() {
         <DemoPage>
             <div>
                 <h1>Demo Closing Effect</h1>
-                <ExampleClosingEffect mode="slide" />
+                <ExampleClosingEffect mode="fall" />
+                <ExampleClosingEffect mode="resize" />
+                <ExampleClosingEffect mode="opacity" />
             </div>
         </DemoPage>
     );

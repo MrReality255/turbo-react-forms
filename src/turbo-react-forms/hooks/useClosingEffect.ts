@@ -4,13 +4,12 @@ import { TClosingEffect, TClosingEffectProps } from '../utils';
 const defaultAnimationDuration = 200;
 const defaultMode = 'resize';
 
-type TClosingEffectPhase = 'measure' | 'prepare' | 'animate' | 'finalize' | 'done';
+type TClosingEffectPhase = 'prepare' | 'animate' | 'finalize' | 'done';
 type TClosingEffectInternalState = {
     phase: TClosingEffectPhase;
     wantOpen: boolean;
     wasOpen: boolean;
     newOpen: boolean;
-    height: number | null;
 };
 
 function getOpacityTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
@@ -87,29 +86,6 @@ function getResizeTransition(state: TClosingEffectInternalState, delay: number):
     }
 }
 
-function getSlideTranslation(state: TClosingEffectInternalState, delay: number): CSSProperties {
-    switch (state.phase) {
-        case 'measure':
-            return {};
-        case 'prepare':
-            return {
-                height: (state.height ?? 0) + 'px',
-            };
-        case 'animate':
-            return {
-                height: (state.height ?? 0) + 'px',
-            };
-        case 'finalize':
-            return {
-                height: (state.height ?? 0) + 'px',
-            };
-        case 'done':
-            return {
-                height: (state.height ?? 0) + 'px',
-            };
-    }
-}
-
 function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffectInternalState): CSSProperties {
     switch (mode) {
         case 'opacity':
@@ -118,8 +94,6 @@ function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffec
             return getResizeTransition(state, delay);
         case 'fall':
             return getFallTranslation(state, delay);
-        case 'slide':
-            return getSlideTranslation(state, delay);
     }
 }
 
@@ -129,14 +103,12 @@ export function useClosingEffect({
     initialState = true,
     initialTargetState = true,
     id,
-    ref,
 }: TClosingEffectProps) {
     const [state, setState] = useState<TClosingEffectInternalState>({
         phase: 'done',
         wantOpen: initialTargetState,
         wasOpen: initialState,
         newOpen: initialState,
-        height: null,
     });
 
     const transition = useMemo(() => {
@@ -162,12 +134,7 @@ export function useClosingEffect({
     useEffect(() => {
         switch (true) {
             case state.phase == 'done' && state.wasOpen != state.wantOpen:
-                setState({ ...state, phase: needMeasure(mode) ? 'measure' : 'prepare', newOpen: state.wantOpen });
-                return;
-            case state.phase == 'measure':
-                const height = ref?.current?.getBoundingClientRect().height;
-                console.log('measure', height, ' ref: ', ref, ' current: ', ref?.current);
-                setState({ ...state, phase: 'prepare', height: height ?? null });
+                setState({ ...state, phase: 'prepare', newOpen: state.wantOpen });
                 return;
             case state.phase == 'prepare':
                 setTimeout(() => {
@@ -208,8 +175,4 @@ export function useClosingEffect({
             closer();
         }, delay + 1);
     }
-}
-
-function needMeasure(mode: TClosingEffect) {
-    return mode == 'slide';
 }
