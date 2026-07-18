@@ -8,14 +8,6 @@ import {
 } from '.';
 import { IDataObject, TValidity } from '..';
 
-export type TFormControlLibTemplateDef<T> = {
-    onRenderTemplateItems: (
-        items: React.ReactNode,
-        baseProps: TFormTemplateStateProps,
-        customProps: T
-    ) => React.ReactNode;
-};
-
 export type TFormControlLib<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,

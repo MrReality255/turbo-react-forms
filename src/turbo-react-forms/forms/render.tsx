@@ -10,11 +10,11 @@ import {
     TFormControlInheritedStateProps,
     TFormControlLib,
     TFormControlList,
-    TFormControlString,
+    TFormControlAtomic,
     TFormControlSubform,
     TFormControlTemplate,
     TFormControlTyped,
-    TFormControlWrapperBaseProps,
+    TFormControlWrapperProps,
     TFormState,
     TFormSubformPropsType,
     TFormTemplatePropsType,
@@ -41,7 +41,7 @@ function newBaseRenderWrapperProps<
     item: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
-): TFormControlWrapperBaseProps {
+): TFormControlWrapperProps {
     if (item.class === 'plain') {
         return {
             id: '',
@@ -50,6 +50,8 @@ function newBaseRenderWrapperProps<
             disabled: inheritedProps.disabled,
             readOnly: inheritedProps.readOnly,
             optional: false,
+            type: null,
+            class: undefined,
         };
     }
 
@@ -62,6 +64,8 @@ function newBaseRenderWrapperProps<
         optional: item.optional ?? false,
         context: item.context,
         label: item.label,
+        type: null,
+        class: undefined,
     };
 }
 
@@ -73,7 +77,7 @@ function newBaseProps<
     SFT extends TFormSubformPropsType,
     Ctx,
 >(
-    item: TFormControlString<P, V, keyof P, Ctx>,
+    item: TFormControlAtomic<P, V, keyof P, Ctx>,
     state: TFormState<Ctx>,
     rawData: IDataObject,
     lib: TFormControlLib<P, V, F, TT, SFT>,

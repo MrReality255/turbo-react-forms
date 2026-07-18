@@ -5,7 +5,8 @@ import {
     TFormSubformPropsType,
     TFormTemplatePropsType,
 } from '.';
-import { IDataObject, TDataObject, TDataObjectEvent, TKey } from '..';
+import { TDataObject, TDataObjectEvent } from '..';
+import { TFormSubmitFct, TFormSubmitFctData } from './types_submit';
 
 export type TFormConfig<
     P extends Record<string, unknown>,
@@ -28,33 +29,6 @@ export type TFormConfig<
         data: TDataObject
     ) => TFormUpdateContext<Ctx, SubmitType> | undefined | Promise<TFormUpdateContext<Ctx, SubmitType> | undefined>;
 };
-
-export type TFormSubmitFuncCtx<Ctx> = {
-    id: TKey | undefined;
-    ctx: Ctx;
-    rawData: IDataObject;
-    customData: unknown;
-};
-
-export type TFormSubmitFctData<Ctx, SubmitType> = {
-    id: TKey | undefined;
-    submitData: SubmitType;
-    rawData?: IDataObject;
-    cancel?: boolean;
-    close: boolean;
-    ctxUpdateFct?: (prev: Ctx) => Ctx;
-};
-
-export type TFormSubmitCtx<Ctx, SubmitType> = {
-    submitData: SubmitType;
-    rawData: IDataObject;
-    ctx: Ctx;
-    id: TKey | undefined;
-};
-
-export type TFormSubmitFct<Ctx, SubmitType> = (
-    submitCtx: TFormSubmitFuncCtx<Ctx>
-) => Promise<TFormSubmitFctData<Ctx, SubmitType>>;
 
 export type TFormUpdateContext<Ctx, SubmitType> = {
     ctx?: Ctx;

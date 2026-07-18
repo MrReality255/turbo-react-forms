@@ -4,13 +4,10 @@ import {
     TFormControlOuterProps,
 } from './types_controls';
 
-export type TFormControlWrapperBaseProps = TFormControlOuterProps &
+export type TFormControlWrapperProps = TFormControlOuterProps &
     TFormControlCommonProps & {
         value: string | null;
         valid: TValidity | null;
+        type: string | null;
+        class: string | undefined;
     };
-
-export type TFormControlWrapperProps = TFormControlWrapperBaseProps & {
-    type: string | null;
-    class: string | undefined;
-};

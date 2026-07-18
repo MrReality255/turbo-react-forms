@@ -115,7 +115,7 @@ export type TFormControlPlain<Ctx> = TFormControlRenderInfoProps & {
     onRender: (ctx: Ctx) => React.ReactNode;
 };
 
-export type TFormControlString<P, V, Type extends keyof P, Ctx> =
+export type TFormControlAtomic<P, V, Type extends keyof P, Ctx> =
     | TFormControlTyped<P, V, Type, Ctx>
     | TFormControlDynamic<Ctx>
     | TFormControlCustom<V, Ctx>;
@@ -128,7 +128,7 @@ export type TFormControl<
     Type extends keyof P,
     Ctx,
 > =
-    | TFormControlString<P, V, Type, Ctx>
+    | TFormControlAtomic<P, V, Type, Ctx>
     | TFormControlTemplate<P, V, TT, SFT, Ctx>
     | TFormControlSubform<P, V, TT, SFT, Ctx>
     | TFormControlPlain<Ctx>;
@@ -172,9 +172,6 @@ export type TFormControlAtomicProps<Ctx> = {
     onValidate?: (value: string, ctx: Ctx) => TValidity;
 };
 
-export type TFormControlCommonRenderInfoProps = TFormControlCommonProps &
-    TFormControlRenderInfoProps;
-
 export type TFormControlOuterProps = {
     label?: string | React.ReactNode;
     context?: TFormControlReactContext;
@@ -188,7 +185,7 @@ export type TFormControlReactContext = {
 };
 
 export type TFormControlCommonPropsDef = TFormControlCommonProps &
-    TFormControlCommonRenderInfoProps &
+    TFormControlRenderInfoProps &
     TFormControlOuterProps & {
         onWrap?: (content: React.ReactNode) => React.ReactNode;
     };

@@ -9,7 +9,7 @@ import {
     TFormControlInheritedStateProps,
     TFormControlList,
     TFormControlSpecificProps,
-    TFormControlString,
+    TFormControlAtomic,
     TFormControlSubform,
     TFormControlTemplate,
     TFormInternalState,
@@ -306,7 +306,7 @@ function createInitDataStringControl<
     Ctx,
 >(
     result: TDataObjectMap,
-    control: TFormControlString<P, V, keyof P, Ctx>,
+    control: TFormControlAtomic<P, V, keyof P, Ctx>,
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     inheritedStateProps: TFormControlInheritedStateProps,
@@ -346,7 +346,7 @@ function validate<
     Ctx,
 >(
     value: string,
-    control: TFormControlString<P, V, keyof P, Ctx>,
+    control: TFormControlAtomic<P, V, keyof P, Ctx>,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     inheritedProps: TFormControlInheritedStateProps
 ): TValidity {

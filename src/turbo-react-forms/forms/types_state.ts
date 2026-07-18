@@ -2,7 +2,7 @@ import { IDataObject, TDataObject } from '../hooks';
 import { THandleProvider, TKey } from '../utils';
 
 export type TFormMode = 'ready' | 'loading' | 'waiting';
-export type TFormModalResult = 'submit' | 'cancel';
+
 export type TFormError = {
     message: string;
     code?: number;
@@ -22,12 +22,3 @@ export type TFormInternalState<Ctx> = {
 export type TFormState<Ctx> = TFormInternalState<Ctx> & {
     data: IDataObject;
 };
-
-// LIB
-
-// SUBMIT
-
-// LIB
-
-// CONFIG
-// WRAPPER

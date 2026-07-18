@@ -1,4 +1,4 @@
-import { THandleProvider, TStateHandle, TValidity } from '..';
+import { THandleProvider, TValidity } from '..';
 
 export type TDataObjectMetaValue = boolean;
 
@@ -12,7 +12,6 @@ export type TDataObject = {
     id: number;
 };
 export type TDataRootObject = TDataObject & { maxID: number };
-export type TDataRoowObjectHandle = TStateHandle<TDataRootObject>;
 
 export type TDataObjectList = {
     items: TDataObject[];
@@ -25,8 +24,6 @@ export type TDataObjectInvalidValue = {
 };
 
 export type TDataObjectValue = string | TDataObject | TDataObjectList | TDataObjectInvalidValue;
-
-export type TDataObjectWrapper = TDataObject & {};
 
 export interface IDataObject {
     set: (key: string, value: TDataObjectValue, eventInfo: TDataObjectEvent) => void;
