@@ -21,7 +21,12 @@ export const DataUtils = {
             current: initValue,
         };
     },
-    orNone,
+    distinct<T>(options: T[]): T[] {
+        return options.filter((v, idx, arr) => arr.indexOf(v) === idx);
+    },
+    orNone<T, R = T>(x: T | undefined, fct: (x: T) => R, defaultValue?: R): R | undefined {
+        return x !== undefined ? fct(x) : defaultValue;
+    },
     using,
 };
 
@@ -31,10 +36,6 @@ function isValid(v: TValidity): boolean {
 
 function getHint(v: TValidity) {
     return typeof v === 'boolean' ? undefined : v.hint;
-}
-
-function orNone<T, R>(src: T | undefined, converterFct: (src: T) => R) {
-    return src !== undefined ? converterFct(src) : undefined;
 }
 
 function using<T, R = T>(src: T, fct: (x: T) => R) {
