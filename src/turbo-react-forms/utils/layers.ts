@@ -26,8 +26,7 @@ function newHandler(ctx: TStateHandle<TLayersState>) {
 
         hideNotification: function (nr?: number) {
             ctx.updateState((prev) => {
-                const lastItem =
-                    prev.notifications[prev.notifications.length - 1];
+                const lastItem = prev.notifications[prev.notifications.length - 1];
                 const delHandle = nr ?? lastItem?.handle;
 
                 if (delHandle === undefined) {
@@ -35,9 +34,7 @@ function newHandler(ctx: TStateHandle<TLayersState>) {
                 }
                 return {
                     ...prev,
-                    notifications: prev.notifications.filter(
-                        (n) => n.handle != delHandle
-                    ),
+                    notifications: prev.notifications.filter((n) => n.handle != delHandle),
                 };
             });
         },

@@ -14,7 +14,7 @@ export const DataUtils = {
         };
     },
     shiftHandleProvider: function (provider: THandleProvider, maxID: number) {
-        while (provider() < maxID) { }
+        while (provider() < maxID) {}
     },
     newRef: function <T>(initValue: T): TRef<T> {
         return {

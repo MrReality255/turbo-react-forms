@@ -21,9 +21,7 @@ export function createFormHook<
         newEmptyList: function <Ctx>() {
             return [] as TFormControlList<P, V, TT, SFT, Ctx>;
         },
-        useForm: function <Ctx, SubmitType>(
-            config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>
-        ) {
+        useForm: function <Ctx, SubmitType>(config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>) {
             return useForm<P, V, F, TT, SFT, Ctx, SubmitType>(lib, config);
         },
     };
@@ -37,37 +35,27 @@ function useForm<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
->(
-    lib: TFormControlLib<P, V, F, TT, SFT>,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>
-) {
+>(lib: TFormControlLib<P, V, F, TT, SFT>, config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>) {
     const lc = useLayersOrNull();
 
     return {
-        show: function (
-            data: TDataObjectMap | null,
-            ctx: Ctx,
-            submitFct?: TFormSubmitFct<Ctx, SubmitType>
-        ) {
-            return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>(
-                (resolve) => {
-                    const showMethod =
-                        lib.showMethod ?? getDefaultShowMethod(lc);
-                    showMethod((handle) => (
-                        <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType>
-                            config={config}
-                            formCtx={ctx}
-                            handle={handle}
-                            initData={data}
-                            initMetaData={{}}
-                            lib={lib}
-                            onSubmit={submitFct}
-                            onResolve={resolve}
-                            strictMode
-                        ></TFormWrapper>
-                    ));
-                }
-            );
+        show: function (data: TDataObjectMap | null, ctx: Ctx, submitFct?: TFormSubmitFct<Ctx, SubmitType>) {
+            return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>((resolve) => {
+                const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
+                showMethod((handle) => (
+                    <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType>
+                        config={config}
+                        formCtx={ctx}
+                        handle={handle}
+                        initData={data}
+                        initMetaData={{}}
+                        lib={lib}
+                        onSubmit={submitFct}
+                        onResolve={resolve}
+                        strictMode
+                    ></TFormWrapper>
+                ));
+            });
         },
     };
 }

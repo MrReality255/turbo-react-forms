@@ -1,4 +1,4 @@
-import { IDataObject, TDataObject, TKey } from '..';
+import { IDataObject, TKey } from '..';
 
 export type TFormSubmitFctCtx<Ctx> = {
     id: TKey | undefined;

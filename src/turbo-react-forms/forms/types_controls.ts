@@ -1,11 +1,6 @@
 import { IDataObject, TDataObjectMap, TFormState, TKey, TValidity } from '..';
 
-export type TFormControlTyped<
-    P,
-    V,
-    Type extends keyof P,
-    Ctx,
-> = TFormControlCommonPropsDef &
+export type TFormControlTyped<P, V, Type extends keyof P, Ctx> = TFormControlCommonPropsDef &
     TFormControlAtomicProps<Ctx> & {
         class?: undefined;
         type: Type;
@@ -40,19 +35,10 @@ export type TFormSubformProps<
     Ctx,
 > = {
     controls:
-    | TFormControlList<P, V, TT, SFT, Ctx>
-    | ((
-        state: TFormState<Ctx>,
-        rawData: IDataObject
-    ) => TFormControlList<P, V, TT, SFT, Ctx>);
-    onWrapControls?: (
-        content: React.ReactNode,
-        data: IDataObject
-    ) => React.ReactNode;
-    onWrapControl?: (
-        content: React.ReactNode,
-        data: IDataObject
-    ) => React.ReactNode;
+        | TFormControlList<P, V, TT, SFT, Ctx>
+        | ((state: TFormState<Ctx>, rawData: IDataObject) => TFormControlList<P, V, TT, SFT, Ctx>);
+    onWrapControls?: (content: React.ReactNode, data: IDataObject) => React.ReactNode;
+    onWrapControl?: (content: React.ReactNode, data: IDataObject) => React.ReactNode;
 };
 
 export type TFormTemplateStateProps = {
@@ -61,7 +47,7 @@ export type TFormTemplateStateProps = {
     count: number;
 
     triggerAdd: () => void;
-    triggerDelete: (idx: number) => void
+    triggerDelete: (idx: number) => void;
 };
 
 export type TFormTemplateProps<
@@ -72,19 +58,20 @@ export type TFormTemplateProps<
     Ctx,
 > = {
     controls:
-    | TFormControlList<P, V, TT, SFT, Ctx>
-    | ((
-        state: TFormState<Ctx>,
-        idx: number,
-        handle: number
-    ) => TFormControlList<P, V, TT, SFT, Ctx>);
+        | TFormControlList<P, V, TT, SFT, Ctx>
+        | ((state: TFormState<Ctx>, idx: number, handle: number) => TFormControlList<P, V, TT, SFT, Ctx>);
 
     minCount?: number;
     maxCount?: number;
     onNewItem?: (idx: number, state: TFormState<Ctx>) => TDataObjectMap;
-    onWrapRowControl?: (item: React.ReactNode, state: TFormState<Ctx>, idx: number) => React.ReactNode
-    onWrapRow?: (item: React.ReactNode, props: TFormTemplateStateProps, state: TFormState<Ctx>, idx: number) => React.ReactNode
-    onWrapTemplate?: (item: React.ReactNode, props: TFormTemplateStateProps, state: TFormState<Ctx>) => React.ReactNode
+    onWrapRowControl?: (item: React.ReactNode, state: TFormState<Ctx>, idx: number) => React.ReactNode;
+    onWrapRow?: (
+        item: React.ReactNode,
+        props: TFormTemplateStateProps,
+        state: TFormState<Ctx>,
+        idx: number
+    ) => React.ReactNode;
+    onWrapTemplate?: (item: React.ReactNode, props: TFormTemplateStateProps, state: TFormState<Ctx>) => React.ReactNode;
 };
 
 export type TFormControlTemplate<
@@ -139,9 +126,12 @@ export type TFormControlList<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
-> = (({
-    [Type in keyof P]: TFormControl<P, V, TT, SFT, Type, Ctx>;
-}[keyof P]) | null)[];
+> = (
+    | {
+          [Type in keyof P]: TFormControl<P, V, TT, SFT, Type, Ctx>;
+      }[keyof P]
+    | null
+)[];
 
 export type TFormControlInheritedStateProps = {
     disabled: boolean;
@@ -205,7 +195,4 @@ export type TFormControlSpecificProps<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
-> =
-    | P[keyof P]
-    | TFormTemplateProps<P, V, TT, SFT, Ctx>
-    | TFormSubformProps<P, V, TT, SFT, Ctx>;
+> = P[keyof P] | TFormTemplateProps<P, V, TT, SFT, Ctx> | TFormSubformProps<P, V, TT, SFT, Ctx>;

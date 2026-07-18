@@ -44,15 +44,12 @@ function createInitData<
     initMetaData: TDataObjectMetaMap | null,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>
-): { data: TDataObjectMap, metaInfo: TDataObjectMetaMap } {
+): { data: TDataObjectMap; metaInfo: TDataObjectMetaMap } {
     initData = initData ?? {};
-    const myControlList =
-        typeof config.controls === 'function'
-            ? config.controls(stateLibCtx.state)
-            : config.controls;
+    const myControlList = typeof config.controls === 'function' ? config.controls(stateLibCtx.state) : config.controls;
 
     const result: TDataObjectMap = {};
-    const resultMetaData: TDataObjectMetaMap = {}
+    const resultMetaData: TDataObjectMetaMap = {};
 
     createInitDataForControlList<P, V, F, TT, SFT, Ctx>(
         result,
@@ -66,8 +63,8 @@ function createInitData<
     );
     return {
         data: result,
-        metaInfo: resultMetaData
-    }
+        metaInfo: resultMetaData,
+    };
 }
 
 function createInitDataForControlList<
@@ -96,7 +93,7 @@ function createInitDataForControlList<
             initMetaData,
             stateLibCtx,
             handleProvider,
-            inheritedStateProps,
+            inheritedStateProps
         );
     });
 }
@@ -116,7 +113,7 @@ function createInitDataForControl<
     initMetaData: TDataObjectMetaMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     handleProvider: THandleProvider,
-    inheritedStateProps: TFormControlInheritedStateProps,
+    inheritedStateProps: TFormControlInheritedStateProps
 ) {
     if (control.class == 'plain' || control.removed) {
         return;
@@ -130,7 +127,7 @@ function createInitDataForControl<
                 initData,
                 stateLibCtx,
                 handleProvider,
-                inheritedStateProps,
+                inheritedStateProps
             );
             return;
         case 'subform':
@@ -142,7 +139,7 @@ function createInitDataForControl<
                 initMetaData,
                 stateLibCtx,
                 handleProvider,
-                inheritedStateProps,
+                inheritedStateProps
             );
             return;
         default:
@@ -164,7 +161,7 @@ function createInitDataForTemplate<
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     handleProvider: THandleProvider,
-    inheritedProps: TFormControlInheritedStateProps,
+    inheritedProps: TFormControlInheritedStateProps
 ) {
     inheritedProps = combineInheritedProps(inheritedProps, control);
 
@@ -175,20 +172,20 @@ function createInitDataForTemplate<
     };
 
     if (initList.items.length > 0) {
-        DataUtils.shiftHandleProvider(handleProvider, initList.items.map(a => a.id).reduce((a, b) => Math.max(a, b), 0))
+        DataUtils.shiftHandleProvider(
+            handleProvider,
+            initList.items.map((a) => a.id).reduce((a, b) => Math.max(a, b), 0)
+        );
     }
 
     const items = initList.items
-        .filter(
-            (_item, idx) =>
-                template.maxCount == undefined || idx < template.maxCount
-        )
+        .filter((_item, idx) => template.maxCount == undefined || idx < template.maxCount)
         .map((item, idx) => {
             const newObj: TDataObject = {
                 type: 'obj',
                 data: {},
                 id: item.id || handleProvider(),
-                metaInfo: {}
+                metaInfo: {},
             };
 
             createInitDataForSubform(
@@ -199,8 +196,7 @@ function createInitDataForTemplate<
                 item.metaInfo,
                 stateLibCtx,
                 handleProvider,
-                inheritedProps,
-
+                inheritedProps
             );
             return newObj;
         });
@@ -208,9 +204,7 @@ function createInitDataForTemplate<
     // create new items to reach the minimum
     if (template.minCount && items.length < template.minCount) {
         for (let i = items.length; i < template.minCount; i++) {
-            items.push(
-                newTemplateItem(control, i, stateLibCtx, handleProvider, inheritedProps)
-            );
+            items.push(newTemplateItem(control, i, stateLibCtx, handleProvider, inheritedProps));
         }
     }
 
@@ -238,24 +232,24 @@ function createInitDataForSubform<
     inheritedProps: TFormControlInheritedStateProps
 ) {
     if (control.useOwnDataObject) {
-        const initObj = (initData[control.id] as TDataObject | undefined)
-        DataUtils.shiftHandleProvider(handleProvider, initObj?.id ?? 0)
-        result[control.id] = { type: 'obj', data: {}, id: initObj?.id ?? 0, metaInfo: { ...(initObj?.metaInfo ?? {}) } };
+        const initObj = initData[control.id] as TDataObject | undefined;
+        DataUtils.shiftHandleProvider(handleProvider, initObj?.id ?? 0);
+        result[control.id] = {
+            type: 'obj',
+            data: {},
+            id: initObj?.id ?? 0,
+            metaInfo: { ...(initObj?.metaInfo ?? {}) },
+        };
     }
-    const srcDataObject =
-        (control.useOwnDataObject
-            ? (initData[control.id] as TDataObject)?.data
-            : initData) ?? {};
+    const srcDataObject = (control.useOwnDataObject ? (initData[control.id] as TDataObject)?.data : initData) ?? {};
 
-    const srcMetaData = { ...(control.useOwnDataObject ? ((initData[control.id] as TDataObject)?.metaInfo ?? {}) : { ...initMetaData }) }
+    const srcMetaData = {
+        ...(control.useOwnDataObject ? ((initData[control.id] as TDataObject)?.metaInfo ?? {}) : { ...initMetaData }),
+    };
 
-    const targetObj = control.useOwnDataObject
-        ? (result[control.id] as TDataObject).data
-        : result;
+    const targetObj = control.useOwnDataObject ? (result[control.id] as TDataObject).data : result;
 
-    const targetMetaData = control.useOwnDataObject
-        ? (result[control.id] as TDataObject).metaInfo
-        : resultMetaData;
+    const targetMetaData = control.useOwnDataObject ? (result[control.id] as TDataObject).metaInfo : resultMetaData;
 
     Object.entries(srcMetaData).forEach(([key, value]) => {
         targetMetaData[key] = value;
@@ -264,21 +258,14 @@ function createInitDataForSubform<
     const listFct =
         typeof control.subform.controls === 'function'
             ? control.subform.controls
-            : () =>
-                control.subform.controls as TFormControlList<
-                    P,
-                    V,
-                    TT,
-                    SFT,
-                    Ctx
-                >;
+            : () => control.subform.controls as TFormControlList<P, V, TT, SFT, Ctx>;
 
     const actualList = listFct(
         stateLibCtx.state,
         DataObjectUtils.create(
             {
                 state: { data: {}, id: 0, type: 'obj', metaInfo: { ...(initMetaData ?? {}) } },
-                updateState: () => { },
+                updateState: () => {},
             },
             true,
             () => 0
@@ -293,7 +280,7 @@ function createInitDataForSubform<
         srcMetaData,
         stateLibCtx,
         handleProvider,
-        combineInheritedProps(inheritedProps, control),
+        combineInheritedProps(inheritedProps, control)
     );
 }
 
@@ -309,12 +296,14 @@ function createInitDataStringControl<
     control: TFormControlAtomic<P, V, keyof P, Ctx>,
     initData: TDataObjectMap,
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
-    inheritedStateProps: TFormControlInheritedStateProps,
+    inheritedStateProps: TFormControlInheritedStateProps
 ) {
-    const controlDef = control.class !== 'custom' ? stateLibCtx.lib.controls[control.type] : undefined
+    const controlDef = control.class !== 'custom' ? stateLibCtx.lib.controls[control.type] : undefined;
     const rawValue =
         DataObjectUtils.getRawValue(() => initData[control.id], false) ||
-        control.defaultValue || controlDef?.forcedDefaultValue || '';
+        control.defaultValue ||
+        controlDef?.forcedDefaultValue ||
+        '';
 
     result[control.id] = DataObjectUtils.newValue(
         rawValue,
@@ -323,18 +312,19 @@ function createInitDataStringControl<
 }
 
 function combineInheritedProps(
-    owner: TFormControlInheritedStateProps, ctrlProps: Partial<TFormControlInheritedStateProps>,
+    owner: TFormControlInheritedStateProps,
+    ctrlProps: Partial<TFormControlInheritedStateProps>
 ): TFormControlInheritedStateProps {
     return {
         disabled: ctrlProps.disabled || owner.disabled || false,
         hidden: ctrlProps.hidden || owner.hidden || false,
         readOnly: ctrlProps.readOnly || owner.readOnly || false,
         removed: ctrlProps.removed || owner.removed || false,
-    }
+    };
 }
 
 function isUnavailable(props: TFormControlInheritedStateProps) {
-    return props.disabled || props.hidden || props.readOnly || props.removed
+    return props.disabled || props.hidden || props.readOnly || props.removed;
 }
 
 function validate<
@@ -350,11 +340,11 @@ function validate<
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
     inheritedProps: TFormControlInheritedStateProps
 ): TValidity {
-    inheritedProps = combineInheritedProps(inheritedProps, control)
-    const unavailable = isUnavailable(inheritedProps)
-    const optional = control.optional || unavailable
+    inheritedProps = combineInheritedProps(inheritedProps, control);
+    const unavailable = isUnavailable(inheritedProps);
+    const optional = control.optional || unavailable;
     if (unavailable) {
-        return true
+        return true;
     }
     if (!value) {
         return optional;
@@ -374,10 +364,7 @@ function validate<
     if (control.validation) {
         const validatorFct = stateLibCtx.lib.validators?.[control.validation];
         if (validatorFct) {
-            const validationFctResult = validatorFct(
-                value,
-                control.class !== 'custom' ? control.prop : null
-            );
+            const validationFctResult = validatorFct(value, control.class !== 'custom' ? control.prop : null);
             if (validationFctResult !== true) {
                 return validationFctResult;
             }
@@ -403,14 +390,15 @@ function newTemplateItem<
         type: 'obj',
         id: handleProvider(),
         data: {},
-        metaInfo: {}
+        metaInfo: {},
     };
 
     createInitDataForSubform(
         newObj.data,
         newObj.metaInfo,
         newTemplateSubForm(control, idx, newObj.id, stateLibCtx),
-        {}, {},
+        {},
+        {},
         stateLibCtx,
         handleProvider,
         combineInheritedProps(inheritedProps, control)
@@ -434,9 +422,7 @@ function newTemplateSubForm<
 ): TFormControlSubform<P, V, TT, any, Ctx> {
     const template = control.template;
     const actualControls =
-        typeof template.controls === 'function'
-            ? template.controls(stateLibCtx.state, idx, handle)
-            : template.controls;
+        typeof template.controls === 'function' ? template.controls(stateLibCtx.state, idx, handle) : template.controls;
 
     return {
         class: 'subform',
@@ -460,17 +446,12 @@ function createRenderContent<
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
     state: TFormState<Ctx>
 ): TFormControlList<P, V, TT, SFT, Ctx> {
-    const controls =
-        typeof config.controls === 'function'
-            ? config.controls(state)
-            : config.controls;
+    const controls = typeof config.controls === 'function' ? config.controls(state) : config.controls;
     return controls
         .filter((ctrl) => ctrl !== null)
         .filter(
             (ctrl) =>
-                (ctrl.sectionID === undefined ||
-                    state.section === undefined ||
-                    ctrl.sectionID === state.section) &&
+                (ctrl.sectionID === undefined || state.section === undefined || ctrl.sectionID === state.section) &&
                 !ctrl.removed
         );
 }
@@ -491,9 +472,7 @@ function getControlProps<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
->(
-    item: TFormControl<P, V, TT, SFT, keyof P, Ctx>
-): TFormControlSpecificProps<P, V, TT, SFT, Ctx> | null {
+>(item: TFormControl<P, V, TT, SFT, keyof P, Ctx>): TFormControlSpecificProps<P, V, TT, SFT, Ctx> | null {
     switch (item.class) {
         case 'plain':
         case 'custom':
@@ -513,12 +492,9 @@ function getFormControlInheritedProps(state: TFormInternalState<unknown>): TForm
         readOnly: state.mode != 'ready',
         hidden: false,
         removed: false,
-    }
+    };
 }
 
-function wrap(
-    content: React.ReactNode,
-    wrapper?: (content: React.ReactNode) => React.ReactNode
-) {
+function wrap(content: React.ReactNode, wrapper?: (content: React.ReactNode) => React.ReactNode) {
     return wrapper ? wrapper(content) : content;
 }

@@ -27,51 +27,33 @@ export type TFormControlLib<
         content: React.ReactNode,
         visible: boolean,
         controlProps: TFormControlWrapperProps,
-        hintTranslator: (hint: string | undefined) => string | undefined,
+        hintTranslator: (hint: string | undefined) => string | undefined
     ) => React.ReactNode;
-    onRenderMainWrapper: (
-        content: React.ReactNode,
-        props: F
-    ) => React.ReactNode;
-    onRenderTemplate: (
-        content: React.ReactNode,
-        stateProps: TFormTemplateStateProps,
-        props: TT
-    ) => React.ReactNode
+    onRenderMainWrapper: (content: React.ReactNode, props: F) => React.ReactNode;
+    onRenderTemplate: (content: React.ReactNode, stateProps: TFormTemplateStateProps, props: TT) => React.ReactNode;
     onRenderTemplateRow: (
         content: React.ReactNode,
         idx: number,
         handle: number,
         stateProps: TFormTemplateStateProps,
         props: TT,
-        isNew: boolean,
-    ) => React.ReactNode
+        isNew: boolean
+    ) => React.ReactNode;
     onRenderTemplateRowControl: (
         content: React.ReactNode,
         rowIdx: number,
         stateProps: TFormTemplateStateProps,
         props: TT
-    ) => React.ReactNode,
-    onRenderSubform: (
-        content: React.ReactNode,
-        data: IDataObject,
-        props: SFT
     ) => React.ReactNode;
-    onRenderSubformControl: (
-        content: React.ReactNode,
-        data: IDataObject,
-        idx: number
-    ) => React.ReactNode;
+    onRenderSubform: (content: React.ReactNode, data: IDataObject, props: SFT) => React.ReactNode;
+    onRenderSubformControl: (content: React.ReactNode, data: IDataObject, idx: number) => React.ReactNode;
     onTranslateHint?: (hint: string) => string;
 };
 
 export type TFormControlDef<Props> = {
     forcedDefaultValue?: string;
-    renderHidden?: boolean
-    onRender: (
-        baseProps: TFormControlBaseProps,
-        customProps: Props
-    ) => React.ReactNode;
+    renderHidden?: boolean;
+    onRender: (baseProps: TFormControlBaseProps, customProps: Props) => React.ReactNode;
 };
 
 export type TFormStateLibCtx<

@@ -9,7 +9,7 @@ export function useNewDataObject(source: TDataObjectNew) {
 
     const initMetaData = useMemo(() => {
         return source.initMeta?.() ?? {};
-    }, [])
+    }, []);
 
     const initRootObject = useMemo(() => {
         const initRootObj: TDataRootObject = {
@@ -17,7 +17,7 @@ export function useNewDataObject(source: TDataObjectNew) {
             data: DataObjectUtils.cloneDataObjectMap(initData),
             id: 1,
             maxID: 2,
-            metaInfo: { ...initMetaData }
+            metaInfo: { ...initMetaData },
         };
         const provider = DataUtils.newHandleProvider();
         DataObjectUtils.updateUniqueID(initRootObj, provider);
@@ -35,11 +35,7 @@ export function useNewDataObject(source: TDataObjectNew) {
     }, [obj]);
 
     return useMemo(() => {
-        return DataObjectUtils.create(
-            objHandle,
-            source.strictMode ?? false,
-            () => objHandle.state.maxID
-        );
+        return DataObjectUtils.create(objHandle, source.strictMode ?? false, () => objHandle.state.maxID);
     }, [objHandle]);
 
     function updateRootObj(fct: (prev: TDataObject) => TDataObject) {

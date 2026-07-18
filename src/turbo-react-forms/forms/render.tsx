@@ -28,8 +28,8 @@ export const RenderUtils = {
 };
 
 const keys = {
-    isNew: '__TRF__IsNew'
-}
+    isNew: '__TRF__IsNew',
+};
 
 function newBaseRenderWrapperProps<
     P extends Record<string, unknown>,
@@ -121,21 +121,16 @@ function renderContent<
 ) {
     return (
         <>
-            {list.filter(item => item !== null).map((item, idx) => {
-                const key = item.class !== 'plain' ? item.id : 'plain' + idx;
-                return (
-                    <TFormControlContainer control={item} key={key}>
-                        {renderControl(
-                            item,
-                            state,
-                            lib,
-                            config,
-                            rawData,
-                            inheritedProps
-                        )}
-                    </TFormControlContainer>
-                );
-            })}
+            {list
+                .filter((item) => item !== null)
+                .map((item, idx) => {
+                    const key = item.class !== 'plain' ? item.id : 'plain' + idx;
+                    return (
+                        <TFormControlContainer control={item} key={key}>
+                            {renderControl(item, state, lib, config, rawData, inheritedProps)}
+                        </TFormControlContainer>
+                    );
+                })}
         </>
     );
 }
@@ -159,13 +154,7 @@ function renderControl<
     if (item.removed) {
         return null;
     }
-    const content = renderControlContent(
-        item,
-        state,
-        lib,
-        rawData,
-        inheritedProps
-    );
+    const content = renderControlContent(item, state, lib, rawData, inheritedProps);
 
     if (lib.onRenderControl) {
         return lib.onRenderControl(
@@ -174,10 +163,7 @@ function renderControl<
             {
                 ...newBaseRenderWrapperProps(item, rawData, inheritedProps),
                 class: item.class as string | undefined,
-                type:
-                    item.class === 'dynamic' || item.class === undefined
-                        ? (item.type as string)
-                        : null,
+                type: item.class === 'dynamic' || item.class === undefined ? (item.type as string) : null,
             },
             (hint) =>
                 translateHint(
@@ -186,11 +172,7 @@ function renderControl<
                         DataUtils.orNone(
                             config.onTranslateHint,
                             (trFct) => (hint: string) =>
-                                trFct(
-                                    hint,
-                                    FormUtils.getControlID(item) ?? '',
-                                    FormUtils.getControlProps(item)
-                                )
+                                trFct(hint, FormUtils.getControlID(item) ?? '', FormUtils.getControlProps(item))
                         )
                     ),
                     lib.onTranslateHint
@@ -218,39 +200,15 @@ function renderControlContent<
         case 'plain':
             return item.onRender(state.ctx);
         case 'custom':
-            return renderCustomControl(
-                item,
-                state,
-                lib,
-                rawData,
-                inheritedProps
-            );
+            return renderCustomControl(item, state, lib, rawData, inheritedProps);
         case 'dynamic':
-            return renderDynamicControl(
-                item,
-                state,
-                lib,
-                rawData,
-                inheritedProps
-            );
+            return renderDynamicControl(item, state, lib, rawData, inheritedProps);
         case 'subform':
-            return renderSubformControl(
-                item,
-                state,
-                lib,
-                rawData,
-                inheritedProps
-            );
+            return renderSubformControl(item, state, lib, rawData, inheritedProps);
         case 'template':
             return renderTemplateControl(item, state, lib, rawData, inheritedProps);
         default:
-            return renderTypedControl(
-                item,
-                state,
-                lib,
-                rawData,
-                inheritedProps
-            );
+            return renderTypedControl(item, state, lib, rawData, inheritedProps);
     }
 }
 
@@ -270,35 +228,26 @@ function renderSubformControl<
 ): React.ReactNode {
     const data = ctrl.useOwnDataObject ? rawData.objectGet(ctrl.id) : rawData;
     const controls =
-        typeof ctrl.subform.controls === 'function'
-            ? ctrl.subform.controls(state, rawData)
-            : ctrl.subform.controls;
-    const content = controls.filter(item => item !== null).map((child, idx) => {
-        const controlContent = renderControlContent(child, state, lib, data, {
-            disabled: ctrl.disabled || inheritedProps.disabled,
-            readOnly: ctrl.readOnly || inheritedProps.readOnly,
-            hidden: ctrl.hidden || inheritedProps.hidden,
-            removed: ctrl.removed || inheritedProps.removed,
+        typeof ctrl.subform.controls === 'function' ? ctrl.subform.controls(state, rawData) : ctrl.subform.controls;
+    const content = controls
+        .filter((item) => item !== null)
+        .map((child, idx) => {
+            const controlContent = renderControlContent(child, state, lib, data, {
+                disabled: ctrl.disabled || inheritedProps.disabled,
+                readOnly: ctrl.readOnly || inheritedProps.readOnly,
+                hidden: ctrl.hidden || inheritedProps.hidden,
+                removed: ctrl.removed || inheritedProps.removed,
+            });
+            const renderedContent = lib.onRenderSubformControl(controlContent, data, idx);
+            const wrappedContent = ctrl.subform.onWrapControl
+                ? ctrl.subform.onWrapControl(renderedContent, rawData)
+                : renderedContent;
+            return <React.Fragment key={idx}>{wrappedContent}</React.Fragment>;
         });
-        const renderedContent = lib.onRenderSubformControl(
-            controlContent,
-            data,
-            idx
-        );
-        const wrappedContent = ctrl.subform.onWrapControl
-            ? ctrl.subform.onWrapControl(renderedContent, rawData)
-            : renderedContent;
-        return <React.Fragment key={idx}>{wrappedContent}</React.Fragment>;
-    });
 
-    const wrappedContent = ctrl.subform.onWrapControls
-        ? ctrl.subform.onWrapControls(content, rawData)
-        : content;
+    const wrappedContent = ctrl.subform.onWrapControls ? ctrl.subform.onWrapControls(content, rawData) : content;
 
-    return wrapControl(
-        ctrl,
-        lib.onRenderSubform(wrappedContent, data, ctrl.subform)
-    );
+    return wrapControl(ctrl, lib.onRenderSubform(wrappedContent, data, ctrl.subform));
 }
 
 function renderTemplateControl<
@@ -313,15 +262,11 @@ function renderTemplateControl<
     state: TFormState<Ctx>,
     lib: TFormControlLib<P, V, F, TT, SFT>,
     rawData: IDataObject,
-    inheriedProps: TFormControlInheritedStateProps,
+    inheriedProps: TFormControlInheritedStateProps
 ) {
     const items = rawData.listItems(ctrl.id);
-    const disableAdd =
-        ctrl.template.maxCount !== undefined &&
-        items.length >= ctrl.template.maxCount;
-    const disableDelete =
-        ctrl.template.minCount !== undefined &&
-        items.length <= ctrl.template.minCount;
+    const disableAdd = ctrl.template.maxCount !== undefined && items.length >= ctrl.template.maxCount;
+    const disableDelete = ctrl.template.minCount !== undefined && items.length <= ctrl.template.minCount;
 
     const templateStateProps: TFormTemplateStateProps = {
         disableAdd,
@@ -331,31 +276,27 @@ function renderTemplateControl<
         triggerAdd: () => {
             rawData.listAdd(
                 ctrl.id,
-                DataUtils.orNone(
-                    ctrl.template.onNewItem,
-                    (n) => () => n(items.length, state)
-                ),
+                DataUtils.orNone(ctrl.template.onNewItem, (n) => () => n(items.length, state)),
                 {
-                    [keys.isNew]: true
+                    [keys.isNew]: true,
                 }
             );
         },
         triggerDelete: (idx: number) => {
-            rawData.listRemove(ctrl.id, idx)
-        }
+            rawData.listRemove(ctrl.id, idx);
+        },
     };
 
-    const content =
+    const content = FormUtils.wrap(
         FormUtils.wrap(
-            FormUtils.wrap(
-                renderTemplateRows(ctrl, state, lib, items, templateStateProps, inheriedProps),
-                DataUtils.orNone(
-                    ctrl.template.onWrapTemplate,
-                    fct => (c: React.ReactNode) => fct(c, templateStateProps, state)
-                ),
-            ),
-            (c: React.ReactNode) => lib.onRenderTemplate(c, templateStateProps, ctrl.template)
-        )
+            renderTemplateRows(ctrl, state, lib, items, templateStateProps, inheriedProps),
+            DataUtils.orNone(
+                ctrl.template.onWrapTemplate,
+                (fct) => (c: React.ReactNode) => fct(c, templateStateProps, state)
+            )
+        ),
+        (c: React.ReactNode) => lib.onRenderTemplate(c, templateStateProps, ctrl.template)
+    );
 
     return wrapControl(ctrl, content);
 }
@@ -373,30 +314,24 @@ function renderTemplateRows<
     lib: TFormControlLib<P, V, F, TT, SFT>,
     items: IDataObject[],
     props: TFormTemplateStateProps,
-    inheritedProps: TFormControlInheritedStateProps,
+    inheritedProps: TFormControlInheritedStateProps
 ): React.ReactNode[] {
     return items.map((item, idx) => {
-        const controlDef = typeof ctrl.template.controls === 'function' ?
-            ctrl.template.controls(state, idx, item.getID()) : ctrl.template.controls
-        const rowControls = controlDef.filter(def => def !== null).map((def) => renderTemplateRowControl(
-            def,
-            item,
-            ctrl,
-            state,
-            lib,
-            props,
-            inheritedProps, idx))
+        const controlDef =
+            typeof ctrl.template.controls === 'function'
+                ? ctrl.template.controls(state, idx, item.getID())
+                : ctrl.template.controls;
+        const rowControls = controlDef
+            .filter((def) => def !== null)
+            .map((def) => renderTemplateRowControl(def, item, ctrl, state, lib, props, inheritedProps, idx));
         return FormUtils.wrap(
             FormUtils.wrap(
                 rowControls,
-                DataUtils.orNone(
-                    ctrl.template.onWrapRow,
-                    fct => (c: React.ReactNode) => fct(c, props, state, idx),
-                )
+                DataUtils.orNone(ctrl.template.onWrapRow, (fct) => (c: React.ReactNode) => fct(c, props, state, idx))
             ),
-            c => lib.onRenderTemplateRow(c, idx, item.getID(), props, ctrl.template, item.getMetaBool(keys.isNew))
-        )
-    })
+            (c) => lib.onRenderTemplateRow(c, idx, item.getID(), props, ctrl.template, item.getMetaBool(keys.isNew))
+        );
+    });
 }
 
 function renderTemplateRowControl<
@@ -406,28 +341,27 @@ function renderTemplateRowControl<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
->
-    (
-        def: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
-        item: IDataObject,
-        ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx>,
-        state: TFormState<Ctx>,
-        lib: TFormControlLib<P, V, F, TT, SFT>,
-        props: TFormTemplateStateProps,
-        inheritedProps: TFormControlInheritedStateProps,
-        rowIdx: number
-    ) {
-    const c = renderControlContent(def, state, lib, item, inheritedProps)
+>(
+    def: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
+    item: IDataObject,
+    ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx>,
+    state: TFormState<Ctx>,
+    lib: TFormControlLib<P, V, F, TT, SFT>,
+    props: TFormTemplateStateProps,
+    inheritedProps: TFormControlInheritedStateProps,
+    rowIdx: number
+) {
+    const c = renderControlContent(def, state, lib, item, inheritedProps);
     return FormUtils.wrap(
         FormUtils.wrap(
             c,
             DataUtils.orNone(
                 ctrl.template.onWrapRowControl,
-                fct => (content: React.ReactNode) => fct(content, state, rowIdx)
+                (fct) => (content: React.ReactNode) => fct(content, state, rowIdx)
             )
         ),
-        c => lib.onRenderTemplateRowControl(c, rowIdx, props, ctrl.template)
-    )
+        (c) => lib.onRenderTemplateRowControl(c, rowIdx, props, ctrl.template)
+    );
 }
 
 function renderTypedControl<
@@ -446,10 +380,7 @@ function renderTypedControl<
 ) {
     return wrapControl(
         item,
-        lib.controls[item.type].onRender(
-            newBaseProps(item, state, rawData, lib, inheritedProps),
-            item.prop
-        )
+        lib.controls[item.type].onRender(newBaseProps(item, state, rawData, lib, inheritedProps), item.prop)
     );
 }
 
@@ -503,17 +434,11 @@ function renderCustomControl<
     );
 }
 
-function wrapControl(
-    ctrl: TFormControlCommonPropsDef,
-    content: React.ReactNode
-) {
+function wrapControl(ctrl: TFormControlCommonPropsDef, content: React.ReactNode) {
     return FormUtils.wrap(content, ctrl.onWrap);
 }
 
-function prepareValue<Ctx>(
-    newValue: string,
-    control: TFormControlAtomicProps<Ctx>
-) {
+function prepareValue<Ctx>(newValue: string, control: TFormControlAtomicProps<Ctx>) {
     if (!control.onWriteValue) {
         return newValue;
     }

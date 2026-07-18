@@ -1,9 +1,4 @@
-import {
-    DataContainer,
-    useClosingEffect,
-    useDataObject,
-    useNewDataObject,
-} from '../turbo-react-forms';
+import { DataContainer, useClosingEffect, useDataObject, useNewDataObject } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
 
 export function DemoDataObject() {
@@ -33,9 +28,7 @@ function Form1() {
                     data.setValue(
                         'item1',
                         e.currentTarget.value,
-                        e.currentTarget.value.length > 3
-                            ? true
-                            : { valid: false, hint: 'too short' }
+                        e.currentTarget.value.length > 3 ? true : { valid: false, hint: 'too short' }
                     )
                 }
             ></input>
@@ -48,11 +41,7 @@ function Form1() {
             {data.listItems('template_items').map((itemCtx, idx) => {
                 return (
                     <DataContainer data={itemCtx} key={itemCtx.getID()}>
-                        <Form3
-                            onDelete={() =>
-                                data.listRemove('template_items', idx)
-                            }
-                        ></Form3>
+                        <Form3 onDelete={() => data.listRemove('template_items', idx)}></Form3>
                     </DataContainer>
                 );
             })}
@@ -75,13 +64,7 @@ function Form2() {
             <input
                 type="text"
                 value={data.getRawValue('item1')}
-                onChange={(e) =>
-                    data.setValue(
-                        'item1',
-                        e.currentTarget.value,
-                        e.currentTarget.value.length > 3
-                    )
-                }
+                onChange={(e) => data.setValue('item1', e.currentTarget.value, e.currentTarget.value.length > 3)}
             ></input>
         </div>
     );
@@ -107,9 +90,7 @@ function Form3(p: { onDelete: () => void }) {
                     <input
                         type="text"
                         value={data.getRawValue('name')}
-                        onChange={(e) =>
-                            data.setValue('name', e.currentTarget.value, true)
-                        }
+                        onChange={(e) => data.setValue('name', e.currentTarget.value, true)}
                     ></input>
                 </div>
                 <div>

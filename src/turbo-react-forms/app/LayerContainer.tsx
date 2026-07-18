@@ -69,10 +69,7 @@ export function TLayerContainer({
                                 <ctxLayer.Provider
                                     value={{
                                         handle: n.handle,
-                                        hide: () =>
-                                            myHandler.hideNotification(
-                                                n.handle
-                                            ),
+                                        hide: () => myHandler.hideNotification(n.handle),
                                     }}
                                     key={n.handle}
                                 >

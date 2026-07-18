@@ -1,11 +1,5 @@
 import { DemoPage } from './components/DemoPage';
-import {
-    TLayer,
-    TLayerContainer,
-    useClosingEffect,
-    useLayer,
-    useLayers,
-} from '../turbo-react-forms';
+import { TLayer, TLayerContainer, useClosingEffect, useLayer, useLayers } from '../turbo-react-forms';
 import { PropsWithChildren, useEffect } from 'react';
 
 export function DemoPageLayers() {
@@ -23,29 +17,22 @@ export function DemoPageLayers() {
             </button>
             <button
                 onClick={() => {
-                    layers.main.showNotification((nr) => (
-                        <Notification h={nr}></Notification>
-                    ));
+                    layers.main.showNotification((nr) => <Notification h={nr}></Notification>);
                 }}
             >
                 Show a notification
             </button>
             <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-                Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.
-                Nullam varius, turpis et commodo pharetra, est eros bibendum
-                elit. Aliquam erat volutpat. Nam dui ligula, fringilla a,
-                euismod sodales. Pellentesque habitant morbi tristique senectus
-                et netus et malesuada fames ac turpis egestas. Vestibulum tortor
-                quam, feugiat vitae, ultricies eget, tempor sit amet, ante.
-                Donec eu libero sit amet quam egestas semper. Aenean ultricies
-                mi vitae est. Mauris placerat eleifend leo.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+                fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.
+                Nullam varius, turpis et commodo pharetra, est eros bibendum elit. Aliquam erat volutpat. Nam dui
+                ligula, fringilla a, euismod sodales. Pellentesque habitant morbi tristique senectus et netus et
+                malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit
+                amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat
+                eleifend leo.
             </p>
         </DemoPage>
     );
@@ -108,9 +95,7 @@ function PopupWindowContent(p: PropsWithChildren) {
             <button onClick={() => la.hide()}>OnClose()</button>
             <button
                 onClick={() => {
-                    l.main.show((nr) => (
-                        <PopupWindowLocal handle={nr}></PopupWindowLocal>
-                    ));
+                    l.main.show((nr) => <PopupWindowLocal handle={nr}></PopupWindowLocal>);
                 }}
             >
                 new popup
@@ -135,9 +120,7 @@ function PopupWindowContent(p: PropsWithChildren) {
             </button>
             <button
                 onClick={() => {
-                    l.local.showNotification((nr) => (
-                        <Notification h={nr}></Notification>
-                    ));
+                    l.local.showNotification((nr) => <Notification h={nr}></Notification>);
                 }}
             >
                 Show local notification

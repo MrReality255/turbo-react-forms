@@ -3,13 +3,7 @@ import { TDataContainerProps } from '.';
 import { ctxDataObject } from '../contexts/DataContext';
 import { useNewDataObject } from '../hooks';
 
-export function DataContainer({
-    children,
-    data,
-    field,
-    idx,
-    onInit,
-}: TDataContainerProps) {
+export function DataContainer({ children, data, field, idx, onInit }: TDataContainerProps) {
     const dataObj = useNewDataObject({
         initFct: data === undefined ? onInit : undefined,
     });
@@ -25,9 +19,5 @@ export function DataContainer({
         return src;
     }, [data, dataObj, field, idx]);
 
-    return (
-        <ctxDataObject.Provider value={actualObj}>
-            {children}
-        </ctxDataObject.Provider>
-    );
+    return <ctxDataObject.Provider value={actualObj}>{children}</ctxDataObject.Provider>;
 }
