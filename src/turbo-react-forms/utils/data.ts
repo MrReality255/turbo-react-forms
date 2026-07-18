@@ -1,4 +1,4 @@
-import { THandleProvider, TRef, TValidity } from '.';
+import { THandleProvider, TRef, TValidity } from './types';
 
 export const DataUtils = {
     Validity: {

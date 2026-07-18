@@ -5,14 +5,14 @@ export type CssOption = string | Record<string, boolean>;
 export type TDateTimeFormat = 'datetime' | 'date' | 'time';
 
 const dateTimeFormats = [
+    'yyyy-MM-dd HH:mm:ss',
     'dd.MM.yyyy HH:mm:ss',
     'dd.MM.yyyy HH:mm',
-    'yyyyMMddHHmmss',
     'yyyyMMdd HHmmss',
-    'yyyy-MM-dd HH:mm:ss',
+    'yyyyMMddHHmmss',
+    'yyyy-MM-dd',
     'dd.MM.yyyy',
     'dd.MM.yy',
-    'yyyy-MM-dd',
     'yyyyMMdd',
 ];
 
