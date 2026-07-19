@@ -22,6 +22,7 @@ import {
 } from '.';
 import { DataUtils, FormUtils, IDataObject } from '..';
 import { TFormControlContainer } from './FormControlContainer';
+import { ViewUtils } from '../utils/view';
 
 export const RenderUtils = {
     renderContent,
@@ -287,8 +288,8 @@ function renderTemplateControl<
         },
     };
 
-    const content = FormUtils.wrap(
-        FormUtils.wrap(
+    const content = ViewUtils.wrap(
+        ViewUtils.wrap(
             renderTemplateRows(ctrl, state, lib, items, templateStateProps, inheriedProps),
             DataUtils.orNone(
                 ctrl.template.onWrapTemplate,
@@ -324,8 +325,8 @@ function renderTemplateRows<
         const rowControls = controlDef
             .filter((def) => def !== null)
             .map((def) => renderTemplateRowControl(def, item, ctrl, state, lib, props, inheritedProps, idx));
-        return FormUtils.wrap(
-            FormUtils.wrap(
+        return ViewUtils.wrap(
+            ViewUtils.wrap(
                 rowControls,
                 DataUtils.orNone(ctrl.template.onWrapRow, (fct) => (c: React.ReactNode) => fct(c, props, state, idx))
             ),
@@ -352,8 +353,8 @@ function renderTemplateRowControl<
     rowIdx: number
 ) {
     const c = renderControlContent(def, state, lib, item, inheritedProps);
-    return FormUtils.wrap(
-        FormUtils.wrap(
+    return ViewUtils.wrap(
+        ViewUtils.wrap(
             c,
             DataUtils.orNone(
                 ctrl.template.onWrapRowControl,
@@ -435,7 +436,7 @@ function renderCustomControl<
 }
 
 function wrapControl(ctrl: TFormControlCommonPropsDef, content: React.ReactNode) {
-    return FormUtils.wrap(content, ctrl.onWrap);
+    return ViewUtils.wrap(content, ctrl.onWrap);
 }
 
 function prepareValue<Ctx>(newValue: string, control: TFormControlAtomicProps<Ctx>) {
