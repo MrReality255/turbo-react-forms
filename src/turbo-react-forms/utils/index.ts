@@ -6,3 +6,4 @@ export * from './forms';
 export * from './layers';
 export * from './math';
 export * from './strings';
+export * from './view';
