@@ -1,6 +1,6 @@
 {
     "name": "@mrreality255/turbo-react-forms",
-    "version": "0.2.4",
+    "version": "0.2.3",
     "author": "Martin Mojzis",
     "type": "module",
     "main": "./dist/index.umd.js",
