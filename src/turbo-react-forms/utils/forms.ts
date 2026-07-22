@@ -39,11 +39,12 @@ function createInitData<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
+    G extends object = object,
 >(
     initData: TDataObjectMap | null,
     initMetaData: TDataObjectMetaMap | null,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>
 ): { data: TDataObjectMap; metaInfo: TDataObjectMetaMap } {
     initData = initData ?? {};
     const myControlList = typeof config.controls === 'function' ? config.controls(stateLibCtx.state) : config.controls;
@@ -51,7 +52,7 @@ function createInitData<
     const result: TDataObjectMap = {};
     const resultMetaData: TDataObjectMetaMap = {};
 
-    createInitDataForControlList<P, V, F, TT, SFT, Ctx>(
+    createInitDataForControlList<P, V, F, TT, SFT, Ctx, G>(
         result,
         resultMetaData,
         myControlList.filter((item) => item !== null),
@@ -74,13 +75,14 @@ function createInitDataForControlList<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     result: TDataObjectMap,
     resultMetaData: TDataObjectMetaMap,
     controlList: TFormControl<P, V, TT, SFT, keyof P, Ctx>[],
     initData: TDataObjectMap,
     initMetaData: TDataObjectMetaMap,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     handleProvider: THandleProvider,
     inheritedStateProps: TFormControlInheritedStateProps
 ) {
@@ -105,13 +107,14 @@ function createInitDataForControl<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     result: TDataObjectMap,
     resultMetaData: TDataObjectMetaMap,
     control: TFormControl<P, V, TT, SFT, keyof P, Ctx>,
     initData: TDataObjectMap,
     initMetaData: TDataObjectMetaMap,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     handleProvider: THandleProvider,
     inheritedStateProps: TFormControlInheritedStateProps
 ) {
@@ -121,7 +124,7 @@ function createInitDataForControl<
 
     switch (control.class) {
         case 'template':
-            createInitDataForTemplate<P, V, F, TT, SFT, Ctx>(
+            createInitDataForTemplate<P, V, F, TT, SFT, Ctx, G>(
                 result,
                 control,
                 initData,
@@ -155,11 +158,12 @@ function createInitDataForTemplate<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     result: TDataObjectMap,
     control: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     handleProvider: THandleProvider,
     inheritedProps: TFormControlInheritedStateProps
 ) {
@@ -221,13 +225,14 @@ function createInitDataForSubform<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     result: TDataObjectMap,
     resultMetaData: TDataObjectMetaMap,
     control: TFormControlSubform<P, V, TT, SFT, Ctx>,
     initData: TDataObjectMap,
     initMetaData: TDataObjectMetaMap,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     handleProvider: THandleProvider,
     inheritedProps: TFormControlInheritedStateProps
 ) {
@@ -291,11 +296,12 @@ function createInitDataStringControl<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     result: TDataObjectMap,
     control: TFormControlAtomic<P, V, keyof P, Ctx>,
     initData: TDataObjectMap,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     inheritedStateProps: TFormControlInheritedStateProps
 ) {
     const controlDef = control.class !== 'custom' ? stateLibCtx.lib.controls[control.type] : undefined;
@@ -334,10 +340,11 @@ function validate<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     value: string,
     control: TFormControlAtomic<P, V, keyof P, Ctx>,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     inheritedProps: TFormControlInheritedStateProps
 ): TValidity {
     inheritedProps = combineInheritedProps(inheritedProps, control);
@@ -379,10 +386,11 @@ function newTemplateItem<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     control: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     idx: number,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     handleProvider: THandleProvider,
     inheritedProps: TFormControlInheritedStateProps
 ): TDataObject {
@@ -414,11 +422,12 @@ function newTemplateSubForm<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 >(
     control: TFormControlTemplate<P, V, TT, SFT, Ctx>,
     idx: number,
     handle: number,
-    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>
+    stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>
 ): TFormControlSubform<P, V, TT, any, Ctx> {
     const template = control.template;
     const actualControls =

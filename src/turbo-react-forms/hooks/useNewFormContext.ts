@@ -21,8 +21,9 @@ export function useNewFormContext<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
+    G extends object = object,
 >(
-    { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx>,
+    { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, G>,
     updateFct: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
     onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined,

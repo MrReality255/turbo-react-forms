@@ -17,13 +17,14 @@ export type TFormWrapperProps<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
+    G extends object = object,
 > = {
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>;
     formCtx: Ctx;
     handle: number;
     initData: TDataObjectMap | null;
     initMetaData: TDataObjectMetaMap | null;
-    lib: TFormControlLib<P, V, F, TT, SFT>;
+    lib: TFormControlLib<P, V, F, TT, SFT, G>;
     section?: TKey;
     strictMode?: boolean;
 

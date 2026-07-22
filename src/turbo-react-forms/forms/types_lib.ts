@@ -14,9 +14,10 @@ export type TFormControlLib<
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
+    G extends object,
 > = {
     controls: {
-        [K in keyof P]: TFormControlDef<P[K]>;
+        [K in keyof P]: TFormControlDef<P[K], G>;
     };
     validators?: {
         [K in keyof V]: (value: string, props: P[keyof P] | null) => TValidity;
@@ -26,7 +27,8 @@ export type TFormControlLib<
     onRenderControl?: (
         content: React.ReactNode,
         visible: boolean,
-        controlProps: TFormControlWrapperProps,
+        wrapperProps: TFormControlWrapperProps,
+        commonProps: G,
         hintTranslator: (hint: string | undefined) => string | undefined
     ) => React.ReactNode;
     onRenderMainWrapper: (content: React.ReactNode, props: F) => React.ReactNode;
@@ -50,10 +52,10 @@ export type TFormControlLib<
     onTranslateHint?: (hint: string) => string;
 };
 
-export type TFormControlDef<Props> = {
+export type TFormControlDef<Props, G> = {
     forcedDefaultValue?: string;
     renderHidden?: boolean;
-    onRender: (baseProps: TFormControlBaseProps, customProps: Props) => React.ReactNode;
+    onRender: (baseProps: TFormControlBaseProps, customProps: Props & G) => React.ReactNode;
 };
 
 export type TFormStateLibCtx<
@@ -63,8 +65,9 @@ export type TFormStateLibCtx<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    G extends object = object,
 > = {
     state: TFormState<Ctx>;
     ctx: Ctx;
-    lib: TFormControlLib<P, V, F, TT, SFT>;
+    lib: TFormControlLib<P, V, F, TT, SFT, G>;
 };
