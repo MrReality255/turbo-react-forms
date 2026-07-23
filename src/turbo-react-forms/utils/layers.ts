@@ -1,4 +1,4 @@
-import { TStateHandle } from '.';
+import { TStateHandle } from './types';
 import { TLayersState } from '../contexts/types';
 
 export const LayerUtils = {

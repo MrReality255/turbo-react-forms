@@ -28,7 +28,6 @@ export const FormUtils = {
     getControlProps,
     getFormControlInheritedProps,
     validate,
-    wrap,
 };
 
 function createInitData<
@@ -505,8 +504,4 @@ function getFormControlInheritedProps(state: TFormInternalState<unknown>): TForm
         hidden: false,
         removed: false,
     };
-}
-
-function wrap(content: React.ReactNode, wrapper?: (content: React.ReactNode) => React.ReactNode) {
-    return wrapper ? wrapper(content) : content;
 }
