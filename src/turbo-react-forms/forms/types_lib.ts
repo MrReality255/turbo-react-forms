@@ -14,6 +14,7 @@ export type TFormControlLib<
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
+    RP extends object,
 > = {
     controls: {
         [K in keyof P]: TFormControlDef<P[K]>;
@@ -27,6 +28,7 @@ export type TFormControlLib<
         content: React.ReactNode,
         visible: boolean,
         controlProps: TFormControlWrapperProps,
+        renderProps: RP | undefined,
         hintTranslator: (hint: string | undefined) => string | undefined
     ) => React.ReactNode;
     onRenderMainWrapper: (content: React.ReactNode, props: F) => React.ReactNode;
@@ -43,10 +45,16 @@ export type TFormControlLib<
         content: React.ReactNode,
         rowIdx: number,
         stateProps: TFormTemplateStateProps,
+        renderProps: RP | undefined,
         props: TT
     ) => React.ReactNode;
     onRenderSubform: (content: React.ReactNode, data: IDataObject, props: SFT) => React.ReactNode;
-    onRenderSubformControl: (content: React.ReactNode, data: IDataObject, idx: number) => React.ReactNode;
+    onRenderSubformControl: (
+        content: React.ReactNode,
+        data: IDataObject,
+        idx: number,
+        renderProps: RP | undefined
+    ) => React.ReactNode;
     onTranslateHint?: (hint: string) => string;
 };
 
@@ -63,8 +71,9 @@ export type TFormStateLibCtx<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    RP extends object,
 > = {
     state: TFormState<Ctx>;
     ctx: Ctx;
-    lib: TFormControlLib<P, V, F, TT, SFT>;
+    lib: TFormControlLib<P, V, F, TT, SFT, RP>;
 };

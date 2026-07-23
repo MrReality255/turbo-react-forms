@@ -8,7 +8,8 @@ export function TFormControlContainer<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
->(p: PropsWithChildren<{ control: TFormControl<P, V, TT, SFT, keyof P, Ctx> }>) {
+    RP extends object,
+>(p: PropsWithChildren<{ control: TFormControl<P, V, TT, SFT, keyof P, Ctx, RP> }>) {
     return (
         <ctxFormControl.Provider value={{ id: p.control.class !== 'plain' ? p.control.id : '' }}>
             {p.children}

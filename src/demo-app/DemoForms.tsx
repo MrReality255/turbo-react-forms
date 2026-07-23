@@ -14,6 +14,9 @@ function getControls(state: TFormState<any>): TDemoLibControls {
         } : null,
          */
         {
+            renderProps: {
+                column: '1 / 3',
+            },
             id: 'list1',
             class: 'template',
             template: {
@@ -121,6 +124,7 @@ export function DemoForms() {
             return {
                 title: 'My demo form',
                 isLoading: state.mode !== 'ready',
+                columns: '1fr 1fr',
             };
         },
         onUpdate: function (cmd, event, ctx, data) {

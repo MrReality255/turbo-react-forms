@@ -3,6 +3,7 @@ import { DataUtils, TFormControlWrapperProps, useClosingEffect } from '../turbo-
 
 export function DemoControl({
     controlProps,
+    renderProps,
     children,
     hintTranslator,
     visible,
@@ -11,15 +12,14 @@ export function DemoControl({
     controlProps: TFormControlWrapperProps;
     children?: React.ReactNode;
     visible: boolean;
+    renderProps: { column?: string };
 }) {
-    const ref = useRef<HTMLDivElement>(null);
     const ce = useClosingEffect({
         mode: 'opacity',
         delay: 250,
         initialState: visible,
         initialTargetState: visible,
         id: controlProps.id == 't1' ? 't1' : undefined,
-        ref: ref,
     });
     const [renderContent, setRenderContent] = useState(visible);
     const isFirstRender = useRef(true);
@@ -41,11 +41,12 @@ export function DemoControl({
     }, [visible]);
 
     if (!renderContent) {
+        return <></>;
         return <div>invisible</div>;
     }
 
     return (
-        <div ref={ref} style={{ ...ce.get() }}>
+        <div style={{ ...ce.get(), gridColumn: renderProps?.column }}>
             {controlProps.context?.top}
             <div
                 style={{

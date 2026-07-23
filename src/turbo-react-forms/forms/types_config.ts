@@ -16,12 +16,19 @@ export type TFormConfig<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
+    RP extends object,
 > = {
     form: F | ((state: TFormState<Ctx>) => F);
-    controls: TFormControlList<P, V, TT, SFT, Ctx> | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx>);
+    controls:
+        | TFormControlList<P, V, TT, SFT, Ctx, RP>
+        | ((state: TFormState<Ctx>) => TFormControlList<P, V, TT, SFT, Ctx, RP>);
     onRenderMainWrapper?: (content: React.ReactNode, ctx: Ctx, state: TFormState<Ctx>) => React.ReactNode;
     onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
-    onTranslateHint?: (hint: string, id: string, props: TFormControlSpecificProps<P, V, TT, SFT, Ctx> | null) => string;
+    onTranslateHint?: (
+        hint: string,
+        id: string,
+        props: TFormControlSpecificProps<P, V, TT, SFT, Ctx, RP> | null
+    ) => string;
     onUpdate?: (
         command: string | null,
         event: TDataObjectEvent,

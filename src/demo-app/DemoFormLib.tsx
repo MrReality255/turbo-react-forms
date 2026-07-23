@@ -20,10 +20,14 @@ type TTemplateProps = {
     addText: string;
 };
 
+type TRenderProps = {
+    column?: string;
+};
+
 const DemoFormLib = createFormHook({
     onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps) => {
         return (
-            <DemoFormWrapper isLoading={form.isLoading} title={form.title}>
+            <DemoFormWrapper columns={form.columns} isLoading={form.isLoading} title={form.title}>
                 {content}
             </DemoFormWrapper>
         );
@@ -54,8 +58,13 @@ const DemoFormLib = createFormHook({
     onRenderSubformControl: (content, data, idx) => {
         return <React.Fragment key={idx}>{content}</React.Fragment>;
     },
-    onRenderControl: (content, visible, controlProps, hintTranslator) => (
-        <DemoControl visible={visible} hintTranslator={hintTranslator} controlProps={controlProps}>
+    onRenderControl: (content, visible, controlProps, renderProps: TRenderProps | undefined, hintTranslator) => (
+        <DemoControl
+            renderProps={renderProps ?? {}}
+            visible={visible}
+            hintTranslator={hintTranslator}
+            controlProps={controlProps}
+        >
             {content}
         </DemoControl>
     ),

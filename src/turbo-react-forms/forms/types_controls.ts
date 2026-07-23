@@ -1,6 +1,6 @@
 import { IDataObject, TDataObjectMap, TFormState, TKey, TValidity } from '..';
 
-export type TFormControlTyped<P, V, Type extends keyof P, Ctx> = TFormControlCommonPropsDef &
+export type TFormControlTyped<P, V, Type extends keyof P, Ctx, RP extends object> = TFormControlCommonPropsDef<RP> &
     TFormControlAtomicProps<Ctx> & {
         class?: undefined;
         type: Type;
@@ -8,7 +8,7 @@ export type TFormControlTyped<P, V, Type extends keyof P, Ctx> = TFormControlCom
         validation?: keyof V;
     };
 
-export type TFormControlDynamic<Ctx> = TFormControlCommonPropsDef &
+export type TFormControlDynamic<Ctx, RP extends object> = TFormControlCommonPropsDef<RP> &
     TFormControlAtomicProps<Ctx> & {
         class: 'dynamic';
         type: string;
@@ -19,7 +19,7 @@ export type TFormControlCustomProps<Ctx> = TFormControlBaseProps & {
     ctx: Ctx;
 };
 
-export type TFormControlCustom<V, Ctx> = TFormControlCommonPropsDef &
+export type TFormControlCustom<V, Ctx, RP extends object> = TFormControlCommonPropsDef<RP> &
     TFormControlAtomicProps<Ctx> & {
         class: 'custom';
         validation?: keyof V;
@@ -33,10 +33,11 @@ export type TFormSubformProps<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    RP extends object,
 > = {
     controls:
-        | TFormControlList<P, V, TT, SFT, Ctx>
-        | ((state: TFormState<Ctx>, rawData: IDataObject) => TFormControlList<P, V, TT, SFT, Ctx>);
+        | TFormControlList<P, V, TT, SFT, Ctx, RP>
+        | ((state: TFormState<Ctx>, rawData: IDataObject) => TFormControlList<P, V, TT, SFT, Ctx, RP>);
     onWrapControls?: (content: React.ReactNode, data: IDataObject) => React.ReactNode;
     onWrapControl?: (content: React.ReactNode, data: IDataObject) => React.ReactNode;
 };
@@ -56,10 +57,11 @@ export type TFormTemplateProps<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    RP extends object,
 > = {
     controls:
-        | TFormControlList<P, V, TT, SFT, Ctx>
-        | ((state: TFormState<Ctx>, idx: number, handle: number) => TFormControlList<P, V, TT, SFT, Ctx>);
+        | TFormControlList<P, V, TT, SFT, Ctx, RP>
+        | ((state: TFormState<Ctx>, idx: number, handle: number) => TFormControlList<P, V, TT, SFT, Ctx, RP>);
 
     minCount?: number;
     maxCount?: number;
@@ -80,9 +82,10 @@ export type TFormControlTemplate<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
-> = TFormControlCommonPropsDef & {
+    RP extends object,
+> = TFormControlCommonPropsDef<RP> & {
     class: 'template';
-    template: TFormTemplateProps<P, V, TT, SFT, Ctx> & TT;
+    template: TFormTemplateProps<P, V, TT, SFT, Ctx, RP> & TT;
 };
 
 export type TFormControlSubform<
@@ -91,21 +94,22 @@ export type TFormControlSubform<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
-> = TFormControlCommonPropsDef & {
+    RP extends object,
+> = TFormControlCommonPropsDef<RP> & {
     class: 'subform';
     useOwnDataObject?: boolean;
-    subform: TFormSubformProps<P, V, TT, SFT, Ctx> & SFT;
+    subform: TFormSubformProps<P, V, TT, SFT, Ctx, RP> & SFT;
 };
 
-export type TFormControlPlain<Ctx> = TFormControlRenderInfoProps & {
+export type TFormControlPlain<Ctx, RP extends object> = TFormControlRenderInfoProps<RP> & {
     class: 'plain';
     onRender: (ctx: Ctx) => React.ReactNode;
 };
 
-export type TFormControlAtomic<P, V, Type extends keyof P, Ctx> =
-    | TFormControlTyped<P, V, Type, Ctx>
-    | TFormControlDynamic<Ctx>
-    | TFormControlCustom<V, Ctx>;
+export type TFormControlAtomic<P, V, Type extends keyof P, Ctx, RP extends object> =
+    | TFormControlTyped<P, V, Type, Ctx, RP>
+    | TFormControlDynamic<Ctx, RP>
+    | TFormControlCustom<V, Ctx, RP>;
 
 export type TFormControl<
     P extends Record<string, unknown>,
@@ -114,11 +118,12 @@ export type TFormControl<
     SFT extends TFormSubformPropsType,
     Type extends keyof P,
     Ctx,
+    RP extends object,
 > =
-    | TFormControlAtomic<P, V, Type, Ctx>
-    | TFormControlTemplate<P, V, TT, SFT, Ctx>
-    | TFormControlSubform<P, V, TT, SFT, Ctx>
-    | TFormControlPlain<Ctx>;
+    | TFormControlAtomic<P, V, Type, Ctx, RP>
+    | TFormControlTemplate<P, V, TT, SFT, Ctx, RP>
+    | TFormControlSubform<P, V, TT, SFT, Ctx, RP>
+    | TFormControlPlain<Ctx, RP>;
 
 export type TFormControlList<
     P extends Record<string, unknown>,
@@ -126,9 +131,10 @@ export type TFormControlList<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
+    RP extends object,
 > = (
     | {
-          [Type in keyof P]: TFormControl<P, V, TT, SFT, Type, Ctx>;
+          [Type in keyof P]: TFormControl<P, V, TT, SFT, Type, Ctx, RP>;
       }[keyof P]
     | null
 )[];
@@ -148,10 +154,11 @@ export type TFormControlCommonProps = {
     readOnly?: boolean;
 };
 
-export type TFormControlRenderInfoProps = {
+export type TFormControlRenderInfoProps<RP extends object> = {
     sectionID?: TKey;
     removed?: boolean;
     hidden?: boolean;
+    renderProps?: RP;
 };
 
 export type TFormControlAtomicProps<Ctx> = {
@@ -174,8 +181,8 @@ export type TFormControlReactContext = {
     bottom?: React.ReactNode;
 };
 
-export type TFormControlCommonPropsDef = TFormControlCommonProps &
-    TFormControlRenderInfoProps &
+export type TFormControlCommonPropsDef<RP extends object> = TFormControlCommonProps &
+    TFormControlRenderInfoProps<RP> &
     TFormControlOuterProps & {
         onWrap?: (content: React.ReactNode) => React.ReactNode;
     };
@@ -195,4 +202,5 @@ export type TFormControlSpecificProps<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     Ctx,
-> = P[keyof P] | TFormTemplateProps<P, V, TT, SFT, Ctx> | TFormSubformProps<P, V, TT, SFT, Ctx>;
+    RP extends object,
+> = P[keyof P] | TFormTemplateProps<P, V, TT, SFT, Ctx, RP> | TFormSubformProps<P, V, TT, SFT, Ctx, RP>;

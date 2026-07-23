@@ -4,6 +4,7 @@ import { useClosingEffect, useFormContext, useLayer, useLayers } from '../turbo-
 export type TDemoFormProps = {
     title: string;
     isLoading: boolean;
+    columns?: string;
 };
 
 export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
@@ -30,7 +31,7 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
             <button onClick={() => ctx.close()}>Close()</button>
             <h2>Raw data</h2>
             <button onClick={() => showRawData()}>Show</button>
-            {p.children}
+            <div style={{ display: p.columns ? 'grid' : undefined, gridTemplateColumns: p.columns }}>{p.children}</div>
             {p.isLoading && (
                 <div
                     style={{

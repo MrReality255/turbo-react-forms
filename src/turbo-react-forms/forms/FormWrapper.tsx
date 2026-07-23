@@ -28,7 +28,8 @@ export function TFormWrapper<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
->({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType>) {
+    RP extends object,
+>({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType, RP>) {
     const { config, formCtx, lib } = p;
     const handleProvider = useMemo(() => {
         return DataUtils.newHandleProvider();
@@ -145,12 +146,13 @@ function createUpdateUpdateHandler<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
+    RP extends object,
 >(
     updateInternalState: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
     eventInfo: TDataObjectEvent,
     updateFct: (prev: TDataObject) => TDataObject,
-    lib: TFormControlLib<P, V, F, TT, SFT>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>
 ): void {
     updateInternalState((prevInternalState) => {
@@ -190,11 +192,12 @@ function updateNextState<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
+    RP extends object,
 >(
     nextState: TFormInternalState<Ctx>,
     updateResult: TFormUpdateContext<Ctx, SubmitType> | undefined,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
-    lib: TFormControlLib<P, V, F, TT, SFT>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>
 ) {
     reinitializeRawData(nextState, config, lib);
@@ -222,12 +225,13 @@ function reinitializeRawData<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
+    RP extends object,
 >(
     nextState: TFormInternalState<Ctx>,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>,
-    lib: TFormControlLib<P, V, F, TT, SFT>
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP>
 ) {
-    const stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx> = {
+    const stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP> = {
         ctx: nextState.ctx,
         lib: lib,
         state: {

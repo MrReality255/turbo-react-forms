@@ -16,13 +16,14 @@ export function createFormHook<
     F extends Record<string, unknown>,
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
->(lib: TFormControlLib<P, V, F, TT, SFT>) {
+    RP extends object,
+>(lib: TFormControlLib<P, V, F, TT, SFT, RP>) {
     return {
         newEmptyList: function <Ctx>() {
-            return [] as TFormControlList<P, V, TT, SFT, Ctx>;
+            return [] as TFormControlList<P, V, TT, SFT, Ctx, RP>;
         },
-        useForm: function <Ctx, SubmitType>(config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>) {
-            return useForm<P, V, F, TT, SFT, Ctx, SubmitType>(lib, config);
+        useForm: function <Ctx, SubmitType>(config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>) {
+            return useForm<P, V, F, TT, SFT, Ctx, SubmitType, RP>(lib, config);
         },
     };
 }
@@ -35,7 +36,8 @@ function useForm<
     SFT extends TFormSubformPropsType,
     Ctx,
     SubmitType,
->(lib: TFormControlLib<P, V, F, TT, SFT>, config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType>) {
+    RP extends object,
+>(lib: TFormControlLib<P, V, F, TT, SFT, RP>, config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>) {
     const lc = useLayersOrNull();
 
     return {
@@ -43,7 +45,7 @@ function useForm<
             return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>((resolve) => {
                 const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
                 showMethod((handle) => (
-                    <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType>
+                    <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType, RP>
                         config={config}
                         formCtx={ctx}
                         handle={handle}
