@@ -42,19 +42,25 @@ function getFallTransition(state: TClosingEffectInternalState, delay: number): C
     switch (state.phase) {
         case 'prepare':
             return {
+                opacity: state.wasOpen ? 1 : 0.25,
                 transform: state.wasOpen ? 'translateY(0)' : 'translateY(-150%)',
             };
         case 'animate':
             return {
+                pointerEvents: 'none',
+                opacity: state.newOpen ? 1 : 0.25,
                 transform: state.newOpen ? 'translateY(0)' : 'translateY(-150%)',
-                transition: `transform ${delay}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+                transition: `opacity ${delay}ms cubic-bezier(0.4, 0, 0.2, 1), transform ${delay}ms cubic-bezier(0.4, 0, 0.2, 1)`,
             };
         case 'finalize':
             return {
+                pointerEvents: 'none',
+                opacity: state.newOpen ? 1 : 0.25,
                 transform: state.newOpen ? 'translateY(0)' : 'translateY(-150%)',
             };
         case 'done':
             return {
+                opacity: state.wasOpen ? 1 : 0.25,
                 transform: state.newOpen ? 'translateY(0)' : 'translateY(-150%)',
             };
         default:
