@@ -25,4 +25,5 @@ export type TClosingEffectProps = {
     initialState?: boolean;
     initialTargetState?: boolean;
     id?: string;
+    visible?: boolean;
 };

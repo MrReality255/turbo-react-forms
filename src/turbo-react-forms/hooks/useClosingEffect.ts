@@ -38,7 +38,7 @@ function getOpacityTransition(state: TClosingEffectInternalState, delay: number)
     }
 }
 
-function getFallTranslation(state: TClosingEffectInternalState, delay: number): CSSProperties {
+function getFallTransition(state: TClosingEffectInternalState, delay: number): CSSProperties {
     switch (state.phase) {
         case 'prepare':
             return {
@@ -93,7 +93,7 @@ function getTransition(mode: TClosingEffect, delay: number, state: TClosingEffec
         case 'resize':
             return getResizeTransition(state, delay);
         case 'fall':
-            return getFallTranslation(state, delay);
+            return getFallTransition(state, delay);
     }
 }
 
@@ -103,6 +103,7 @@ export function useClosingEffect({
     initialState = true,
     initialTargetState = true,
     id,
+    visible,
 }: TClosingEffectProps) {
     const [state, setState] = useState<TClosingEffectInternalState>({
         phase: 'done',
@@ -110,6 +111,23 @@ export function useClosingEffect({
         wasOpen: initialState,
         newOpen: initialState,
     });
+
+    const [isVisible, setIsVisible] = useState<undefined | boolean>(visible);
+
+    useEffect(() => {
+        if (visible === undefined) {
+            return;
+        }
+
+        if (visible) {
+            setIsVisible(true);
+            show();
+        } else {
+            hide(() => {
+                setIsVisible(false);
+            });
+        }
+    }, [visible]);
 
     const transition = useMemo(() => {
         return getTransition(mode, delay, state);
@@ -152,7 +170,7 @@ export function useClosingEffect({
         }
     }, [state.phase, state.wasOpen, state.wantOpen]);
 
-    return { get, show, hide, getState: () => state };
+    return { get, show, hide, getState: () => state, isVisible };
 
     function get(): CSSProperties {
         return transition;
