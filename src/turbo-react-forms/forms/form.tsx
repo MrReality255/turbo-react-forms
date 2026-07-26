@@ -59,7 +59,7 @@ function useForm<
                         lib={lib}
                         onSubmit={submitFct}
                         onResolve={resolve}
-                        strictMode={formSettings?.strictMode ?? false}
+                        strictMode={formSettings?.strictMode ?? true}
                         allowSubmitInvalid={formSettings?.allowSubmitInvalid ?? false}
                     ></TFormWrapper>
                 ));

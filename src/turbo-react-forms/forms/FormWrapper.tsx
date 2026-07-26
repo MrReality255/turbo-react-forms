@@ -193,14 +193,20 @@ function handleFormUpdate<
 
             if (result && 'then' in result) {
                 nextState.mode = 'waiting';
-                result.then((newUpdateResult) => {
-                    const newNextState: TFormInternalState<Ctx> = {
-                        ...nextState,
-                        mode: 'ready',
-                    };
-                    updateNextState(newNextState, newUpdateResult, config, lib, frmCtxRef, strictMode);
-                    updateInternalState(() => newNextState);
-                });
+                result
+                    .then((newUpdateResult) => {
+                        updateInternalState((prevState) => {
+                            const newNextState: TFormInternalState<Ctx> = {
+                                ...prevState,
+                                mode: 'ready',
+                            };
+                            updateNextState(newNextState, newUpdateResult, config, lib, frmCtxRef, strictMode);
+                            return newNextState;
+                        });
+                    })
+                    .catch((err) => {
+                        throw 'form update failed: ' + err;
+                    });
                 return nextState;
             }
 

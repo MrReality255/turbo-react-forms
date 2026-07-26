@@ -35,7 +35,7 @@ export function useNewDataObject(source: TDataObjectNew) {
     }, [obj]);
 
     return useMemo(() => {
-        return DataObjectUtils.create(objHandle, source.strictMode ?? false, () => objHandle.state.maxID);
+        return DataObjectUtils.create(objHandle, source.strictMode ?? true, () => objHandle.state.maxID);
     }, [objHandle]);
 
     function updateRootObj(fct: (prev: TDataObject) => TDataObject) {

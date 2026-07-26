@@ -75,7 +75,7 @@ export function useNewFormContext<
             },
             triggerCommand: onCommand,
         };
-    }, [state, onSubmit, updateFct, hideMethodRef]);
+    }, [state, onSubmit, updateFct, hideMethodRef, allowSubmitInvalid]);
 
     function handleSubmitResult(submitValue: TFormSubmitFctData<Ctx, SubmitType>) {
         const newCtx = submitValue.ctxUpdateFct ? submitValue.ctxUpdateFct(state.ctx) : state.ctx;
