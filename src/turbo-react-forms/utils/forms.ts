@@ -19,6 +19,7 @@ import {
     TFormTemplatePropsType,
     THandleProvider,
     TValidity,
+    TFormCommandCtx,
 } from '..';
 
 export const FormUtils = {
@@ -46,7 +47,14 @@ function createInitData<
     stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP>
 ): { data: TDataObjectMap; metaInfo: TDataObjectMetaMap } {
     initData = initData ?? {};
-    const myControlList = typeof config.controls === 'function' ? config.controls(stateLibCtx.state) : config.controls;
+    const myControlList =
+        typeof config.controls === 'function'
+            ? config.controls(stateLibCtx.state, {
+                  cancel: () => {},
+                  command: () => {},
+                  submit: () => {},
+              })
+            : config.controls;
 
     const result: TDataObjectMap = {};
     const resultMetaData: TDataObjectMetaMap = {};
@@ -453,9 +461,10 @@ function createRenderContent<
     RP extends object,
 >(
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
-    state: TFormState<Ctx>
+    state: TFormState<Ctx>,
+    cmdCtx: TFormCommandCtx
 ): TFormControlList<P, V, TT, SFT, Ctx, RP> {
-    const controls = typeof config.controls === 'function' ? config.controls(state) : config.controls;
+    const controls = typeof config.controls === 'function' ? config.controls(state, cmdCtx) : config.controls;
     return controls
         .filter((ctrl) => ctrl !== null)
         .filter(

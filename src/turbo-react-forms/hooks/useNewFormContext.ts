@@ -29,7 +29,8 @@ export function useNewFormContext<
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
     onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined,
     onError: (err: unknown) => TFormError,
-    onCommand: (cmd: TFormCommand) => void
+    onCommand: (cmd: TFormCommand) => void,
+    allowSubmitInvalid: boolean
 ) {
     const hideMethodRef = useMemo(() => {
         return DataUtils.newRef((prev: () => void) => prev());
@@ -44,6 +45,10 @@ export function useNewFormContext<
             close,
             submitEx: handleSubmitResult,
             submit: function (id?: TKey, customData?: unknown) {
+                if (!state.data.isValid() && !allowSubmitInvalid) {
+                    return;
+                }
+
                 if (!onSubmit) {
                     close();
                     return;

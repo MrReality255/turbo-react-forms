@@ -26,6 +26,7 @@ export type TFormWrapperProps<
     initMetaData: TDataObjectMetaMap | null;
     lib: TFormControlLib<P, V, F, TT, SFT, RP>;
     section?: TKey;
+    allowSubmitInvalid?: boolean;
     strictMode?: boolean;
 
     children?: React.ReactNode;

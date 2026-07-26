@@ -18,6 +18,7 @@ export const DataObjectUtils = {
     cloneDataObjectMap,
     create,
     replace,
+    updateObject,
     getList: function (get: () => TDataObjectValue): TDataObjectList | undefined {
         const value = get();
         if (value === undefined || typeof value === 'string' || value.type != 'list') {
@@ -154,6 +155,31 @@ function replace(target: IDataObject, newData: TDataObject): IDataObject {
         target.isStrictMode(),
         target.getHandleProvider()
     );
+}
+
+function updateObject(
+    source: TDataObject,
+    strictMode: boolean,
+    nextHandleProvder: () => number,
+    replaceFct: (src: IDataObject) => void
+) {
+    let objectUpdater: (prev: TDataObject) => TDataObject = (prev) => prev;
+
+    const obj = create(
+        {
+            state: source,
+            updateState: (newUpdater) => {
+                const prevUpdater = objectUpdater;
+                objectUpdater = (p: TDataObject) => {
+                    return newUpdater(prevUpdater(p));
+                };
+            },
+        },
+        strictMode,
+        nextHandleProvder
+    );
+    replaceFct(obj);
+    return objectUpdater;
 }
 
 function create(os: TDataObjectStateUpdateHandle, strictMode: boolean, nextHandleProvider: () => number): IDataObject {

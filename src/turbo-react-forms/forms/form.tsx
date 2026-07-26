@@ -2,6 +2,7 @@ import {
     TFormConfig,
     TFormControlLib,
     TFormControlList,
+    TFormSettings,
     TFormSubformPropsType,
     TFormSubmitCtx,
     TFormSubmitFct,
@@ -37,7 +38,11 @@ function useForm<
     Ctx,
     SubmitType,
     RP extends object,
->(lib: TFormControlLib<P, V, F, TT, SFT, RP>, config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>) {
+>(
+    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
+    formSettings?: TFormSettings
+) {
     const lc = useLayersOrNull();
 
     return {
@@ -54,7 +59,8 @@ function useForm<
                         lib={lib}
                         onSubmit={submitFct}
                         onResolve={resolve}
-                        strictMode
+                        strictMode={formSettings?.strictMode ?? false}
+                        allowSubmitInvalid={formSettings?.allowSubmitInvalid ?? false}
                     ></TFormWrapper>
                 ));
             });

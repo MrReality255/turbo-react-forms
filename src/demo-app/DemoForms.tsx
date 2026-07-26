@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { DataObjectUtils, DataUtils, TFormState } from '../turbo-react-forms';
+import { TFormCommandCtx, TFormState, useFormContext } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
 import { TDemoLibControls, useForm } from './DemoFormLib';
 
-function getControls(state: TFormState<any>): TDemoLibControls {
+function getControls(state: TFormState<any>, cmdCtx: TFormCommandCtx): TDemoLibControls {
     const isActivated = state.data.getValue('activator') == 'true';
 
     return [
-        /*
-        state.data.isValid() ? {
-            class: 'plain',
-            onRender: () => <div>Alles valide</div>,
-        } : null,
-         */
+        state.data.isValid()
+            ? {
+                  class: 'plain',
+                  onRender: () => <div>Alles valide</div>,
+              }
+            : null,
         {
             renderProps: {
                 column: '1 / 3',
@@ -45,10 +45,50 @@ function getControls(state: TFormState<any>): TDemoLibControls {
             },
         },
         {
+            id: 'textRow',
+            class: undefined,
+            type: 'text',
+            prop: { label: 'text Row', maxLen: 40 },
+        },
+        {
+            id: 'textRow2',
+            class: undefined,
+            type: 'text',
+            prop: { label: 'text Row #2', maxLen: 40 },
+        },
+        {
             id: 'activator',
             class: undefined,
             type: 'checkBox',
             prop: { aaa: 3 },
+            context: {
+                top: (
+                    <div>
+                        This is a top context with buttons:
+                        <button
+                            onClick={() => {
+                                cmdCtx.command({ id: 'cmd1', data: 123 });
+                            }}
+                        >
+                            command
+                        </button>
+                        <button
+                            onClick={() => {
+                                cmdCtx.submit();
+                            }}
+                        >
+                            submit
+                        </button>
+                        <button
+                            onClick={() => {
+                                cmdCtx.cancel();
+                            }}
+                        >
+                            cancel
+                        </button>
+                    </div>
+                ),
+            },
         },
         {
             id: 't1',
@@ -56,6 +96,12 @@ function getControls(state: TFormState<any>): TDemoLibControls {
             type: 'text',
             prop: { label: 'text 1', maxLen: 20 },
             hidden: !isActivated,
+        },
+        {
+            class: 'plain',
+            onRender: (ctx) => {
+                return <DemoPlain />;
+            },
         },
         {
             id: 'subform1',
@@ -117,8 +163,8 @@ export function DemoForms() {
     const [formResponse, setFormResponse] = useState('-');
 
     const frm = useForm<{ id: number }, any>({
-        controls: (state) => {
-            return getControls(state);
+        controls: (state, triggerCmd) => {
+            return getControls(state, triggerCmd);
         },
         form: (state) => {
             return {
@@ -128,18 +174,34 @@ export function DemoForms() {
             };
         },
         onUpdate: function (cmd, event, ctx, data) {
-            switch (event.id) {
-                case 't1':
-                    /*
-                    if (event.type == 'value' && event.value.length > 4) {
+            if (cmd) {
+                switch (cmd?.id) {
+                    case 'cmdExt':
+                        return {
+                            onUpdateData: (_prev, replacerFct) => {
+                                return replacerFct((d) => {
+                                    d.setValue('activator', 'true', true);
+                                });
+                            },
+                        };
+                    case 'cmd1':
                         return new Promise((resolve) => {
                             setTimeout(() => {
-                                resolve(undefined);
-                            }, 500);
+                                resolve({
+                                    onUpdateData: (prev, replacer) => {
+                                        return replacer((d) => {
+                                            d.setValue('textRow', 'some value', true);
+                                            d.setValue('textRow2', 'some other value', true);
+                                        });
+                                    },
+                                });
+                            }, 1000);
                         });
-                    }
-                        */
-
+                }
+                return {};
+            }
+            switch (event?.id) {
+                case 't1':
                     if (event.type == 'value' && event.value == 'cancel') {
                         return {
                             modalResult: {
@@ -179,4 +241,13 @@ export function DemoForms() {
             })
         );
     }
+}
+
+function DemoPlain() {
+    const c = useFormContext();
+    return (
+        <div>
+            DemoContext <button onClick={() => c.triggerCommand('cmdExt')}>Test button</button>
+        </div>
+    );
 }

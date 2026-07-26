@@ -1,5 +1,7 @@
 import { RefObject, useMemo, useRef, useState } from 'react';
 import {
+    TFormCommand,
+    TFormCommandRec,
     TFormConfig,
     TFormControlLib,
     TFormInternalState,
@@ -12,7 +14,7 @@ import {
     TFormWrapperProps,
 } from '.';
 import { ctxForm } from '../contexts/FormContext';
-import { TCommandEvent, TDataObject, TDataObjectEvent, TDataObjectMap } from '../hooks';
+import { IDataObject, TCommandEvent, TDataObject, TDataObjectEvent, TDataObjectMap } from '../hooks';
 import { DataObjectUtils, DataUtils, FormUtils } from '..';
 import { useNewFormContext } from '../hooks/useNewFormContext';
 import { RenderUtils } from './render';
@@ -63,7 +65,7 @@ export function TFormWrapper<
         return newFormState(
             internalState,
             (updateFct, eventInfo) =>
-                handleFormUpdate(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef),
+                handleFormUpdate(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef, strictMode),
             strictMode
         );
     }, [internalState]);
@@ -78,15 +80,8 @@ export function TFormWrapper<
         p.onResolve,
         p.onSubmit,
         p.onError ?? ((err) => ({ message: errUnknown, data: err })),
-        (cmd) =>
-            handleFormUpdate(
-                updateInternalState,
-                config,
-                { type: 'command', cmd: cmd },
-                (prev) => prev,
-                lib,
-                formCtxRef
-            )
+        (cmd) => triggerCommand(cmd),
+        p.allowSubmitInvalid ?? false
     );
 
     formCtxRef.current = formContext;
@@ -100,7 +95,11 @@ export function TFormWrapper<
         <ctxForm.Provider value={formContext}>
             {mainWrapper(
                 RenderUtils.renderContent(
-                    FormUtils.createRenderContent(p.config, state),
+                    FormUtils.createRenderContent(p.config, state, {
+                        submit: () => formContext.submit(),
+                        cancel: () => formContext.close(),
+                        command: (cmd) => formContext.triggerCommand(cmd),
+                    }),
                     state,
                     lib,
                     config,
@@ -110,6 +109,18 @@ export function TFormWrapper<
             )}
         </ctxForm.Provider>
     );
+
+    function triggerCommand(cmd: TFormCommand) {
+        handleFormUpdate(
+            updateInternalState,
+            config,
+            { type: 'command', cmd: cmd },
+            (prev) => prev,
+            lib,
+            formCtxRef,
+            strictMode
+        );
+    }
 
     function newFormInternalState(rawData: TDataObjectMap): TFormInternalState<Ctx> {
         return {
@@ -162,7 +173,8 @@ function handleFormUpdate<
     eventInfo: TDataObjectEvent | TCommandEvent,
     updateFct: (prev: TDataObject) => TDataObject,
     lib: TFormControlLib<P, V, F, TT, SFT, RP>,
-    frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>
+    frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
+    strictMode: boolean
 ): void {
     updateInternalState((prevInternalState) => {
         const newDataObj = updateFct(prevInternalState.rawData);
@@ -173,7 +185,7 @@ function handleFormUpdate<
 
         if (config.onUpdate) {
             const result = config.onUpdate(
-                eventInfo.type == 'command' ? eventInfo.cmd : null,
+                eventInfo.type == 'command' ? createCommandRec(eventInfo.cmd) : null,
                 eventInfo.type != 'command' ? eventInfo : null,
                 prevInternalState.ctx,
                 newDataObj
@@ -186,13 +198,13 @@ function handleFormUpdate<
                         ...nextState,
                         mode: 'ready',
                     };
-                    updateNextState(newNextState, newUpdateResult, config, lib, frmCtxRef);
+                    updateNextState(newNextState, newUpdateResult, config, lib, frmCtxRef, strictMode);
                     updateInternalState(() => newNextState);
                 });
                 return nextState;
             }
 
-            updateNextState(nextState, result, config, lib, frmCtxRef);
+            updateNextState(nextState, result, config, lib, frmCtxRef, strictMode);
         }
 
         return nextState;
@@ -212,7 +224,8 @@ function updateNextState<
     updateResult: TFormUpdateContext<Ctx, SubmitType> | undefined,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
     lib: TFormControlLib<P, V, F, TT, SFT, RP>,
-    frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>
+    frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
+    strictMode: boolean
 ) {
     reinitializeRawData(nextState, config, lib);
 
@@ -224,7 +237,11 @@ function updateNextState<
         nextState.ctx = updateResult.ctx;
     }
     if (updateResult.onUpdateData) {
-        nextState.rawData = updateResult.onUpdateData(nextState.rawData);
+        nextState.rawData = updateResult.onUpdateData(nextState.rawData, (fct: (x: IDataObject) => void) => {
+            const r = DataObjectUtils.updateObject(nextState.rawData, strictMode, nextState.handleProvider, fct);
+            return r(nextState.rawData);
+        });
+        reinitializeRawData(nextState, config, lib);
     }
     if (updateResult.modalResult && frmCtxRef.current !== null) {
         frmCtxRef.current.submitEx(updateResult.modalResult);
@@ -275,4 +292,8 @@ function reinitializeRawData<
         data: newInitData.data,
         metaInfo: newInitData.metaInfo,
     };
+}
+
+function createCommandRec(cmd: TFormCommand): TFormCommandRec {
+    return typeof cmd === 'string' ? { id: cmd } : cmd;
 }
