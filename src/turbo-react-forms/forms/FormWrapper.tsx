@@ -12,7 +12,7 @@ import {
     TFormWrapperProps,
 } from '.';
 import { ctxForm } from '../contexts/FormContext';
-import { TDataObject, TDataObjectEvent, TDataObjectMap } from '../hooks';
+import { TCommandEvent, TDataObject, TDataObjectEvent, TDataObjectMap } from '../hooks';
 import { DataObjectUtils, DataUtils, FormUtils } from '..';
 import { useNewFormContext } from '../hooks/useNewFormContext';
 import { RenderUtils } from './render';
@@ -63,7 +63,7 @@ export function TFormWrapper<
         return newFormState(
             internalState,
             (updateFct, eventInfo) =>
-                createUpdateUpdateHandler(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef),
+                handleFormUpdate(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef),
             strictMode
         );
     }, [internalState]);
@@ -77,7 +77,16 @@ export function TFormWrapper<
         updateInternalState,
         p.onResolve,
         p.onSubmit,
-        p.onError ?? ((err) => ({ message: errUnknown, data: err }))
+        p.onError ?? ((err) => ({ message: errUnknown, data: err })),
+        (cmd) =>
+            handleFormUpdate(
+                updateInternalState,
+                config,
+                { type: 'command', cmd: cmd },
+                (prev) => prev,
+                lib,
+                formCtxRef
+            )
     );
 
     formCtxRef.current = formContext;
@@ -138,7 +147,7 @@ function newFormState<Ctx>(
     };
 }
 
-function createUpdateUpdateHandler<
+function handleFormUpdate<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
     F extends Record<string, unknown>,
@@ -150,7 +159,7 @@ function createUpdateUpdateHandler<
 >(
     updateInternalState: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
-    eventInfo: TDataObjectEvent,
+    eventInfo: TDataObjectEvent | TCommandEvent,
     updateFct: (prev: TDataObject) => TDataObject,
     lib: TFormControlLib<P, V, F, TT, SFT, RP>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>
@@ -163,7 +172,12 @@ function createUpdateUpdateHandler<
         };
 
         if (config.onUpdate) {
-            const result = config.onUpdate(null, eventInfo, prevInternalState.ctx, newDataObj);
+            const result = config.onUpdate(
+                eventInfo.type == 'command' ? eventInfo.cmd : null,
+                eventInfo.type != 'command' ? eventInfo : null,
+                prevInternalState.ctx,
+                newDataObj
+            );
 
             if (result && 'then' in result) {
                 nextState.mode = 'waiting';

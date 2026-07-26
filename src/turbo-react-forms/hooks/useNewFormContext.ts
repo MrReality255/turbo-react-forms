@@ -1,6 +1,7 @@
 import { useContext, useMemo } from 'react';
 import { TFormContext } from '../contexts/types';
 import {
+    TFormCommand,
     TFormError,
     TFormInternalState,
     TFormStateLibCtx,
@@ -27,7 +28,8 @@ export function useNewFormContext<
     updateFct: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
     onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined,
-    onError: (err: unknown) => TFormError
+    onError: (err: unknown) => TFormError,
+    onCommand: (cmd: TFormCommand) => void
 ) {
     const hideMethodRef = useMemo(() => {
         return DataUtils.newRef((prev: () => void) => prev());
@@ -66,6 +68,7 @@ export function useNewFormContext<
                         }));
                     });
             },
+            triggerCommand: onCommand,
         };
     }, [state, onSubmit, updateFct, hideMethodRef]);
 

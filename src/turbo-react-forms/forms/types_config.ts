@@ -8,6 +8,8 @@ import {
 import { TDataObject, TDataObjectEvent } from '..';
 import { TFormSubmitFct, TFormSubmitFctData } from './types_submit';
 
+export type TFormCommand = string | { id: string; data: unknown };
+
 export type TFormConfig<
     P extends Record<string, unknown>,
     V extends Record<string, unknown>,
@@ -30,8 +32,8 @@ export type TFormConfig<
         props: TFormControlSpecificProps<P, V, TT, SFT, Ctx, RP> | null
     ) => string;
     onUpdate?: (
-        command: string | null,
-        event: TDataObjectEvent,
+        command: TFormCommand | null,
+        event: TDataObjectEvent | null,
         ctx: Ctx,
         data: TDataObject
     ) => TFormUpdateContext<Ctx, SubmitType> | undefined | Promise<TFormUpdateContext<Ctx, SubmitType> | undefined>;

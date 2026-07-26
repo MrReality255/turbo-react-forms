@@ -1,4 +1,4 @@
-import { THandleProvider, TValidity } from '..';
+import { TFormCommand, THandleProvider, TValidity } from '..';
 
 export type TDataObjectMetaValue = boolean;
 
@@ -104,4 +104,9 @@ export type TDataObjectEventListRemoveEvent = {
     id: string;
     ownerID: number;
     idx: number | undefined;
+};
+
+export type TCommandEvent = {
+    type: 'command';
+    cmd: TFormCommand;
 };
