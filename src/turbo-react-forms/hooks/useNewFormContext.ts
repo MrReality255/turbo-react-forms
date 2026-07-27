@@ -29,7 +29,7 @@ export function useNewFormContext<
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
     onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined,
     onError: (err: unknown) => TFormError,
-    onCommand: (cmd: TFormCommand) => void,
+    onCommand: (cmd: TFormCommand | Promise<TFormCommand>) => void,
     allowSubmitInvalid: boolean
 ) {
     const hideMethodRef = useMemo(() => {

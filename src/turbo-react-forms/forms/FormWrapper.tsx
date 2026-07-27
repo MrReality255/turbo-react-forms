@@ -115,7 +115,7 @@ export function TFormWrapper<
         };
     }
 
-    function triggerCommand(cmd: TFormCommand) {
+    function triggerCommand(cmd: TFormCommand | Promise<TFormCommand>) {
         handleFormUpdate(
             updateInternalState,
             config,
@@ -188,9 +188,15 @@ function handleFormUpdate<
             rawData: newDataObj,
         };
 
+        if (eventInfo.type == 'command' && eventInfo.cmd instanceof Promise) {
+            return nextState;
+        }
+
         if (config.onUpdate) {
             const result = config.onUpdate(
-                eventInfo.type == 'command' ? createCommandRec(eventInfo.cmd) : null,
+                eventInfo.type == 'command' && !(eventInfo.cmd instanceof Promise)
+                    ? createCommandRec(eventInfo.cmd)
+                    : null,
                 eventInfo.type != 'command' ? eventInfo : null,
                 prevInternalState.ctx,
                 newDataObj

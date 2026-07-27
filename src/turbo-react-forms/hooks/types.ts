@@ -108,5 +108,5 @@ export type TDataObjectEventListRemoveEvent = {
 
 export type TCommandEvent = {
     type: 'command';
-    cmd: TFormCommand;
+    cmd: TFormCommand | Promise<TFormCommand>;
 };
