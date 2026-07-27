@@ -1,6 +1,7 @@
 import { RefObject, useMemo, useRef, useState } from 'react';
 import {
     TFormCommand,
+    TFormCommandCtx,
     TFormCommandRec,
     TFormConfig,
     TFormControlLib,
@@ -85,7 +86,7 @@ export function TFormWrapper<
     );
 
     formCtxRef.current = formContext;
-    const formConfig = typeof config.form === 'function' ? config.form(state) : config.form;
+    const formConfig = typeof config.form === 'function' ? config.form(state, createCommandContext()) : config.form;
 
     const mainWrapper = config.onRenderMainWrapper
         ? (content: React.ReactNode) => config.onRenderMainWrapper?.(content, formCtx, state)
@@ -95,11 +96,7 @@ export function TFormWrapper<
         <ctxForm.Provider value={formContext}>
             {mainWrapper(
                 RenderUtils.renderContent(
-                    FormUtils.createRenderContent(p.config, state, {
-                        submit: () => formContext.submit(),
-                        cancel: () => formContext.close(),
-                        command: (cmd) => formContext.triggerCommand(cmd),
-                    }),
+                    FormUtils.createRenderContent(p.config, state, createCommandContext()),
                     state,
                     lib,
                     config,
@@ -109,6 +106,14 @@ export function TFormWrapper<
             )}
         </ctxForm.Provider>
     );
+
+    function createCommandContext(): TFormCommandCtx {
+        return {
+            submit: () => formContext.submit(),
+            cancel: () => formContext.close(),
+            command: (cmd) => formContext.triggerCommand(cmd),
+        };
+    }
 
     function triggerCommand(cmd: TFormCommand) {
         handleFormUpdate(

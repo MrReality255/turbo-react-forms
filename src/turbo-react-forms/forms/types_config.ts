@@ -27,7 +27,7 @@ export type TFormConfig<
     SubmitType,
     RP extends object,
 > = {
-    form: F | ((state: TFormState<Ctx>) => F);
+    form: F | ((state: TFormState<Ctx>, cmdCtx: TFormCommandCtx) => F);
     controls:
         | TFormControlList<P, V, TT, SFT, Ctx, RP>
         | ((state: TFormState<Ctx>, commandCtx: TFormCommandCtx) => TFormControlList<P, V, TT, SFT, Ctx, RP>);
