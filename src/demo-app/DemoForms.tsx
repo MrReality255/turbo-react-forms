@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TFormCommandCtx, TFormState, useFormContext } from '../turbo-react-forms';
+import { TFormCommand, TFormCommandCtx, TFormState, useFormContext } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
 import { TDemoLibControls, useForm } from './DemoFormLib';
 
@@ -227,13 +227,16 @@ export function DemoForms() {
     );
 
     async function handleBtn() {
-        const result = await frm.show(null, { id: 324 }, async (ctx) => {
+        const result = await frm.show(
+            null,
+            { id: 324 } /* async (ctx) => {
             return {
                 id: 'bla',
                 close: true,
                 submitData: 777,
             };
-        });
+        }*/
+        );
         setFormResponse(
             JSON.stringify({
                 result,
@@ -247,7 +250,23 @@ function DemoPlain() {
     const c = useFormContext();
     return (
         <div>
-            DemoContext <button onClick={() => c.triggerCommand('cmdExt')}>Test button</button>
+            DemoContext
+            <button onClick={() => c.triggerCommand('cmdExt')}>Test button</button>
+            <button
+                onClick={() => {
+                    c.triggerCommand(handleCmd1());
+                }}
+            >
+                HandleCmd1
+            </button>
         </div>
     );
+}
+
+function handleCmd1(): Promise<TFormCommand> {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve('cmd1');
+        }, 2000);
+    });
 }

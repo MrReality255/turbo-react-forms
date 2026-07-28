@@ -66,7 +66,7 @@ export function TFormWrapper<
         return newFormState(
             internalState,
             (updateFct, eventInfo) =>
-                handleFormUpdate(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef, strictMode),
+                handleFormUpdate(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef, strictMode, false),
             strictMode
         );
     }, [internalState]);
@@ -123,7 +123,8 @@ export function TFormWrapper<
             (prev) => prev,
             lib,
             formCtxRef,
-            strictMode
+            strictMode,
+            false
         );
     }
 
@@ -179,7 +180,8 @@ function handleFormUpdate<
     updateFct: (prev: TDataObject) => TDataObject,
     lib: TFormControlLib<P, V, F, TT, SFT, RP>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
-    strictMode: boolean
+    strictMode: boolean,
+    resetReady: boolean
 ): void {
     updateInternalState((prevInternalState) => {
         const newDataObj = updateFct(prevInternalState.rawData);
@@ -188,7 +190,26 @@ function handleFormUpdate<
             rawData: newDataObj,
         };
 
+        if (resetReady) {
+            nextState.mode = 'ready';
+        }
+
         if (eventInfo.type == 'command' && eventInfo.cmd instanceof Promise) {
+            // process the promise
+            eventInfo.cmd.then((actualCmd) => {
+                handleFormUpdate(
+                    updateInternalState,
+                    config,
+                    { type: 'command', cmd: actualCmd },
+                    updateFct,
+                    lib,
+                    frmCtxRef,
+                    strictMode,
+                    true
+                );
+            });
+            // put the window into the loading mode
+            nextState.mode = 'loading';
             return nextState;
         }
 
