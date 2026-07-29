@@ -19,7 +19,6 @@ export function DemoControl({
         delay: 250,
         initialState: visible,
         initialTargetState: visible,
-        id: controlProps.id == 't1' ? 't1' : undefined,
     });
     const [renderContent, setRenderContent] = useState(visible);
     const isFirstRender = useRef(true);

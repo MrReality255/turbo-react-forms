@@ -244,6 +244,8 @@ function handleFormUpdate<
             }
 
             updateNextState(nextState, result, config, lib, frmCtxRef, strictMode);
+        } else {
+            updateNextState(nextState, {}, config, lib, frmCtxRef, strictMode);
         }
 
         return nextState;

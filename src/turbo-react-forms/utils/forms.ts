@@ -53,6 +53,7 @@ function createInitData<
                   cancel: () => {},
                   command: () => {},
                   submit: () => {},
+                  loading: () => {},
               })
             : config.controls;
 

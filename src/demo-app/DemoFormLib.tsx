@@ -13,7 +13,7 @@ import { DemoControl } from './DemoControl';
 
 type TTextProps = {
     label: string;
-    maxLen: number;
+    maxLen?: number;
 };
 
 type TTemplateProps = {
@@ -97,7 +97,7 @@ const DemoFormLib = createFormHook({
         },
         checkBox: {
             forcedDefaultValue: 'false',
-            onRender: function (bp: TFormControlBaseProps, props: { aaa: number }) {
+            onRender: function (bp: TFormControlBaseProps, props: { aaa: number; label?: string }) {
                 return (
                     <input
                         type="checkbox"
@@ -117,7 +117,7 @@ const DemoFormLib = createFormHook({
                   }
                 : true,
         too_long: (x: string, props: unknown | null) => {
-            return props !== null && x.length > (props as TTextProps).maxLen
+            return props !== null && x.length > ((props as TTextProps).maxLen ?? 0)
                 ? { valid: false, hint: 'too_long' }
                 : true;
         },
