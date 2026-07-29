@@ -11,6 +11,9 @@ function getControls(state: TFormState<any>, cmdCtx: TFormCommandCtx): TDemoLibC
             ? {
                   class: 'plain',
                   onRender: () => <div>Alles valide</div>,
+                  renderProps: {
+                      column: '1 / 3',
+                  },
               }
             : null,
         {
@@ -162,7 +165,7 @@ function getControls(state: TFormState<any>, cmdCtx: TFormCommandCtx): TDemoLibC
 export function DemoForms() {
     const [formResponse, setFormResponse] = useState('-');
 
-    const frm = useForm<{ id: number }, any>({
+    const frm = useForm<{ id: number }, number>({
         controls: (state, triggerCmd) => {
             return getControls(state, triggerCmd);
         },
@@ -171,6 +174,13 @@ export function DemoForms() {
                 title: 'My demo form',
                 isLoading: state.mode !== 'ready',
                 columns: '1fr 1fr',
+            };
+        },
+        onSubmit: async (ctx) => {
+            return {
+                id: 'bla',
+                close: true,
+                submitData: 777,
             };
         },
         onUpdate: function (cmd, event, ctx, data) {
@@ -227,16 +237,7 @@ export function DemoForms() {
     );
 
     async function handleBtn() {
-        const result = await frm.show(
-            null,
-            { id: 324 } /* async (ctx) => {
-            return {
-                id: 'bla',
-                close: true,
-                submitData: 777,
-            };
-        }*/
-        );
+        const result = await frm.show(null, { id: 324 });
         setFormResponse(
             JSON.stringify({
                 result,

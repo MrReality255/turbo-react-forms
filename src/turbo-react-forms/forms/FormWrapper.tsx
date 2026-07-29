@@ -79,7 +79,7 @@ export function TFormWrapper<
         },
         updateInternalState,
         p.onResolve,
-        p.onSubmit,
+        p.onSubmit ?? config.onSubmit,
         p.onError ?? ((err) => ({ message: errUnknown, data: err })),
         (cmd) => triggerCommand(cmd),
         p.allowSubmitInvalid ?? false
@@ -112,6 +112,7 @@ export function TFormWrapper<
             submit: () => formContext.submit(),
             cancel: () => formContext.close(),
             command: (cmd) => formContext.triggerCommand(cmd),
+            loading: (loaderFct, onDone) => formContext.triggerLoading(loaderFct, onDone),
         };
     }
 

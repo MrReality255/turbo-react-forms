@@ -43,6 +43,18 @@ export function useNewFormContext<
             data: state.data,
             hideMethodRef,
             close,
+            triggerLoading: function <T>(loader: () => Promise<T>, onDone?: (src: T) => void) {
+                updateFct((prev) => ({ ...prev, mode: 'loading' }));
+                const p = loader();
+                p.then((resultValue) => {
+                    updateFct((prev) => ({ ...prev, mode: 'ready' }));
+                    if (onDone) {
+                        onDone(resultValue);
+                    }
+                }).catch(() => {
+                    throw 'the loader function is not allowed to fail.';
+                });
+            },
             submitEx: handleSubmitResult,
             submit: function (id?: TKey, customData?: unknown) {
                 if (!state.data.isValid() && !allowSubmitInvalid) {

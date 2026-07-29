@@ -30,6 +30,7 @@ export type TFormContext<Ctx, SubmitType> = {
     submit: (id?: TKey, customData?: unknown) => void;
     submitEx: (submitValue: TFormSubmitFctData<Ctx, SubmitType>) => void;
     triggerCommand: (command: TFormCommand | Promise<TFormCommand>) => void;
+    triggerLoading: <T>(loaderFct: () => Promise<T>, onDone?: (src: T) => void) => void;
 };
 
 export type TFormControlContext = {

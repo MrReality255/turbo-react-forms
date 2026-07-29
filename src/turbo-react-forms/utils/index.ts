@@ -5,5 +5,6 @@ export * from './data_object';
 export * from './forms';
 export * from './layers';
 export * from './math';
+export * from './misc';
 export * from './strings';
 export * from './view';

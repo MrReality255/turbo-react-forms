@@ -15,6 +15,7 @@ export type TFormCommandCtx = {
     command: (cmd: TFormCommand) => void;
     submit: () => void;
     cancel: () => void;
+    loading: <T>(loadFct: () => Promise<T>, onDone?: (src: T) => void) => void;
 };
 
 export type TFormConfig<
