@@ -91,7 +91,7 @@ export function useNewFormContext<
 
     function handleSubmitResult(submitValue: TFormSubmitFctData<Ctx, SubmitType>) {
         const newCtx = submitValue.ctxUpdateFct ? submitValue.ctxUpdateFct(state.ctx) : state.ctx;
-        if (submitValue.close) {
+        if (!submitValue.preventClose) {
             hide(() =>
                 onResolve(
                     submitValue.cancel

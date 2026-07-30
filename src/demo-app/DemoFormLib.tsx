@@ -3,6 +3,8 @@ import {
     createFormHook,
     DataUtils,
     TFormControlBaseProps,
+    TFormInternalState,
+    TFormState,
     TFormTemplatePropsType,
     TFormTemplateStateProps,
 } from '../turbo-react-forms';
@@ -25,7 +27,7 @@ type TRenderProps = {
 };
 
 const DemoFormLib = createFormHook({
-    onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps) => {
+    onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps, state: TFormInternalState<unknown>) => {
         return (
             <DemoFormWrapper columns={form.columns} isLoading={form.isLoading} title={form.title}>
                 {content}

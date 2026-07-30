@@ -1,6 +1,7 @@
 import {
     TFormControlBaseProps,
     TFormControlWrapperProps,
+    TFormInternalState,
     TFormState,
     TFormSubformPropsType,
     TFormTemplatePropsType,
@@ -31,7 +32,7 @@ export type TFormControlLib<
         renderProps: RP | undefined,
         hintTranslator: (hint: string | undefined) => string | undefined
     ) => React.ReactNode;
-    onRenderMainWrapper: (content: React.ReactNode, props: F) => React.ReactNode;
+    onRenderMainWrapper: (content: React.ReactNode, props: F, state: TFormInternalState<unknown>) => React.ReactNode;
     onRenderTemplate: (content: React.ReactNode, stateProps: TFormTemplateStateProps, props: TT) => React.ReactNode;
     onRenderTemplateRow: (
         content: React.ReactNode,

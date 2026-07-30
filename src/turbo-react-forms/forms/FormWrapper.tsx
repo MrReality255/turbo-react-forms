@@ -90,7 +90,7 @@ export function TFormWrapper<
 
     const mainWrapper = config.onRenderMainWrapper
         ? (content: React.ReactNode) => config.onRenderMainWrapper?.(content, formCtx, state)
-        : (content: React.ReactNode) => lib.onRenderMainWrapper(content, formConfig);
+        : (content: React.ReactNode) => lib.onRenderMainWrapper(content, formConfig, state);
 
     return (
         <ctxForm.Provider value={formContext}>

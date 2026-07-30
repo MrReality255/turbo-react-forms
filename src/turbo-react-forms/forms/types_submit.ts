@@ -8,11 +8,11 @@ export type TFormSubmitFctCtx<Ctx> = {
 };
 
 export type TFormSubmitFctData<Ctx, SubmitType> = {
-    id: TKey | undefined;
+    id?: TKey | undefined;
     submitData: SubmitType;
     rawData?: IDataObject;
     cancel?: boolean;
-    close: boolean;
+    preventClose?: boolean;
     ctxUpdateFct?: (prev: Ctx) => Ctx;
 };
 
