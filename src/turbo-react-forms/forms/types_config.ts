@@ -27,13 +27,14 @@ export type TFormConfig<
     Ctx,
     SubmitType,
     RP extends object,
+    FormEnv,
 > = {
     form: F | ((state: TFormState<Ctx>, cmdCtx: TFormCommandCtx) => F);
     controls:
         | TFormControlList<P, V, TT, SFT, Ctx, RP>
         | ((state: TFormState<Ctx>, commandCtx: TFormCommandCtx) => TFormControlList<P, V, TT, SFT, Ctx, RP>);
     onRenderMainWrapper?: (content: React.ReactNode, ctx: Ctx, state: TFormState<Ctx>) => React.ReactNode;
-    onSubmit?: TFormSubmitFct<Ctx, SubmitType>;
+    onSubmit?: TFormSubmitFct<Ctx, SubmitType, FormEnv>;
     onTranslateHint?: (
         hint: string,
         id: string,
@@ -44,7 +45,10 @@ export type TFormConfig<
         event: TDataObjectEvent | null,
         ctx: Ctx,
         data: TDataObject
-    ) => TFormUpdateContext<Ctx, SubmitType> | undefined | Promise<TFormUpdateContext<Ctx, SubmitType> | undefined>;
+    ) =>
+        | TFormUpdateContext<Ctx, SubmitType, FormEnv>
+        | undefined
+        | Promise<TFormUpdateContext<Ctx, SubmitType, FormEnv> | undefined>;
 };
 
 export type TFormSettings = {
@@ -52,9 +56,9 @@ export type TFormSettings = {
     allowSubmitInvalid?: boolean;
 };
 
-export type TFormUpdateContext<Ctx, SubmitType> = {
+export type TFormUpdateContext<Ctx, SubmitType, FormEnv = any> = {
     ctx?: Ctx;
-    modalResult?: TFormSubmitFctData<Ctx, SubmitType>;
+    modalResult?: TFormSubmitFctData<Ctx, SubmitType, FormEnv>;
 
     onUpdateData?: (prev: TDataObject, replacerFct: (fct: (x: IDataObject) => void) => TDataObject) => TDataObject;
 };

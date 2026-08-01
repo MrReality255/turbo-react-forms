@@ -23,13 +23,12 @@ export function useNewFormContext<
     Ctx,
     SubmitType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 >(
     { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP, FormEnv>,
     updateFct: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
-    onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined,
+    onSubmit: TFormSubmitFct<Ctx, SubmitType, FormEnv> | undefined,
     onError: (err: unknown) => TFormError,
     onCommand: (cmd: TFormCommand | Promise<TFormCommand>) => void,
     allowSubmitInvalid: boolean,
@@ -95,8 +94,11 @@ export function useNewFormContext<
         };
     }, [state, onSubmit, updateFct, hideMethodRef, allowSubmitInvalid, formEnv, setFormEnv]);
 
-    function handleSubmitResult(submitValue: TFormSubmitFctData<Ctx, SubmitType>) {
+    function handleSubmitResult(submitValue: TFormSubmitFctData<Ctx, SubmitType, FormEnv>) {
         const newCtx = submitValue.ctxUpdateFct ? submitValue.ctxUpdateFct(state.ctx) : state.ctx;
+        if (submitValue.ctxUpdateEnv) {
+            setFormEnv(submitValue.ctxUpdateEnv);
+        }
         if (!submitValue.preventClose) {
             hide(() =>
                 onResolve(

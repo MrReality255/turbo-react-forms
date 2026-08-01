@@ -32,8 +32,7 @@ export function TFormWrapper<
     Ctx,
     SubmitType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 >({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>) {
     const { config, formCtx, lib } = p;
     const handleProvider = useMemo(() => {
@@ -180,11 +179,10 @@ function handleFormUpdate<
     Ctx,
     SubmitType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 >(
     updateInternalState: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>,
     eventInfo: TDataObjectEvent | TCommandEvent,
     updateFct: (prev: TDataObject) => TDataObject,
     lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
@@ -268,12 +266,11 @@ function updateNextState<
     Ctx,
     SubmitType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 >(
     nextState: TFormInternalState<Ctx>,
-    updateResult: TFormUpdateContext<Ctx, SubmitType> | undefined,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
+    updateResult: TFormUpdateContext<Ctx, SubmitType, FormEnv> | undefined,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>,
     lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
     strictMode: boolean
@@ -308,11 +305,10 @@ function reinitializeRawData<
     Ctx,
     SubmitType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 >(
     nextState: TFormInternalState<Ctx>,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>,
     lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>
 ) {
     const stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP, FormEnv> = {

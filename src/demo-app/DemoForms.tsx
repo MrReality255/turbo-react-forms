@@ -179,6 +179,15 @@ export function DemoForms() {
         },
         onSubmit: async (ctx) => {
             return {
+                submitData: 0,
+                preventClose: true,
+                ctxUpdateEnv: (e) => {
+                    return {
+                        errorMessage: 'bla',
+                    };
+                },
+            };
+            return {
                 id: 'bla',
                 close: true,
                 submitData: 777,

@@ -20,14 +20,13 @@ export function createFormHook<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 >(lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>) {
     return {
         newEmptyList: function <Ctx>() {
             return [] as TFormControlList<P, V, TT, SFT, Ctx, RP>;
         },
-        useForm: function <Ctx, SubmitType>(config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>) {
+        useForm: function <Ctx, SubmitType>(config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>) {
             return useForm<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>(lib, config);
         },
         useFormContext: function () {
@@ -45,17 +44,16 @@ function useForm<
     Ctx,
     SubmitType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 >(
     lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>,
     formSettings?: TFormSettings
 ) {
     const lc = useLayersOrNull();
 
     return {
-        show: function (data: TDataObjectMap | null, ctx: Ctx, submitFct?: TFormSubmitFct<Ctx, SubmitType>) {
+        show: function (data: TDataObjectMap | null, ctx: Ctx, submitFct?: TFormSubmitFct<Ctx, SubmitType, FormEnv>) {
             return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>((resolve) => {
                 const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
                 showMethod((handle) => (

@@ -16,8 +16,7 @@ export type TFormControlLib<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 > = {
     controls: {
         [K in keyof P]: TFormControlDef<P[K]>;
@@ -81,8 +80,7 @@ export type TFormStateLibCtx<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 > = {
     state: TFormState<Ctx>;
     ctx: Ctx;

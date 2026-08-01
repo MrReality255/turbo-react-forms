@@ -7,13 +7,14 @@ export type TFormSubmitFctCtx<Ctx> = {
     customData: unknown;
 };
 
-export type TFormSubmitFctData<Ctx, SubmitType> = {
+export type TFormSubmitFctData<Ctx, SubmitType, FormEnv> = {
     id?: TKey | undefined;
     submitData: SubmitType;
     rawData?: IDataObject;
     cancel?: boolean;
     preventClose?: boolean;
     ctxUpdateFct?: (prev: Ctx) => Ctx;
+    ctxUpdateEnv?: (prev: FormEnv) => FormEnv;
 };
 
 export type TFormSubmitCtx<Ctx, SubmitType> = {
@@ -23,6 +24,6 @@ export type TFormSubmitCtx<Ctx, SubmitType> = {
     id: TKey | undefined;
 };
 
-export type TFormSubmitFct<Ctx, SubmitType> = (
+export type TFormSubmitFct<Ctx, SubmitType, FormEnv> = (
     submitCtx: TFormSubmitFctCtx<Ctx>
-) => Promise<TFormSubmitFctData<Ctx, SubmitType>>;
+) => Promise<TFormSubmitFctData<Ctx, SubmitType, FormEnv>>;

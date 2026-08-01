@@ -18,10 +18,9 @@ export type TFormWrapperProps<
     Ctx,
     SubmitType,
     RP extends object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FormEnv = any,
+    FormEnv,
 > = {
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>;
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>;
     formCtx: Ctx;
     handle: number;
     initData: TDataObjectMap | null;
@@ -33,7 +32,7 @@ export type TFormWrapperProps<
 
     children?: React.ReactNode;
 
-    onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined;
+    onSubmit: TFormSubmitFct<Ctx, SubmitType, FormEnv> | undefined;
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
     onError?: (err: unknown) => TFormError;
 };
