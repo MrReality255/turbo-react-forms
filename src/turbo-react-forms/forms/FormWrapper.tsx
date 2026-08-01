@@ -69,7 +69,17 @@ export function TFormWrapper<
         return newFormState(
             internalState,
             (updateFct, eventInfo) =>
-                handleFormUpdate(updateInternalState, config, eventInfo, updateFct, lib, formCtxRef, strictMode, false),
+                handleFormUpdate(
+                    updateInternalState,
+                    config,
+                    eventInfo,
+                    updateFct,
+                    lib,
+                    formCtxRef,
+                    strictMode,
+                    false,
+                    setFormEnv
+                ),
             strictMode
         );
     }, [internalState]);
@@ -130,7 +140,8 @@ export function TFormWrapper<
             lib,
             formCtxRef,
             strictMode,
-            false
+            false,
+            setFormEnv
         );
     }
 
@@ -188,7 +199,8 @@ function handleFormUpdate<
     lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
     strictMode: boolean,
-    resetReady: boolean
+    resetReady: boolean,
+    setFormEnv: (updater: FormEnv | ((prev: FormEnv) => FormEnv)) => void
 ): void {
     updateInternalState((prevInternalState) => {
         const newDataObj = updateFct(prevInternalState.rawData);
@@ -212,7 +224,8 @@ function handleFormUpdate<
                     lib,
                     frmCtxRef,
                     strictMode,
-                    true
+                    true,
+                    setFormEnv
                 );
             });
             // put the window into the loading mode
@@ -239,7 +252,15 @@ function handleFormUpdate<
                                 ...prevState,
                                 mode: 'ready',
                             };
-                            updateNextState(newNextState, newUpdateResult, config, lib, frmCtxRef, strictMode);
+                            updateNextState(
+                                newNextState,
+                                newUpdateResult,
+                                config,
+                                lib,
+                                frmCtxRef,
+                                strictMode,
+                                setFormEnv
+                            );
                             return newNextState;
                         });
                     })
@@ -249,9 +270,9 @@ function handleFormUpdate<
                 return nextState;
             }
 
-            updateNextState(nextState, result, config, lib, frmCtxRef, strictMode);
+            updateNextState(nextState, result, config, lib, frmCtxRef, strictMode, setFormEnv);
         } else {
-            updateNextState(nextState, {}, config, lib, frmCtxRef, strictMode);
+            updateNextState(nextState, {}, config, lib, frmCtxRef, strictMode, setFormEnv);
         }
 
         return nextState;
@@ -273,7 +294,8 @@ function updateNextState<
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>,
     lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
-    strictMode: boolean
+    strictMode: boolean,
+    setFormEnv: (updater: FormEnv | ((prev: FormEnv) => FormEnv)) => void
 ) {
     reinitializeRawData(nextState, config, lib);
 
@@ -290,6 +312,9 @@ function updateNextState<
             return r(nextState.rawData);
         });
         reinitializeRawData(nextState, config, lib);
+    }
+    if (updateResult.onUpdateEnv) {
+        setFormEnv(updateResult.onUpdateEnv);
     }
     if (updateResult.modalResult && frmCtxRef.current !== null) {
         frmCtxRef.current.submitEx(updateResult.modalResult);

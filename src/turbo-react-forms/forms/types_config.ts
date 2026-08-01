@@ -56,9 +56,10 @@ export type TFormSettings = {
     allowSubmitInvalid?: boolean;
 };
 
-export type TFormUpdateContext<Ctx, SubmitType, FormEnv = any> = {
+export type TFormUpdateContext<Ctx, SubmitType, FormEnv> = {
     ctx?: Ctx;
     modalResult?: TFormSubmitFctData<Ctx, SubmitType, FormEnv>;
 
     onUpdateData?: (prev: TDataObject, replacerFct: (fct: (x: IDataObject) => void) => TDataObject) => TDataObject;
+    onUpdateEnv?: (prev: FormEnv) => FormEnv;
 };
