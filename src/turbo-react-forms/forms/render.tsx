@@ -79,11 +79,12 @@ function newBaseProps<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     item: TFormControlAtomic<P, V, keyof P, Ctx, RP>,
     state: TFormState<Ctx>,
     rawData: IDataObject,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     inheritedProps: TFormControlInheritedStateProps
 ): TFormControlBaseProps {
     return {
@@ -92,7 +93,7 @@ function newBaseProps<
         valid: rawData.getValidity(item.id),
         onValueChange: (newValue) => {
             newValue = prepareValue(newValue, item);
-            const isValid = FormUtils.validate<P, V, F, TT, SFT, Ctx, RP>(
+            const isValid = FormUtils.validate<P, V, F, TT, SFT, Ctx, RP, FormEnv>(
                 newValue,
                 item,
                 {
@@ -115,11 +116,12 @@ function renderContent<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     list: TFormControlList<P, V, TT, SFT, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, any, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, unknown, RP, FormEnv>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
 ) {
@@ -147,11 +149,12 @@ function renderControl<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     item: TFormControl<P, V, TT, SFT, keyof P, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
-    config: TFormConfig<P, V, F, TT, SFT, Ctx, any, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
+    config: TFormConfig<P, V, F, TT, SFT, Ctx, unknown, RP, FormEnv>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
 ): React.ReactNode {
@@ -196,10 +199,11 @@ function renderControlContent<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     item: TFormControl<P, V, TT, SFT, keyof P, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
 ) {
@@ -227,10 +231,11 @@ function renderSubformControl<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     ctrl: TFormControlSubform<P, V, TT, SFT, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
 ): React.ReactNode {
@@ -266,10 +271,11 @@ function renderTemplateControl<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     rawData: IDataObject,
     inheriedProps: TFormControlInheritedStateProps
 ) {
@@ -318,10 +324,11 @@ function renderTemplateRows<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     items: IDataObject[],
     props: TFormTemplateStateProps,
     inheritedProps: TFormControlInheritedStateProps
@@ -352,12 +359,13 @@ function renderTemplateRowControl<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     def: TFormControl<P, V, TT, SFT, keyof P, Ctx, RP>,
     item: IDataObject,
     ctrl: TFormControlTemplate<P, V, TT, SFT, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     props: TFormTemplateStateProps,
     inheritedProps: TFormControlInheritedStateProps,
     rowIdx: number
@@ -383,10 +391,11 @@ function renderTypedControl<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     item: TFormControlTyped<P, V, keyof P, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
 ) {
@@ -404,10 +413,11 @@ function renderDynamicControl<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     item: TFormControlDynamic<Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
 ) {
@@ -432,10 +442,11 @@ function renderCustomControl<
     SFT extends TFormSubformPropsType,
     Ctx,
     RP extends object,
+    FormEnv,
 >(
     item: TFormControlCustom<V, Ctx, RP>,
     state: TFormState<Ctx>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     rawData: IDataObject,
     inheritedProps: TFormControlInheritedStateProps
 ) {
