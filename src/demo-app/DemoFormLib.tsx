@@ -26,8 +26,20 @@ type TRenderProps = {
     column?: string;
 };
 
+type TDemoFormEnv = {
+    errorMessage?: string;
+};
+
 const DemoFormLib = createFormHook({
-    onRenderMainWrapper: (content: React.ReactNode, form: TDemoFormProps, state: TFormInternalState<unknown>) => {
+    onInit: () => {
+        return {} as TDemoFormEnv;
+    },
+    onRenderMainWrapper: (
+        content: React.ReactNode,
+        form: TDemoFormProps,
+        state: TFormInternalState<unknown>,
+        formEnv: TDemoFormEnv
+    ) => {
         return (
             <DemoFormWrapper columns={form.columns} isLoading={form.isLoading} title={form.title}>
                 {content}
@@ -128,3 +140,4 @@ const DemoFormLib = createFormHook({
 
 export type TDemoLibControls = ReturnType<typeof DemoFormLib.newEmptyList>;
 export const useForm = DemoFormLib.useForm;
+export const useDemoFormContext = DemoFormLib.useFormContext;

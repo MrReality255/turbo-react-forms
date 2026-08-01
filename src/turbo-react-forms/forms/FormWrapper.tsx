@@ -32,7 +32,9 @@ export function TFormWrapper<
     Ctx,
     SubmitType,
     RP extends object,
->({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType, RP>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
+>({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>) {
     const { config, formCtx, lib } = p;
     const handleProvider = useMemo(() => {
         return DataUtils.newHandleProvider();
@@ -62,6 +64,8 @@ export function TFormWrapper<
 
     const [internalState, updateInternalState] = useState<TFormInternalState<Ctx>>(initializedDataMap);
 
+    const [formEnv, setFormEnv] = useState<FormEnv>(() => (lib.onInit ? lib.onInit() : (undefined as FormEnv)));
+
     const state = useMemo(() => {
         return newFormState(
             internalState,
@@ -82,7 +86,9 @@ export function TFormWrapper<
         p.onSubmit ?? config.onSubmit,
         p.onError ?? ((err) => ({ message: errUnknown, data: err })),
         (cmd) => triggerCommand(cmd),
-        p.allowSubmitInvalid ?? false
+        p.allowSubmitInvalid ?? false,
+        formEnv,
+        setFormEnv
     );
 
     formCtxRef.current = formContext;
@@ -90,7 +96,7 @@ export function TFormWrapper<
 
     const mainWrapper = config.onRenderMainWrapper
         ? (content: React.ReactNode) => config.onRenderMainWrapper?.(content, formCtx, state)
-        : (content: React.ReactNode) => lib.onRenderMainWrapper(content, formConfig, state);
+        : (content: React.ReactNode) => lib.onRenderMainWrapper(content, formConfig, state, formEnv);
 
     return (
         <ctxForm.Provider value={formContext}>
@@ -174,12 +180,14 @@ function handleFormUpdate<
     Ctx,
     SubmitType,
     RP extends object,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
 >(
     updateInternalState: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
     eventInfo: TDataObjectEvent | TCommandEvent,
     updateFct: (prev: TDataObject) => TDataObject,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
     strictMode: boolean,
     resetReady: boolean
@@ -260,11 +268,13 @@ function updateNextState<
     Ctx,
     SubmitType,
     RP extends object,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
 >(
     nextState: TFormInternalState<Ctx>,
     updateResult: TFormUpdateContext<Ctx, SubmitType> | undefined,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     frmCtxRef: RefObject<TFormContext<Ctx, SubmitType> | null>,
     strictMode: boolean
 ) {
@@ -298,12 +308,14 @@ function reinitializeRawData<
     Ctx,
     SubmitType,
     RP extends object,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
 >(
     nextState: TFormInternalState<Ctx>,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>
 ) {
-    const stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP> = {
+    const stateLibCtx: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP, FormEnv> = {
         ctx: nextState.ctx,
         lib: lib,
         state: {

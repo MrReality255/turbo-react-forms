@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { TFormCommand, TFormCommandCtx, TFormState, useFormContext } from '../turbo-react-forms';
 import { DemoPage } from './components/DemoPage';
-import { TDemoLibControls, useForm } from './DemoFormLib';
+import { TDemoLibControls, useDemoFormContext, useForm } from './DemoFormLib';
 
 function getControls(state: TFormState<any>, cmdCtx: TFormCommandCtx): TDemoLibControls {
     const isActivated = state.data.getValue('activator') == 'true';
@@ -174,6 +174,7 @@ export function DemoForms() {
                 title: 'My demo form',
                 isLoading: state.mode !== 'ready',
                 columns: '1fr 1fr',
+                errorMessage: undefined,
             };
         },
         onSubmit: async (ctx) => {
@@ -248,17 +249,25 @@ export function DemoForms() {
 }
 
 function DemoPlain() {
-    const c = useFormContext();
+    const c = useDemoFormContext();
     return (
         <div>
             DemoContext
             <button onClick={() => c.triggerCommand('cmdExt')}>Test button</button>
             <button
                 onClick={() => {
+                    c.setFormEnv({ errorMessage: undefined });
                     c.triggerCommand(handleCmd1());
                 }}
             >
                 HandleCmd1
+            </button>
+            <button
+                onClick={() => {
+                    c.setFormEnv({ errorMessage: 'error message' });
+                }}
+            >
+                HandleCmd2
             </button>
         </div>
     );

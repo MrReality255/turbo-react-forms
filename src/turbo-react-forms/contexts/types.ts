@@ -21,10 +21,12 @@ export type TLayerContext = {
     hide: () => void;
 };
 
-export type TFormContext<Ctx, SubmitType> = {
+export type TFormContext<Ctx, SubmitType, FormEnv = any> = {
     ctx: Ctx;
     data: IDataObject;
     hideMethodRef: TRef<(origHide: () => void) => void>;
+    formEnv: FormEnv;
+    setFormEnv: (updater: FormEnv | ((prev: FormEnv) => FormEnv)) => void;
 
     close: () => void;
     submit: (id?: TKey, customData?: unknown) => void;

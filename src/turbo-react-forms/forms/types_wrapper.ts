@@ -18,13 +18,15 @@ export type TFormWrapperProps<
     Ctx,
     SubmitType,
     RP extends object,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
 > = {
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>;
     formCtx: Ctx;
     handle: number;
     initData: TDataObjectMap | null;
     initMetaData: TDataObjectMetaMap | null;
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>;
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>;
     section?: TKey;
     allowSubmitInvalid?: boolean;
     strictMode?: boolean;

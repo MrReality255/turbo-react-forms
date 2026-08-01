@@ -7,3 +7,4 @@ export * from './useLayer';
 export * from './useLayers';
 export * from './useLayersOrNull';
 export * from './useNewDataObject';
+export * from './useNewFormContext';

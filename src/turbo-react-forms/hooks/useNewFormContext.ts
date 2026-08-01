@@ -23,25 +23,31 @@ export function useNewFormContext<
     Ctx,
     SubmitType,
     RP extends object,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
 >(
-    { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP>,
+    { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP, FormEnv>,
     updateFct: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
     onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
     onSubmit: TFormSubmitFct<Ctx, SubmitType> | undefined,
     onError: (err: unknown) => TFormError,
     onCommand: (cmd: TFormCommand | Promise<TFormCommand>) => void,
-    allowSubmitInvalid: boolean
+    allowSubmitInvalid: boolean,
+    formEnv: FormEnv,
+    setFormEnv: (updater: FormEnv | ((prev: FormEnv) => FormEnv)) => void
 ) {
     const hideMethodRef = useMemo(() => {
         return DataUtils.newRef((prev: () => void) => prev());
     }, []);
     const lctx = useContext(ctxLayer);
 
-    return useMemo<TFormContext<Ctx, SubmitType>>(() => {
+    return useMemo<TFormContext<Ctx, SubmitType, FormEnv>>(() => {
         return {
             ctx: state.ctx,
             data: state.data,
             hideMethodRef,
+            formEnv,
+            setFormEnv,
             close,
             triggerLoading: function <T>(loader: () => Promise<T>, onDone?: (src: T) => void) {
                 updateFct((prev) => ({ ...prev, mode: 'loading' }));
@@ -87,7 +93,7 @@ export function useNewFormContext<
             },
             triggerCommand: onCommand,
         };
-    }, [state, onSubmit, updateFct, hideMethodRef, allowSubmitInvalid]);
+    }, [state, onSubmit, updateFct, hideMethodRef, allowSubmitInvalid, formEnv, setFormEnv]);
 
     function handleSubmitResult(submitValue: TFormSubmitFctData<Ctx, SubmitType>) {
         const newCtx = submitValue.ctxUpdateFct ? submitValue.ctxUpdateFct(state.ctx) : state.ctx;

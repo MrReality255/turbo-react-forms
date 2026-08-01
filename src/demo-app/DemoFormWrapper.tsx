@@ -1,5 +1,6 @@
 import { PropsWithChildren } from 'react';
 import { useClosingEffect, useFormContext, useLayer, useLayers } from '../turbo-react-forms';
+import { useDemoFormContext } from './DemoFormLib';
 
 export type TDemoFormProps = {
     title: string;
@@ -8,13 +9,14 @@ export type TDemoFormProps = {
 };
 
 export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
-    const ctx = useFormContext();
+    const ctx = useDemoFormContext();
     const l = useLayers();
 
     const closer = useClosingEffect({ mode: 'resize', delay: 350, initialState: false });
     ctx.hideMethodRef.current = (prev) => {
         closer.hide(prev);
     };
+
     return (
         <div
             style={{
@@ -29,6 +31,9 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
         >
             <h1>{p.title}</h1>
             <button onClick={() => ctx.close()}>Close()</button>
+            {ctx.formEnv.errorMessage ? (
+                <div style={{ color: 'yellow', backgroundColor: 'red' }}>{ctx.formEnv.errorMessage}</div>
+            ) : null}
             <h2>Raw data</h2>
             <button onClick={() => showRawData()}>Show</button>
             <div style={{ display: p.columns ? 'grid' : undefined, gridTemplateColumns: p.columns }}>{p.children}</div>

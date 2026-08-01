@@ -10,6 +10,8 @@ import {
 } from '.';
 import { ILayers, TDataObjectMap, useLayersOrNull } from '../hooks';
 import { TFormWrapper } from './FormWrapper';
+import { useFormContext } from '../hooks/useFormContext';
+import { TFormContext } from '../contexts/types';
 
 export function createFormHook<
     P extends Record<string, unknown>,
@@ -18,13 +20,18 @@ export function createFormHook<
     TT extends TFormTemplatePropsType,
     SFT extends TFormSubformPropsType,
     RP extends object,
->(lib: TFormControlLib<P, V, F, TT, SFT, RP>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
+>(lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>) {
     return {
         newEmptyList: function <Ctx>() {
             return [] as TFormControlList<P, V, TT, SFT, Ctx, RP>;
         },
         useForm: function <Ctx, SubmitType>(config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>) {
-            return useForm<P, V, F, TT, SFT, Ctx, SubmitType, RP>(lib, config);
+            return useForm<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>(lib, config);
+        },
+        useFormContext: function () {
+            return useFormContext() as TFormContext<unknown, unknown, FormEnv>;
         },
     };
 }
@@ -38,8 +45,10 @@ function useForm<
     Ctx,
     SubmitType,
     RP extends object,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FormEnv = any,
 >(
-    lib: TFormControlLib<P, V, F, TT, SFT, RP>,
+    lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>,
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP>,
     formSettings?: TFormSettings
 ) {
@@ -50,7 +59,7 @@ function useForm<
             return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>((resolve) => {
                 const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
                 showMethod((handle) => (
-                    <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType, RP>
+                    <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>
                         config={config}
                         formCtx={ctx}
                         handle={handle}
