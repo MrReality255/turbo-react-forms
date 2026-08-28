@@ -13,7 +13,7 @@ export type TFormInternalState<Ctx> = {
     ctx: Ctx;
     mode: TFormMode;
     error: TFormError[] | TFormError | undefined;
-    handle: number;
+    handle: number | undefined;
     section?: TKey;
     rawData: TDataObject;
     handleProvider: THandleProvider;

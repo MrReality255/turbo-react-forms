@@ -5,6 +5,7 @@ import { DemoPageLayers } from './DemoPageLayers';
 import { DemoDataObject } from './DemoDataObject';
 import { DemoForms } from './DemoForms';
 import { DemoClosingEffect } from './DemoClosingEffect';
+import { DemoInlineForms } from './DemoInlineForms';
 
 export default function DemoApp() {
     return (
@@ -22,6 +23,7 @@ function AppRouter() {
                 <Route path="/layers" element={<DemoPageLayers></DemoPageLayers>}></Route>
                 <Route path="/dataobject" element={<DemoDataObject></DemoDataObject>}></Route>
                 <Route path="/forms" element={<DemoForms></DemoForms>}></Route>
+                <Route path="/inline-forms" element={<DemoInlineForms></DemoInlineForms>}></Route>
                 <Route path="/closing-effect" element={<DemoClosingEffect></DemoClosingEffect>}></Route>
             </Routes>
         </HashRouter>

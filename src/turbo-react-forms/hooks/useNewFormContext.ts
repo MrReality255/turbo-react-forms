@@ -27,7 +27,7 @@ export function useNewFormContext<
 >(
     { state, lib }: TFormStateLibCtx<P, V, F, TT, SFT, Ctx, RP, FormEnv>,
     updateFct: (fct: (prev: TFormInternalState<Ctx>) => TFormInternalState<Ctx>) => void,
-    onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void,
+    onResolve: ((ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void) | undefined,
     onSubmit: TFormSubmitFct<Ctx, SubmitType, FormEnv> | undefined,
     onError: (err: unknown) => TFormError,
     onCommand: (cmd: TFormCommand | Promise<TFormCommand>) => void,
@@ -99,7 +99,7 @@ export function useNewFormContext<
         if (submitValue.ctxUpdateEnv) {
             setFormEnv(submitValue.ctxUpdateEnv);
         }
-        if (!submitValue.preventClose) {
+        if (!submitValue.preventClose && onResolve) {
             hide(() =>
                 onResolve(
                     submitValue.cancel
@@ -135,6 +135,8 @@ export function useNewFormContext<
     }
 
     function close() {
-        hide(() => onResolve(null));
+        if (onResolve) {
+            hide(() => onResolve(null));
+        }
     }
 }

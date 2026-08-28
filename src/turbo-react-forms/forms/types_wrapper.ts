@@ -22,7 +22,7 @@ export type TFormWrapperProps<
 > = {
     config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>;
     formCtx: Ctx;
-    handle: number;
+    handle: number | undefined;
     initData: TDataObjectMap | null;
     initMetaData: TDataObjectMetaMap | null;
     lib: TFormControlLib<P, V, F, TT, SFT, RP, FormEnv>;
@@ -33,6 +33,6 @@ export type TFormWrapperProps<
     children?: React.ReactNode;
 
     onSubmit: TFormSubmitFct<Ctx, SubmitType, FormEnv> | undefined;
-    onResolve: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
+    onResolve?: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
     onError?: (err: unknown) => TFormError;
 };

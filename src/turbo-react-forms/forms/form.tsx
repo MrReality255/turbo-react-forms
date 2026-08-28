@@ -32,6 +32,38 @@ export function createFormHook<
         useFormContext: function () {
             return useFormContext() as TFormContext<unknown, unknown, FormEnv>;
         },
+        Form: function <Ctx, SubmitType = never>({
+            config,
+            ctx,
+            handle,
+            data,
+            submitFct,
+            resolve,
+            formSettings,
+        }: {
+            config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>;
+            ctx: Ctx;
+            handle?: number;
+            data: TDataObjectMap | null;
+            formSettings?: TFormSettings;
+            submitFct?: TFormSubmitFct<Ctx, SubmitType, FormEnv>;
+            resolve?: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
+        }) {
+            return (
+                <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>
+                    config={config}
+                    formCtx={ctx}
+                    handle={handle}
+                    initData={data}
+                    initMetaData={{}}
+                    lib={lib}
+                    onSubmit={submitFct}
+                    onResolve={resolve}
+                    strictMode={formSettings?.strictMode ?? true}
+                    allowSubmitInvalid={formSettings?.allowSubmitInvalid ?? false}
+                ></TFormWrapper>
+            );
+        },
     };
 }
 

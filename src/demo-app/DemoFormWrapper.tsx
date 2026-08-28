@@ -3,9 +3,10 @@ import { useClosingEffect, useFormContext, useLayer, useLayers } from '../turbo-
 import { useDemoFormContext } from './DemoFormLib';
 
 export type TDemoFormProps = {
-    title: string;
+    title?: string;
     isLoading: boolean;
     columns?: string;
+    isInline?: boolean;
 };
 
 export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
@@ -19,18 +20,22 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
 
     return (
         <div
-            style={{
-                ...closer.get(),
-                position: 'absolute',
-                background: '#030',
-                minWidth: '640px',
-                height: '800px',
-                padding: '1em',
-                overflow: 'auto',
-            }}
+            style={
+                p.isInline
+                    ? { position: 'relative' }
+                    : {
+                          ...closer.get(),
+                          position: 'absolute',
+                          background: '#030',
+                          minWidth: '640px',
+                          height: '800px',
+                          padding: '1em',
+                          overflow: 'auto',
+                      }
+            }
         >
-            <h1>{p.title}</h1>
-            <button onClick={() => ctx.close()}>Close()</button>
+            {p.title !== undefined ? <h1>{p.title}</h1> : null}
+            {!p.isInline ? <button onClick={() => ctx.close()}>Close()</button> : null}
             {ctx.formEnv.errorMessage ? (
                 <div style={{ color: 'yellow', backgroundColor: 'red' }}>{ctx.formEnv.errorMessage}</div>
             ) : null}
@@ -54,14 +59,16 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
                     Loading
                 </div>
             )}
-            <button
-                disabled={!ctx.data.isValid()}
-                onClick={() => {
-                    ctx.submit(undefined);
-                }}
-            >
-                SUBMIT
-            </button>
+            {!p.isInline ? (
+                <button
+                    disabled={!ctx.data.isValid()}
+                    onClick={() => {
+                        ctx.submit(undefined);
+                    }}
+                >
+                    SUBMIT
+                </button>
+            ) : null}
         </div>
     );
 

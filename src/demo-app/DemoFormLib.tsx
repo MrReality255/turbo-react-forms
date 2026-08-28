@@ -40,11 +40,7 @@ const DemoFormLib = createFormHook({
         state: TFormInternalState<unknown>,
         formEnv: TDemoFormEnv
     ) => {
-        return (
-            <DemoFormWrapper columns={form.columns} isLoading={form.isLoading} title={form.title}>
-                {content}
-            </DemoFormWrapper>
-        );
+        return <DemoFormWrapper {...form}>{content}</DemoFormWrapper>;
     },
     onRenderTemplate: (content: React.ReactNode, stateProps: TFormTemplateStateProps, props: TTemplateProps) => {
         return (
@@ -141,3 +137,4 @@ const DemoFormLib = createFormHook({
 export type TDemoLibControls = ReturnType<typeof DemoFormLib.newEmptyList>;
 export const useForm = DemoFormLib.useForm;
 export const useDemoFormContext = DemoFormLib.useFormContext;
+export const InlineForm = DemoFormLib.Form;
