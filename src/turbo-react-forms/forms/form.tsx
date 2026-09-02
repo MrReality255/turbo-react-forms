@@ -85,26 +85,45 @@ function useForm<
     const lc = useLayersOrNull();
 
     return {
+        render,
         show: function (data: TDataObjectMap | null, ctx: Ctx, submitFct?: TFormSubmitFct<Ctx, SubmitType, FormEnv>) {
             return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>((resolve) => {
                 const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
-                showMethod((handle) => (
-                    <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>
-                        config={config}
-                        formCtx={ctx}
-                        handle={handle}
-                        initData={data}
-                        initMetaData={{}}
-                        lib={lib}
-                        onSubmit={submitFct}
-                        onResolve={resolve}
-                        strictMode={formSettings?.strictMode ?? true}
-                        allowSubmitInvalid={formSettings?.allowSubmitInvalid ?? false}
-                    ></TFormWrapper>
-                ));
+                showMethod((handle) =>
+                    render(data, ctx, {
+                        handle,
+                        onResolve: resolve,
+                        onSubmit: submitFct,
+                    })
+                );
             });
         },
     };
+
+    function render(
+        data: TDataObjectMap | null,
+        ctx: Ctx,
+        options: {
+            handle?: number;
+            onSubmit?: TFormSubmitFct<Ctx, SubmitType, FormEnv>;
+            onResolve?: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
+        }
+    ) {
+        return (
+            <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>
+                config={config}
+                formCtx={ctx}
+                handle={options?.handle}
+                initData={data}
+                initMetaData={{}}
+                lib={lib}
+                onSubmit={options?.onSubmit}
+                onResolve={options?.onResolve}
+                strictMode={formSettings?.strictMode ?? true}
+                allowSubmitInvalid={formSettings?.allowSubmitInvalid ?? false}
+            ></TFormWrapper>
+        );
+    }
 }
 
 function getDefaultShowMethod(lc: ILayers | null) {
