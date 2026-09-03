@@ -29,6 +29,7 @@ export type TFormWrapperProps<
     section?: TKey;
     allowSubmitInvalid?: boolean;
     strictMode?: boolean;
+    inContainer: boolean;
 
     children?: React.ReactNode;
 

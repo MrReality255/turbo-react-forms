@@ -1,4 +1,4 @@
-import { RefObject, useMemo, useRef, useState } from 'react';
+import React, { RefObject, useMemo, useRef, useState } from 'react';
 import {
     TFormCommand,
     TFormCommandCtx,
@@ -33,7 +33,7 @@ export function TFormWrapper<
     SubmitType,
     RP extends object,
     FormEnv,
->({ strictMode = false, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>) {
+>({ strictMode = false, inContainer, ...p }: TFormWrapperProps<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>) {
     const { config, formCtx, lib } = p;
     const handleProvider = useMemo(() => {
         return DataUtils.newHandleProvider();
@@ -103,22 +103,28 @@ export function TFormWrapper<
     formCtxRef.current = formContext;
     const formConfig = typeof config.form === 'function' ? config.form(state, createCommandContext()) : config.form;
 
+    const mainContainer = config.onRenderMainContainer
+        ? (content: React.ReactNode) => config.onRenderMainContainer?.(content, formCtx, state)
+        : (content: React.ReactNode) => lib.onRenderMainContainer(content, formConfig, state, formEnv);
+
     const mainWrapper = config.onRenderMainWrapper
         ? (content: React.ReactNode) => config.onRenderMainWrapper?.(content, formCtx, state)
         : (content: React.ReactNode) => lib.onRenderMainWrapper(content, formConfig, state, formEnv);
 
+    const formContent = mainWrapper(
+        RenderUtils.renderContent(
+            FormUtils.createRenderContent(p.config, state, createCommandContext()),
+            state,
+            lib,
+            config,
+            state.data,
+            FormUtils.getFormControlInheritedProps(state)
+        )
+    );
+
     return (
         <ctxForm.Provider value={formContext}>
-            {mainWrapper(
-                RenderUtils.renderContent(
-                    FormUtils.createRenderContent(p.config, state, createCommandContext()),
-                    state,
-                    lib,
-                    config,
-                    state.data,
-                    FormUtils.getFormControlInheritedProps(state)
-                )
-            )}
+            {mainContainer ? mainContainer(formContent) : formContent}
         </ctxForm.Provider>
     );
 

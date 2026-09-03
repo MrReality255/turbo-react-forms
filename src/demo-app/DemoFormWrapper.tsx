@@ -6,36 +6,14 @@ export type TDemoFormProps = {
     title?: string;
     isLoading: boolean;
     columns?: string;
-    isInline?: boolean;
 };
 
 export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
     const ctx = useDemoFormContext();
     const l = useLayers();
 
-    const closer = useClosingEffect({ mode: 'resize', delay: 350, initialState: false });
-    ctx.hideMethodRef.current = (prev) => {
-        closer.hide(prev);
-    };
-
     return (
-        <div
-            style={
-                p.isInline
-                    ? { position: 'relative' }
-                    : {
-                          ...closer.get(),
-                          position: 'absolute',
-                          background: '#030',
-                          minWidth: '640px',
-                          height: '800px',
-                          padding: '1em',
-                          overflow: 'auto',
-                      }
-            }
-        >
-            {p.title !== undefined ? <h1>{p.title}</h1> : null}
-            {!p.isInline ? <button onClick={() => ctx.close()}>Close()</button> : null}
+        <div style={{ position: 'relative' }}>
             {ctx.formEnv.errorMessage ? (
                 <div style={{ color: 'yellow', backgroundColor: 'red' }}>{ctx.formEnv.errorMessage}</div>
             ) : null}
@@ -59,16 +37,6 @@ export function DemoFormWrapper(p: PropsWithChildren<TDemoFormProps>) {
                     Loading
                 </div>
             )}
-            {!p.isInline ? (
-                <button
-                    disabled={!ctx.data.isValid()}
-                    onClick={() => {
-                        ctx.submit(undefined);
-                    }}
-                >
-                    SUBMIT
-                </button>
-            ) : null}
         </div>
     );
 

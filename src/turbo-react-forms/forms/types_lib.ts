@@ -40,6 +40,12 @@ export type TFormControlLib<
         state: TFormInternalState<unknown>,
         formEnv: FormEnv
     ) => React.ReactNode;
+    onRenderMainContainer: (
+        content: React.ReactNode,
+        props: F,
+        state: TFormInternalState<unknown>,
+        formEnv: FormEnv
+    ) => React.ReactNode;
     onRenderTemplate: (content: React.ReactNode, stateProps: TFormTemplateStateProps, props: TT) => React.ReactNode;
     onRenderTemplateRow: (
         content: React.ReactNode,

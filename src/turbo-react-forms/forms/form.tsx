@@ -37,32 +37,24 @@ export function createFormHook<
             ctx,
             handle,
             data,
-            submitFct,
-            resolve,
             formSettings,
+            onResolve,
+            onSubmit,
         }: {
             config: TFormConfig<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>;
             ctx: Ctx;
             handle?: number;
             data: TDataObjectMap | null;
             formSettings?: TFormSettings;
-            submitFct?: TFormSubmitFct<Ctx, SubmitType, FormEnv>;
-            resolve?: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
+            onSubmit?: TFormSubmitFct<Ctx, SubmitType, FormEnv>;
+            onResolve?: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
         }) {
-            return (
-                <TFormWrapper<P, V, F, TT, SFT, Ctx, SubmitType, RP, FormEnv>
-                    config={config}
-                    formCtx={ctx}
-                    handle={handle}
-                    initData={data}
-                    initMetaData={{}}
-                    lib={lib}
-                    onSubmit={submitFct}
-                    onResolve={resolve}
-                    strictMode={formSettings?.strictMode ?? true}
-                    allowSubmitInvalid={formSettings?.allowSubmitInvalid ?? false}
-                ></TFormWrapper>
-            );
+            const frm = useForm(lib, config, formSettings);
+            return frm.render(false, data, ctx, {
+                handle,
+                onResolve,
+                onSubmit,
+            });
         },
     };
 }
@@ -90,7 +82,7 @@ function useForm<
             return new Promise<TFormSubmitCtx<Ctx, SubmitType> | null>((resolve) => {
                 const showMethod = lib.showMethod ?? getDefaultShowMethod(lc);
                 showMethod((handle) =>
-                    render(data, ctx, {
+                    render(true, data, ctx, {
                         handle,
                         onResolve: resolve,
                         onSubmit: submitFct,
@@ -101,6 +93,7 @@ function useForm<
     };
 
     function render(
+        inContainer: boolean,
         data: TDataObjectMap | null,
         ctx: Ctx,
         options: {
@@ -121,6 +114,7 @@ function useForm<
                 onResolve={options?.onResolve}
                 strictMode={formSettings?.strictMode ?? true}
                 allowSubmitInvalid={formSettings?.allowSubmitInvalid ?? false}
+                inContainer={inContainer}
             ></TFormWrapper>
         );
     }

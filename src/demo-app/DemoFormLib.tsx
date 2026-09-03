@@ -12,6 +12,7 @@ import { DemoFormWrapper, TDemoFormProps } from './DemoFormWrapper';
 import { DemoCollapse } from './components/DemoCollapse';
 import { DemoTemplateRow } from './DemoTemplateRow';
 import { DemoControl } from './DemoControl';
+import { DemoFormContainer } from './DemoFormContainer';
 
 type TTextProps = {
     label: string;
@@ -33,6 +34,9 @@ type TDemoFormEnv = {
 const DemoFormLib = createFormHook({
     onInit: () => {
         return {} as TDemoFormEnv;
+    },
+    onRenderMainContainer: (content, form, state, formEnv) => {
+        return <DemoFormContainer title={form.title}>{content}</DemoFormContainer>;
     },
     onRenderMainWrapper: (
         content: React.ReactNode,

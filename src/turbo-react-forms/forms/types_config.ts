@@ -33,6 +33,7 @@ export type TFormConfig<
     controls:
         | TFormControlList<P, V, TT, SFT, Ctx, RP>
         | ((state: TFormState<Ctx>, commandCtx: TFormCommandCtx) => TFormControlList<P, V, TT, SFT, Ctx, RP>);
+    onRenderMainContainer?: (content: React.ReactNode, ctx: Ctx, state: TFormState<Ctx>) => React.ReactNode;
     onRenderMainWrapper?: (content: React.ReactNode, ctx: Ctx, state: TFormState<Ctx>) => React.ReactNode;
     onSubmit?: TFormSubmitFct<Ctx, SubmitType, FormEnv>;
     onTranslateHint?: (
