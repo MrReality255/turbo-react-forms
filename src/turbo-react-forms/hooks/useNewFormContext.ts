@@ -42,6 +42,7 @@ export function useNewFormContext<
 
     return useMemo<TFormContext<Ctx, SubmitType, FormEnv>>(() => {
         return {
+            formMode: state.mode,
             ctx: state.ctx,
             data: state.data,
             hideMethodRef,
