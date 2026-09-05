@@ -124,7 +124,7 @@ export function TFormWrapper<
 
     return (
         <ctxForm.Provider value={formContext}>
-            {mainContainer ? mainContainer(formContent) : formContent}
+            {inContainer ? mainContainer(formContent) : formContent}
         </ctxForm.Provider>
     );
 
