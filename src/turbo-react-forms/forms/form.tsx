@@ -90,6 +90,27 @@ function useForm<
                 );
             });
         },
+        Form: function ({
+            inContainer,
+            data,
+            ctx,
+            handle,
+            onSubmit,
+            onResolve,
+        }: {
+            inContainer?: boolean;
+            data: TDataObjectMap | null;
+            ctx: Ctx;
+            handle?: number;
+            onSubmit?: TFormSubmitFct<Ctx, SubmitType, FormEnv>;
+            onResolve?: (ctx: TFormSubmitCtx<Ctx, SubmitType> | null) => void;
+        }) {
+            return render(inContainer ?? false, data, ctx, {
+                handle,
+                onSubmit,
+                onResolve,
+            });
+        },
     };
 
     function render(
