@@ -105,11 +105,13 @@ export function TFormWrapper<
 
     const mainContainer = config.onRenderMainContainer
         ? (content: React.ReactNode) => config.onRenderMainContainer?.(content, formCtx, state)
-        : (content: React.ReactNode) => lib.onRenderMainContainer(content, formConfig, state, formEnv);
+        : (content: React.ReactNode) =>
+              lib.onRenderMainContainer(content, formConfig, state as TFormInternalState<unknown>, formEnv);
 
     const mainWrapper = config.onRenderMainWrapper
         ? (content: React.ReactNode) => config.onRenderMainWrapper?.(content, formCtx, state)
-        : (content: React.ReactNode) => lib.onRenderMainWrapper(content, formConfig, state, formEnv);
+        : (content: React.ReactNode) =>
+              lib.onRenderMainWrapper(content, formConfig, state as TFormInternalState<unknown>, formEnv);
 
     const formContent = mainWrapper(
         RenderUtils.renderContent(
@@ -153,6 +155,9 @@ export function TFormWrapper<
 
     function newFormInternalState(rawData: TDataObjectMap): TFormInternalState<Ctx> {
         return {
+            inContainer,
+            disabled: p.config.disabled ?? false,
+            readOnly: p.config.readOnly ?? false,
             error: undefined,
             ctx: p.formCtx,
             handle: p.handle,

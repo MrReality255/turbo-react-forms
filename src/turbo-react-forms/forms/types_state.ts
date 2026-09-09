@@ -16,6 +16,9 @@ export type TFormInternalState<Ctx> = {
     handle: number | undefined;
     section?: TKey;
     rawData: TDataObject;
+    readOnly: boolean | ((state: TFormInternalState<Ctx>) => boolean);
+    disabled: boolean | ((state: TFormInternalState<Ctx>) => boolean);
+    inContainer: boolean;
     handleProvider: THandleProvider;
 };
 

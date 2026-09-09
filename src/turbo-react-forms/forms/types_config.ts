@@ -1,6 +1,7 @@
 import {
     TFormControlList,
     TFormControlSpecificProps,
+    TFormInternalState,
     TFormState,
     TFormSubformPropsType,
     TFormTemplatePropsType,
@@ -29,6 +30,8 @@ export type TFormConfig<
     RP extends object,
     FormEnv,
 > = {
+    disabled?: boolean | ((state: TFormInternalState<Ctx>) => boolean);
+    readOnly?: boolean | ((state: TFormInternalState<Ctx>) => boolean);
     form: F | ((state: TFormState<Ctx>, cmdCtx: TFormCommandCtx) => F);
     controls:
         | TFormControlList<P, V, TT, SFT, Ctx, RP>

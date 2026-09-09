@@ -69,7 +69,7 @@ function createInitData<
         initMetaData ?? {},
         stateLibCtx,
         DataUtils.newHandleProvider(),
-        getFormControlInheritedProps(stateLibCtx.state)
+        getFormControlInheritedProps<Ctx>(stateLibCtx.state)
     );
     return {
         data: result,
@@ -517,10 +517,13 @@ function getControlProps<
     }
 }
 
-function getFormControlInheritedProps(state: TFormInternalState<unknown>): TFormControlInheritedStateProps {
+function getFormControlInheritedProps<Ctx>(state: TFormInternalState<Ctx>): TFormControlInheritedStateProps {
+    const disabled = typeof state.disabled === 'function' ? state.disabled(state) : state.disabled;
+    const readOnly = typeof state.readOnly === 'function' ? state.readOnly(state) : state.readOnly;
+
     return {
-        disabled: state.mode == 'loading',
-        readOnly: state.mode != 'ready',
+        disabled: disabled ?? state.mode == 'loading',
+        readOnly: readOnly ?? state.mode != 'ready',
         hidden: false,
         removed: false,
     };
