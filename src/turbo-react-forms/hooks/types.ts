@@ -5,6 +5,8 @@ export type TDataObjectMetaValue = boolean;
 export type TDataObjectMap = Record<string, TDataObjectValue>;
 export type TDataObjectMetaMap = Record<string, TDataObjectMetaValue>;
 
+export type TDataObjectJSON = Record<string, string | Record<string, string> | Record<string, string>[]>;
+
 export type TDataObject = {
     data: TDataObjectMap;
     metaInfo: TDataObjectMetaMap;
@@ -48,6 +50,7 @@ export interface IDataObject {
     clone: () => TDataObject;
     getID: () => number;
     getRef: () => TDataObject;
+    getJSON: () => TDataObjectJSON;
 
     getMetaBool(key: string): boolean;
 

@@ -11,6 +11,7 @@ import {
     THandleProvider,
     TValidity,
     TDataObjectMetaMap,
+    TDataObjectJSON,
 } from '..';
 
 export const DataObjectUtils = {
@@ -364,9 +365,34 @@ function create(os: TDataObjectStateUpdateHandle, strictMode: boolean, nextHandl
             return DataObjectUtils.cloneDataObject(os.state);
         },
 
+        getJSON: () => getJSONFromMap(os.state.data),
+
         getRef: () => os.state,
         getID: () => os.state.id,
     };
+
+    function getJSONFromMap(dataMap: TDataObjectMap): TDataObjectJSON {
+        const keys = Object.keys(dataMap);
+        return Object.fromEntries(
+            keys.map((key) => {
+                const value = dataMap[key];
+                if (typeof value === 'string') {
+                    return [key, value];
+                }
+
+                switch (value.type) {
+                    case 'invalid':
+                        return [key, value.value];
+                    case 'obj':
+                        return [key, getJSONFromMap(value.data)];
+                    case 'list':
+                        return [key, value.items.map((item) => getJSONFromMap(item.data))];
+                }
+
+                return [key, ''];
+            })
+        );
+    }
 
     function getMetaBool(key: string): boolean {
         return (getMeta(key) as boolean | undefined) ?? false;
